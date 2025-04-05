@@ -1,0 +1,119 @@
+body {
+    padding-top: 20px;
+    padding-bottom: 20px;
+    background-color: #9834eb;
+    color: white;
+    opacity: 0;
+    transition: opacity 1s ease-in-out;
+}
+.loaded {
+    opacity: 1;
+}
+.resultado {
+    margin-top: 20px;
+    padding: 15px;
+    border-radius: 5px;
+    background-color: rgba(255, 255, 255, 0.9);
+    color: #333;
+}
+.form-group {
+    margin-bottom: 15px;
+}
+.btn-primary {
+    background-color: #9834eb;
+    border-color: #9834eb;
+}
+.btn-primary:hover {
+    background-color: #8129d0;
+    border-color: #8129d0;
+}
+.btn-primary:focus, .btn-primary:active {
+    background-color: #7022b8 !important;
+    border-color: #7022b8 !important;
+    box-shadow: 0 0 0 0.25rem rgba(152, 52, 235, 0.5) !important;
+}
+/* Estilos para validación de formularios */
+.was-validated .form-control:invalid {
+    border-color: #dc3545;
+    padding-right: calc(1.5em + 0.75rem);
+    background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 12 12' width='12' height='12' fill='none' stroke='%23dc3545'%3e%3ccircle cx='6' cy='6' r='4.5'/%3e%3cpath stroke-linejoin='round' d='M5.8 3.6h.4L6 6.5z'/%3e%3ccircle cx='6' cy='8.2' r='.6' fill='%23dc3545' stroke='none'/%3e%3c/svg%3e");
+    background-repeat: no-repeat;
+    background-position: right calc(0.375em + 0.1875rem) center;
+    background-size: calc(0.75em + 0.375rem) calc(0.75em + 0.375rem);
+}
+.was-validated .form-control:valid {
+    border-color: #198754;
+    padding-right: calc(1.5em + 0.75rem);
+    background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 8 8'%3e%3cpath fill='%23198754' d='M2.3 6.73L.6 4.53c-.4-1.04.46-1.4 1.1-.8l1.1 1.4 3.4-3.8c.6-.63 1.6-.27 1.2.7l-4 4.6c-.43.5-.8.4-1.1.1z'/%3e%3c/svg%3e");
+    background-repeat: no-repeat;
+    background-position: right calc(0.375em + 0.1875rem) center;
+    background-size: calc(0.75em + 0.375rem) calc(0.75em + 0.375rem);
+}
+.invalid-feedback {
+    display: none;
+    width: 100%;
+    margin-top: 0.25rem;
+    font-size: 0.875em;
+    color: #dc3545;
+}
+.was-validated .form-control:invalid ~ .invalid-feedback,
+.was-validated .form-select:invalid ~ .invalid-feedback {
+    display: block;
+}
+/* Estilos para el footer */
+.footer {
+    background-color: rgba(0, 0, 0, 0.3);
+    backdrop-filter: blur(5px);
+    font-size: 0.9rem;
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
+}
+/* Espacio para el footer */
+body {
+    margin-bottom: 60px;
+}
+.content {
+    padding-bottom: 2rem;
+}
+
+/* Animación de caída para la página principal */
+@keyframes fallIn {
+    0% {
+        transform: translateY(-100px);
+        opacity: 0;
+    }
+    100% {
+        transform: translateY(0);
+        opacity: 1;
+    }
+}
+
+.fall-element {
+    opacity: 0;
+    animation: fallIn 0.8s ease-out forwards;
+}
+
+/* Diferentes retrasos para escalonar la animación */
+.fall-delay-1 {
+    animation-delay: 0.2s;
+}
+
+.fall-delay-2 {
+    animation-delay: 0.4s;
+}
+
+.fall-delay-3 {
+    animation-delay: 0.6s;
+}
+
+.fall-delay-4 {
+    animation-delay: 0.8s;
+}
+.card {
+    background-color: rgba(255, 255, 255, 0.9);
+    color: #333;
+}
+.jumbotron {
+    background-color: rgba(255, 255, 255, 0.1);
+    padding: 2rem;
+    border-radius: 0.5rem;
+}
