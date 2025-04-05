@@ -6,6 +6,11 @@
 <h2 class="text-white">Predictor de Sueldos</h2>
 <p class="lead text-white">Completa el formulario para obtener una predicción de sueldo anual</p>
 
+<!-- Botón para mostrar el código de entrenamiento -->
+<button type="button" class="btn btn-secondary mb-3" data-bs-toggle="modal" data-bs-target="#modeloModal">
+    <i class="bi bi-code-slash"></i> Cómo entrené el modelo
+</button>
+
 {% if error %}
 <div class="alert alert-danger alert-dismissible fade show" role="alert">
     <strong>Error:</strong> {{ error }}
@@ -18,19 +23,19 @@
         <form method="POST" action="/predictor-sueldos" class="p-4 bg-white rounded shadow-sm text-dark">
             <div class="form-group">
                 <label for="edad">Edad:</label>
-                <input type="number" class="form-control" id="edad" name="edad" required min="22" max="65" placeholder="Ej: 30">
-                <div class="invalid-feedback">Por favor ingresa una edad entre 22 y 65 años.</div>
+                <input type="number" class="form-control" id="edad" name="edad" required min="18" max="70" placeholder="Ej: 30">
+                <div class="invalid-feedback">Por favor ingresa una edad entre 18 y 70 años.</div>
             </div>
             
             <div class="form-group">
                 <label for="experiencia">Años de Experiencia:</label>
-                <input type="number" class="form-control" id="experiencia" name="experiencia" required min="0" max="47" placeholder="Ej: 5">
-                <div class="invalid-feedback">Por favor ingresa años de experiencia entre 0 y 47.</div>
+                <input type="number" class="form-control" id="experiencia" name="experiencia" required min="0" max="50" placeholder="Ej: 5">
+                <div class="invalid-feedback">Por favor ingresa años de experiencia entre 0 y 50.</div>
             </div>
             
             <div class="form-group">
                 <label for="horas">Horas Semanales:</label>
-                <input type="number" class="form-control" id="horas" name="horas" required min="30" max="60" placeholder="Ej: 40">
+                <input type="number" class="form-control" id="horas" name="horas" required min="10" max="80" placeholder="Ej: 40">
                 <div class="invalid-feedback">Por favor ingresa horas semanales entre 10 y 80.</div>
             </div>
             
@@ -104,6 +109,63 @@
             </ul>
         </div>
         {% endif %}
+    </div>
+</div>
+
+<!-- Modal con el código de entrenamiento -->
+<div class="modal fade" id="modeloModal" tabindex="-1" aria-labelledby="modeloModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg modal-dialog-scrollable">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="modeloModalLabel">Código de Entrenamiento del Modelo</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <pre class="bg-dark text-light p-3 rounded"><code>import pandas as pd
+import numpy as np
+from sklearn.model_selection import train_test_split
+from sklearn.ensemble import RandomForestRegressor
+
+def remove_labels(df, label_name):
+    X = df.drop(label_name, axis=1)
+    y = df[label_name].copy()
+    return (X, y)
+
+
+# Carga de datos
+df = pd.read_csv("dataset_sueldos.csv")
+df_copy = df.copy()
+
+# Preprocesamiento
+df_copy = pd.get_dummies(df_copy, columns=["Nivel_Educativo", "Industria","Ubicación","Género"], drop_first=True)
+
+# Transformación logarítmica del sueldo
+df_copy["Sueldo_Anual"] = np.log1p(df_copy["Sueldo_Anual"])
+
+# Separación de características y variable objetivo
+X, y = remove_labels(df_copy, "Sueldo_Anual")
+
+# División en conjuntos de entrenamiento y prueba
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.4, random_state=42)
+
+# Entrenamiento del modelo RandomForest
+clf_tree = RandomForestRegressor(
+    random_state=42, 
+    n_estimators=500,
+    max_depth=4,
+    min_samples_split=5,  
+    max_features='sqrt')
+
+clf_tree.fit(X_train, y_train)
+
+# Guardado del modelo entrenado
+import joblib
+joblib.dump(clf_tree, 'modelo_sueldos.pkl')</code></pre>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
+            </div>
+        </div>
     </div>
 </div>
 {% endblock %}
