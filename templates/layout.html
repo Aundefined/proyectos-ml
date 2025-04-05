@@ -56,6 +56,20 @@
         .was-validated .form-select:invalid ~ .invalid-feedback {
             display: block;
         }
+        /* Estilos para el footer */
+        .footer {
+            background-color: rgba(0, 0, 0, 0.3);
+            backdrop-filter: blur(5px);
+            font-size: 0.9rem;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        /* Espacio para el footer */
+        body {
+            margin-bottom: 60px;
+        }
+        .content {
+            padding-bottom: 2rem;
+        }
         .card {
             background-color: rgba(255, 255, 255, 0.9);
             color: #333;
@@ -93,6 +107,25 @@
             {% block content %}{% endblock %}
         </div>
     </div>
+
+    <!-- Footer -->
+    <footer class="footer mt-auto py-3 fixed-bottom">
+        <div class="container">
+            <div class="row">
+                <div class="col-md-6">
+                    <p class="mb-0 text-white">© 2025 Andria ML</p>
+                </div>
+                <div class="col-md-6 text-end">
+                    <a href="mailto:tartulierarnaud@gmail.com" class="text-white me-3">
+                        <i class="bi bi-envelope-fill"></i> Contacto
+                    </a>
+                    <a href="https://github.com/Aundefined/proyectos-ml" target="_blank" class="text-white">
+                        <i class="bi bi-github"></i> GitHub
+                    </a>
+                </div>
+            </div>
+        </div>
+    </footer>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
     <script>
