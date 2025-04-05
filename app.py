@@ -37,12 +37,12 @@ def predictor_sueldos():
             
             # Validaciones adicionales
             if not (22 <= edad <= 65):
-                raise ValueError("La edad debe estar entre 18 y 70 años")
-            if not (0 <= experiencia <= 50):
+                raise ValueError("La edad debe estar entre 22 y 65 años")
+            if not (0 <= experiencia <= 47):
                 raise ValueError("La experiencia debe estar entre 0 y 47 años")
-            if not (10 <= horas <= 80):
+            if not (30 <= horas <= 60):
                 raise ValueError("Las horas semanales deben estar entre 30 y 60")
-            if experiencia > (edad - 18):
+            if experiencia > (edad - 22):
                 raise ValueError("La experiencia no puede ser mayor que la edad menos 18 años")
             if educacion not in ['Licenciatura', 'Máster', 'Doctorado']:
                 raise ValueError("Nivel educativo no válido")
