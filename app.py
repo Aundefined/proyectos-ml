@@ -18,8 +18,28 @@ def predictor_sueldos():
     """Página para el predictor de sueldos"""
     resultado = None
     error = None
+    form_data = {
+        'edad': '',
+        'experiencia': '',
+        'horas': '',
+        'educacion': '',
+        'industria': '',
+        'ubicacion': '',
+        'genero': ''
+    }
     
     if request.method == 'POST':
+        # Recoger los datos del formulario
+        form_data = {
+            'edad': request.form.get('edad', ''),
+            'experiencia': request.form.get('experiencia', ''),
+            'horas': request.form.get('horas', ''),
+            'educacion': request.form.get('educacion', ''),
+            'industria': request.form.get('industria', ''),
+            'ubicacion': request.form.get('ubicacion', ''),
+            'genero': request.form.get('genero', '')
+        }
+        
         try:
             # Validación del backend
             if not all(field in request.form and request.form[field] for field in 
@@ -97,7 +117,10 @@ def predictor_sueldos():
         except Exception as e:
             error = f"Error inesperado: {str(e)}"
         
-    return render_template('predictor_sueldos.html', resultado=resultado, error=error)
+    return render_template('predictor_sueldos.html', 
+                               resultado=resultado, 
+                               error=error, 
+                               form_data=form_data)
 
 if __name__ == '__main__':
     app.run(debug=True)

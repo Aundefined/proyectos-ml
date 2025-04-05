@@ -23,29 +23,29 @@
         <form method="POST" action="/predictor-sueldos" class="p-4 bg-white rounded shadow-sm text-dark fall-element fall-delay-2">
             <div class="form-group">
                 <label for="edad">Edad:</label>
-                <input type="number" class="form-control" id="edad" name="edad" required min="18" max="70" placeholder="Ej: 30">
+                <input type="number" class="form-control" id="edad" name="edad" required min="18" max="70" placeholder="Ej: 30" value="{{ form_data.edad }}">
                 <div class="invalid-feedback">Por favor ingresa una edad entre 18 y 70 años.</div>
             </div>
             
             <div class="form-group">
                 <label for="experiencia">Años de Experiencia:</label>
-                <input type="number" class="form-control" id="experiencia" name="experiencia" required min="0" max="50" placeholder="Ej: 5">
+                <input type="number" class="form-control" id="experiencia" name="experiencia" required min="0" max="50" placeholder="Ej: 5" value="{{ form_data.experiencia }}">
                 <div class="invalid-feedback">Por favor ingresa años de experiencia entre 0 y 50.</div>
             </div>
             
             <div class="form-group">
                 <label for="horas">Horas Semanales:</label>
-                <input type="number" class="form-control" id="horas" name="horas" required min="10" max="80" placeholder="Ej: 40">
+                <input type="number" class="form-control" id="horas" name="horas" required min="10" max="80" placeholder="Ej: 40" value="{{ form_data.horas }}">
                 <div class="invalid-feedback">Por favor ingresa horas semanales entre 10 y 80.</div>
             </div>
             
             <div class="form-group">
                 <label for="educacion">Nivel Educativo:</label>
                 <select class="form-control" id="educacion" name="educacion" required>
-                    <option value="" selected disabled>Selecciona nivel educativo</option>
-                    <option value="Licenciatura">Licenciatura</option>
-                    <option value="Máster">Máster</option>
-                    <option value="Doctorado">Doctorado</option>
+                    <option value="" {% if not form_data.educacion %}selected{% endif %} disabled>Selecciona nivel educativo</option>
+                    <option value="Licenciatura" {% if form_data.educacion == 'Licenciatura' %}selected{% endif %}>Licenciatura</option>
+                    <option value="Máster" {% if form_data.educacion == 'Máster' %}selected{% endif %}>Máster</option>
+                    <option value="Doctorado" {% if form_data.educacion == 'Doctorado' %}selected{% endif %}>Doctorado</option>
                 </select>
                 <div class="invalid-feedback">Por favor selecciona un nivel educativo.</div>
             </div>
@@ -53,12 +53,12 @@
             <div class="form-group">
                 <label for="industria">Industria:</label>
                 <select class="form-control" id="industria" name="industria" required>
-                    <option value="" selected disabled>Selecciona una industria</option>
-                    <option value="Tecnología">Tecnología</option>
-                    <option value="Finanzas">Finanzas</option>
-                    <option value="Salud">Salud</option>
-                    <option value="Manufactura">Manufactura</option>
-                    <option value="Retail">Retail</option>
+                    <option value="" {% if not form_data.industria %}selected{% endif %} disabled>Selecciona una industria</option>
+                    <option value="Tecnología" {% if form_data.industria == 'Tecnología' %}selected{% endif %}>Tecnología</option>
+                    <option value="Finanzas" {% if form_data.industria == 'Finanzas' %}selected{% endif %}>Finanzas</option>
+                    <option value="Salud" {% if form_data.industria == 'Salud' %}selected{% endif %}>Salud</option>
+                    <option value="Manufactura" {% if form_data.industria == 'Manufactura' %}selected{% endif %}>Manufactura</option>
+                    <option value="Retail" {% if form_data.industria == 'Retail' %}selected{% endif %}>Retail</option>
                 </select>
                 <div class="invalid-feedback">Por favor selecciona una industria.</div>
             </div>
@@ -66,10 +66,10 @@
             <div class="form-group">
                 <label for="ubicacion">Ubicación:</label>
                 <select class="form-control" id="ubicacion" name="ubicacion" required>
-                    <option value="" selected disabled>Selecciona una ubicación</option>
-                    <option value="EE.UU.">EE.UU.</option>
-                    <option value="Europa">Europa</option>
-                    <option value="Latinoamérica">Latinoamérica</option>
+                    <option value="" {% if not form_data.ubicacion %}selected{% endif %} disabled>Selecciona una ubicación</option>
+                    <option value="EE.UU." {% if form_data.ubicacion == 'EE.UU.' %}selected{% endif %}>EE.UU.</option>
+                    <option value="Europa" {% if form_data.ubicacion == 'Europa' %}selected{% endif %}>Europa</option>
+                    <option value="Latinoamérica" {% if form_data.ubicacion == 'Latinoamérica' %}selected{% endif %}>Latinoamérica</option>
                 </select>
                 <div class="invalid-feedback">Por favor selecciona una ubicación.</div>
             </div>
@@ -77,10 +77,10 @@
             <div class="form-group">
                 <label for="genero">Género:</label>
                 <select class="form-control" id="genero" name="genero" required>
-                    <option value="" selected disabled>Selecciona un género</option>
-                    <option value="Masculino">Masculino</option>
-                    <option value="Femenino">Femenino</option>
-                    <option value="Otro">Otro</option>
+                    <option value="" {% if not form_data.genero %}selected{% endif %} disabled>Selecciona un género</option>
+                    <option value="Masculino" {% if form_data.genero == 'Masculino' %}selected{% endif %}>Masculino</option>
+                    <option value="Femenino" {% if form_data.genero == 'Femenino' %}selected{% endif %}>Femenino</option>
+                    <option value="Otro" {% if form_data.genero == 'Otro' %}selected{% endif %}>Otro</option>
                 </select>
                 <div class="invalid-feedback">Por favor selecciona un género.</div>
             </div>
