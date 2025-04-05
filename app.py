@@ -1,5 +1,4 @@
 from flask import Flask, render_template, request, jsonify
-import numpy as np
 import pandas as pd
 import joblib
 
@@ -98,7 +97,10 @@ def predictor_sueldos():
             # Realizar predicción
             prediccion_log = modelo.predict(nuevo_dato_df)
             # Invertir la transformación logarítmica para obtener el sueldo en escala original
-            sueldo_predicho = np.expm1(prediccion_log[0])
+            import math
+            x = prediccion_log[0]
+            sueldo_predicho = math.exp(x) - 1
+
             
             resultado = {
                 'sueldo': round(sueldo_predicho, 2),
