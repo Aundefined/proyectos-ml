@@ -91,7 +91,7 @@
     
     <div class="col-lg-6 col-md-12">
         {% if resultado %}
-        <div class="resultado fall-element fall-delay-3">
+        <div id="resultadoSection" class="resultado fall-element fall-delay-3">
             <h3>Resultado de la Predicción</h3>
             <div class="alert alert-success">
                 <h4>Sueldo Anual Estimado:</h4>
@@ -169,4 +169,19 @@ with open('modelo_sueldos.pkl', 'wb') as f:
         </div>
     </div>
 </div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Comprobar si existe la sección de resultados
+        const resultadoSection = document.getElementById('resultadoSection');
+        
+        // Si hay resultados, desplazarse hasta ellos
+        if (resultadoSection) {
+            // Pequeño retraso para asegurar que las animaciones de caída se completen
+            setTimeout(function() {
+                resultadoSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            }, 300); // 300ms de retraso, ajustar según sea necesario
+        }
+    });
+</script>
 {% endblock %}
