@@ -1,6 +1,7 @@
 import pandas as pd
 from sklearn.model_selection import train_test_split
 from sklearn.ensemble import RandomForestRegressor
+import math
 
 def remove_labels(df, label_name):
     X = df.drop(label_name, axis=1)
@@ -16,7 +17,7 @@ df_copy=df.copy()
 df_copy = pd.get_dummies(df_copy, columns=["Nivel_Educativo", "Industria","Ubicación","Género"], drop_first=True)
 
 
-df_copy["Sueldo_Anual"] = np.log1p(df_copy["Sueldo_Anual"])
+df_copy["Sueldo_Anual"] = df_copy["Sueldo_Anual"].apply(math.log1p)
 
 
 X,y= remove_labels(df_copy,"Sueldo_Anual")

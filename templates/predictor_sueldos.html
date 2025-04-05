@@ -121,8 +121,8 @@
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <div class="modal-body">
-                <pre class="bg-dark text-light p-3 rounded" style="overflow-x: auto;"><code>import pandas as pd
-import numpy as np
+                <pre class="bg-dark text-light p-3 rounded" style="overflow-x: auto;"><code>
+import pandas as pd
 from sklearn.model_selection import train_test_split
 from sklearn.ensemble import RandomForestRegressor
 
@@ -140,7 +140,7 @@ df_copy = df.copy()
 df_copy = pd.get_dummies(df_copy, columns=["Nivel_Educativo", "Industria","Ubicación","Género"], drop_first=True)
 
 # Transformación logarítmica del sueldo
-df_copy["Sueldo_Anual"] = np.log1p(df_copy["Sueldo_Anual"])
+df_copy["Sueldo_Anual"] = df_copy["Sueldo_Anual"].apply(math.log1p)
 
 # Separación de características y variable objetivo
 X, y = remove_labels(df_copy, "Sueldo_Anual")
@@ -159,8 +159,9 @@ clf_tree = RandomForestRegressor(
 clf_tree.fit(X_train, y_train)
 
 # Guardado del modelo entrenado
-import joblib
-joblib.dump(clf_tree, 'modelo_sueldos.pkl')</code></pre>
+import cloudpickle
+with open('modelo_sueldos.pkl', 'wb') as f:
+    cloudpickle.dump(clf_tree, f)</code></pre>
             </div>
             <div class="modal-footer">
                 <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
