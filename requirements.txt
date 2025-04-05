@@ -5,3 +5,4 @@ pandas==2.0.3
 scikit-learn==1.6.1
 joblib==1.2.0
 gunicorn==20.1.0
+cloudpickle==2.2.1
