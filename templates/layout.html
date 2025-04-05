@@ -70,6 +70,40 @@
         .content {
             padding-bottom: 2rem;
         }
+        
+        /* Animación de caída para la página principal */
+        @keyframes fallIn {
+            0% {
+                transform: translateY(-100px);
+                opacity: 0;
+            }
+            100% {
+                transform: translateY(0);
+                opacity: 1;
+            }
+        }
+        
+        .fall-element {
+            opacity: 0;
+            animation: fallIn 0.8s ease-out forwards;
+        }
+        
+        /* Diferentes retrasos para escalonar la animación */
+        .fall-delay-1 {
+            animation-delay: 0.2s;
+        }
+        
+        .fall-delay-2 {
+            animation-delay: 0.4s;
+        }
+        
+        .fall-delay-3 {
+            animation-delay: 0.6s;
+        }
+        
+        .fall-delay-4 {
+            animation-delay: 0.8s;
+        }
         .card {
             background-color: rgba(255, 255, 255, 0.9);
             color: #333;
@@ -83,7 +117,7 @@
 </head>
 <body>
     <div class="container">
-        <nav class="navbar navbar-expand-lg navbar-light bg-light mb-4">
+        <nav class="navbar navbar-expand-lg navbar-light bg-light mb-4 fall-element">
             <div class="container-fluid">
                 <a class="navbar-brand" href="/">Proyectos ML</a>
                 <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
