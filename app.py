@@ -43,7 +43,7 @@ def predictor_sueldos():
             if not (30 <= horas <= 60):
                 raise ValueError("Las horas semanales deben estar entre 30 y 60")
             if experiencia > (edad - 22):
-                raise ValueError("La experiencia no puede ser mayor que la edad menos 18 años")
+                raise ValueError("La experiencia no puede ser mayor que la edad menos 22 años")
             if educacion not in ['Licenciatura', 'Máster', 'Doctorado']:
                 raise ValueError("Nivel educativo no válido")
             if industria not in ['Tecnología', 'Finanzas', 'Salud', 'Manufactura', 'Retail']:
