@@ -13,7 +13,7 @@
             background-color: #9834eb;
             color: white;
             opacity: 0;
-            transition: opacity 1s ease-in-out;
+            transition: opacity 0.8s ease-in-out;
         }
         .loaded {
             opacity: 1;
@@ -145,11 +145,19 @@
     <!-- Footer -->
     <footer class="footer mt-auto py-3 fixed-bottom">
         <div class="container">
-            <div class="row">
-                <div class="col-md-6">
-                    <p class="mb-0 text-white">© 2025 Andria ML</p>
+            <div class="row align-items-center">
+                <div class="col-md-4">
+                    <p class="mb-0 text-white">© 2025 Proyectos ML</p>
                 </div>
-                <div class="col-md-6 text-end">
+                <div class="col-md-4 text-center">
+                    <a href="https://www.python.org/" target="_blank" class="mx-2" title="Python">
+                        <i class="bi bi-filetype-py" style="font-size: 1.5rem; color: #3776AB;"></i>
+                    </a>
+                    <a href="https://scikit-learn.org/" target="_blank" class="mx-2" title="Scikit-learn">
+                        <img src="https://scikit-learn.org/stable/_static/scikit-learn-logo-small.png" alt="Scikit-learn" height="24">
+                    </a>
+                </div>
+                <div class="col-md-4 text-end">
                     <a href="mailto:tartulierarnaud@gmail.com" class="text-white me-3">
                         <i class="bi bi-envelope-fill"></i> Contacto
                     </a>
@@ -167,7 +175,7 @@
         document.addEventListener('DOMContentLoaded', function() {
             setTimeout(function() {
                 document.body.classList.add('loaded');
-            }, 20); // Pequeño retraso para asegurar que la transición se active
+            }, 50); // Pequeño retraso para asegurar que la transición se active
         });
     </script>
     {% block scripts %}{% endblock %}
