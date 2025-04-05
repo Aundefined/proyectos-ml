@@ -5,7 +5,10 @@ import joblib
 app = Flask(__name__)
 
 # Cargamos el modelo entrenado
-modelo = joblib.load('modelo_sueldos.pkl')
+import cloudpickle
+
+with open('modelo_sueldos.pkl', 'rb') as f:
+    modelo = cloudpickle.load(f)
 
 @app.route('/')
 def home():
