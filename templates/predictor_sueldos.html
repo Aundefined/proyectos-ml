@@ -19,7 +19,7 @@
 {% endif %}
 
 <div class="row">
-    <div class="col-md-6">
+    <div class="col-lg-6 col-md-12 mb-4">
         <form method="POST" action="/predictor-sueldos" class="p-4 bg-white rounded shadow-sm text-dark">
             <div class="form-group">
                 <label for="edad">Edad:</label>
@@ -89,7 +89,7 @@
         </form>
     </div>
     
-    <div class="col-md-6">
+    <div class="col-lg-6 col-md-12">
         {% if resultado %}
         <div class="resultado">
             <h3>Resultado de la Predicción</h3>
@@ -114,14 +114,14 @@
 
 <!-- Modal con el código de entrenamiento -->
 <div class="modal fade" id="modeloModal" tabindex="-1" aria-labelledby="modeloModalLabel" aria-hidden="true">
-    <div class="modal-dialog modal-lg modal-dialog-scrollable">
+    <div class="modal-dialog modal-lg modal-dialog-scrollable modal-fullscreen-sm-down">
         <div class="modal-content">
             <div class="modal-header">
                 <h5 class="modal-title" id="modeloModalLabel">Código de Entrenamiento del Modelo</h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <div class="modal-body">
-                <pre class="bg-dark text-light p-3 rounded"><code>import pandas as pd
+                <pre class="bg-dark text-light p-3 rounded" style="overflow-x: auto;"><code>import pandas as pd
 import numpy as np
 from sklearn.model_selection import train_test_split
 from sklearn.ensemble import RandomForestRegressor
