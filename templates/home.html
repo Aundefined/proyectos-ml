@@ -1,0 +1,25 @@
+{% extends "layout.html" %}
+
+{% block title %}Proyectos de Machine Learning{% endblock %}
+
+{% block content %}
+<div class="jumbotron">
+    <h1 class="display-4">Bienvenido a mis Proyectos de Machine Learning</h1>
+    <p class="lead">En este sitio encontrarás diferentes aplicaciones de machine learning implementadas como servicios web.</p>
+    <hr class="my-4">
+    <p>Explora los diferentes proyectos utilizando la barra de navegación superior.</p>
+</div>
+
+<div class="row mt-4">
+    <div class="col-md-4">
+        <div class="card">
+            <div class="card-body">
+                <h5 class="card-title">Predictor de Sueldos</h5>
+                <p class="card-text">Modelo de regresión que predice el sueldo anual basado en diferentes factores.</p>
+                <a href="/predictor-sueldos" class="btn btn-primary">Ir al predictor</a>
+            </div>
+        </div>
+    </div>
+    <!-- Aquí se pueden añadir más tarjetas para futuros proyectos -->
+</div>
+{% endblock %}

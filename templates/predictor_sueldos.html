@@ -1,0 +1,109 @@
+{% extends "layout.html" %}
+
+{% block title %}Predictor de Sueldos{% endblock %}
+
+{% block content %}
+<h2 class="text-white">Predictor de Sueldos</h2>
+<p class="lead text-white">Completa el formulario para obtener una predicción de sueldo anual</p>
+
+{% if error %}
+<div class="alert alert-danger alert-dismissible fade show" role="alert">
+    <strong>Error:</strong> {{ error }}
+    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+</div>
+{% endif %}
+
+<div class="row">
+    <div class="col-md-6">
+        <form method="POST" action="/predictor-sueldos" class="p-4 bg-white rounded shadow-sm text-dark">
+            <div class="form-group">
+                <label for="edad">Edad:</label>
+                <input type="number" class="form-control" id="edad" name="edad" required min="22" max="65" placeholder="Ej: 30">
+                <div class="invalid-feedback">Por favor ingresa una edad entre 22 y 65 años.</div>
+            </div>
+            
+            <div class="form-group">
+                <label for="experiencia">Años de Experiencia:</label>
+                <input type="number" class="form-control" id="experiencia" name="experiencia" required min="0" max="47" placeholder="Ej: 5">
+                <div class="invalid-feedback">Por favor ingresa años de experiencia entre 0 y 47.</div>
+            </div>
+            
+            <div class="form-group">
+                <label for="horas">Horas Semanales:</label>
+                <input type="number" class="form-control" id="horas" name="horas" required min="30" max="60" placeholder="Ej: 40">
+                <div class="invalid-feedback">Por favor ingresa horas semanales entre 10 y 80.</div>
+            </div>
+            
+            <div class="form-group">
+                <label for="educacion">Nivel Educativo:</label>
+                <select class="form-control" id="educacion" name="educacion" required>
+                    <option value="" selected disabled>Selecciona nivel educativo</option>
+                    <option value="Licenciatura">Licenciatura</option>
+                    <option value="Máster">Máster</option>
+                    <option value="Doctorado">Doctorado</option>
+                </select>
+                <div class="invalid-feedback">Por favor selecciona un nivel educativo.</div>
+            </div>
+            
+            <div class="form-group">
+                <label for="industria">Industria:</label>
+                <select class="form-control" id="industria" name="industria" required>
+                    <option value="" selected disabled>Selecciona una industria</option>
+                    <option value="Tecnología">Tecnología</option>
+                    <option value="Finanzas">Finanzas</option>
+                    <option value="Salud">Salud</option>
+                    <option value="Manufactura">Manufactura</option>
+                    <option value="Retail">Retail</option>
+                </select>
+                <div class="invalid-feedback">Por favor selecciona una industria.</div>
+            </div>
+            
+            <div class="form-group">
+                <label for="ubicacion">Ubicación:</label>
+                <select class="form-control" id="ubicacion" name="ubicacion" required>
+                    <option value="" selected disabled>Selecciona una ubicación</option>
+                    <option value="EE.UU.">EE.UU.</option>
+                    <option value="Europa">Europa</option>
+                    <option value="Latinoamérica">Latinoamérica</option>
+                </select>
+                <div class="invalid-feedback">Por favor selecciona una ubicación.</div>
+            </div>
+            
+            <div class="form-group">
+                <label for="genero">Género:</label>
+                <select class="form-control" id="genero" name="genero" required>
+                    <option value="" selected disabled>Selecciona un género</option>
+                    <option value="Masculino">Masculino</option>
+                    <option value="Femenino">Femenino</option>
+                    <option value="Otro">Otro</option>
+                </select>
+                <div class="invalid-feedback">Por favor selecciona un género.</div>
+            </div>
+            
+            <button type="submit" class="btn btn-primary">Predecir Sueldo</button>
+        </form>
+    </div>
+    
+    <div class="col-md-6">
+        {% if resultado %}
+        <div class="resultado">
+            <h3>Resultado de la Predicción</h3>
+            <div class="alert alert-success">
+                <h4>Sueldo Anual Estimado:</h4>
+                <p class="display-5">{{ "{:,.2f}".format(resultado.sueldo) }} €</p>
+            </div>
+            
+            <h5>Datos utilizados:</h5>
+            <ul class="list-group">
+                {% for campo, valor in resultado.datos.items() %}
+                <li class="list-group-item d-flex justify-content-between align-items-center">
+                    {{ campo }}
+                    <span class="badge bg-primary rounded-pill">{{ valor }}</span>
+                </li>
+                {% endfor %}
+            </ul>
+        </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}
