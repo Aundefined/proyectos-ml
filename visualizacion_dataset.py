@@ -13,8 +13,8 @@ from sklearn.model_selection import train_test_split
 from sklearn.inspection import permutation_importance
 from sklearn.preprocessing import LabelEncoder, StandardScaler
 from sklearn.metrics import accuracy_score, r2_score
-import traceback  # Asegúrate de importar traceback
-import logging    # Añadir esta importación
+import traceback
+import logging
 # Configurar el logging
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
@@ -130,11 +130,12 @@ def index():
     # Obtener el índice de la etiqueta si se especificó
     label_index = request.form.get('labelIndex', '')
     
+    # Obtener el límite de filas si se especificó
+    max_rows = request.form.get('maxRows', '')
+    max_rows = int(max_rows) if max_rows and max_rows.isdigit() else None
+    
     try:
         # Guardar temporalmente el archivo
-        # temp_path = os.path.join('static', 'temp', file.filename)
-        # os.makedirs(os.path.dirname(temp_path), exist_ok=True)
-        # file.save(temp_path)
         import tempfile
 
         with tempfile.NamedTemporaryFile(delete=False, suffix=".csv") as temp_file:
@@ -142,11 +143,17 @@ def index():
             temp_path = temp_file.name
 
         
-        # Leer el CSV
+        # Leer el CSV, limitando las filas si se especificó max_rows
         try:
-            df = pd.read_csv(temp_path, encoding='utf-8')
+            if max_rows:
+                df = pd.read_csv(temp_path, encoding='utf-8', nrows=max_rows)
+            else:
+                df = pd.read_csv(temp_path, encoding='utf-8')
         except UnicodeDecodeError:
-            df = pd.read_csv(temp_path, encoding='latin1')
+            if max_rows:
+                df = pd.read_csv(temp_path, encoding='latin1', nrows=max_rows)
+            else:
+                df = pd.read_csv(temp_path, encoding='latin1')
 
         
         # Determinar la columna de etiqueta
@@ -302,7 +309,7 @@ def index():
         # Preparar los datos para la tabla paginable
         # Convertir NaNs a None para serialización JSON
         table_data = []
-        for _, row in df.head(1000).iterrows():
+        for _, row in df.head(1000).iterrows():  # Limitamos a 1000 filas para la visualización en tabla
             row_dict = {}
             for col in df.columns:
                 value = row[col]
@@ -338,9 +345,13 @@ def index():
                 'importance': float(row['importance'])
             })
         
+        # Añadir información sobre el límite de filas aplicado
         result = {
             'fileName': file.filename,
             'rowCount': len(df),
+            'totalRowsInFile': 'Desconocido' if max_rows is None else 'Al menos ' + str(max_rows),
+            'rowsLimited': max_rows is not None,
+            'maxRowsApplied': max_rows,
             'columnCount': len(df.columns),
             'labelColumn': label_column,
             'columns': columns_list,

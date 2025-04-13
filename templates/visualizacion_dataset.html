@@ -18,16 +18,21 @@
                 <h5 class="card-title">Subir Dataset</h5>
                 <form id="uploadForm" enctype="multipart/form-data">
                     <div class="row">
-                        <div class="col-md-8 mb-3">
+                        <div class="col-md-6 mb-3">
                             <label for="file" class="form-label">Archivo CSV:</label>
                             <input type="file" class="form-control" id="file" name="file" accept=".csv" required>
                         </div>
-                        <div class="col-md-4 mb-3">
-                            <label for="labelIndex" class="form-label">Índice de columna etiqueta (opcional):</label>
+                        <div class="col-md-3 mb-3">
+                            <label for="labelIndex" class="form-label">Índice de columna etiqueta:</label>
                             <input type="number" class="form-control" id="labelIndex" name="labelIndex" min="1"
                                 placeholder="Por defecto: última columna">
-                            <small class="form-text text-muted">Número de la columna que contiene la etiqueta (1 para la
-                                primera columna, etc.)</small>
+                            <small class="form-text text-muted">Número de la columna que contiene la etiqueta</small>
+                        </div>
+                        <div class="col-md-3 mb-3">
+                            <label for="maxRows" class="form-label">Límite de filas (opcional):</label>
+                            <input type="number" class="form-control" id="maxRows" name="maxRows" min="1"
+                                placeholder="Sin límite">
+                            <small class="form-text text-muted">Máximo número de filas a procesar</small>
                         </div>
                     </div>
                     <button type="submit" class="btn btn-primary" id="btnAnalizar">
@@ -364,6 +369,9 @@
                     // Llenar información básica
                     document.getElementById('fileName').textContent = data.fileName;
                     document.getElementById('rowCount').textContent = data.rowCount;
+                    if (data.rowsLimited) {
+                        document.getElementById('rowCount').textContent += ` (limitado a las primeras ${data.maxRowsApplied} filas)`;
+                    }
                     document.getElementById('columnCount').textContent = data.columnCount;
                     document.getElementById('labelColumn').textContent = data.labelColumn;
                     document.getElementById('modelMetricName').textContent = data.modelMetric.name;
