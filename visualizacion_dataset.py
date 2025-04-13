@@ -19,6 +19,7 @@ import logging    # Añadir esta importación
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
+
 # Crear un Blueprint para la visualización de datasets
 visualizacion_dataset_bp = Blueprint('visualizacion_dataset', __name__, url_prefix='/visualizacion-dataset')
 
@@ -131,12 +132,22 @@ def index():
     
     try:
         # Guardar temporalmente el archivo
-        temp_path = os.path.join('static', 'temp', file.filename)
-        os.makedirs(os.path.dirname(temp_path), exist_ok=True)
-        file.save(temp_path)
+        # temp_path = os.path.join('static', 'temp', file.filename)
+        # os.makedirs(os.path.dirname(temp_path), exist_ok=True)
+        # file.save(temp_path)
+        import tempfile
+
+        with tempfile.NamedTemporaryFile(delete=False, suffix=".csv") as temp_file:
+            file.save(temp_file.name)
+            temp_path = temp_file.name
+
         
         # Leer el CSV
-        df = pd.read_csv(temp_path)
+        try:
+            df = pd.read_csv(temp_path, encoding='utf-8')
+        except UnicodeDecodeError:
+            df = pd.read_csv(temp_path, encoding='latin1')
+
         
         # Determinar la columna de etiqueta
         if label_index and label_index.isdigit():
