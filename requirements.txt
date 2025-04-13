@@ -19,7 +19,3 @@ seaborn
 cycler
 kiwisolver
 pillow
-
-
-traceback
-logging
