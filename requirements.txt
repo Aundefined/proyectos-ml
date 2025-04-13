@@ -7,3 +7,15 @@ pandas
 scikit-learn
 joblib
 cloudpickle
+numpy
+
+
+# Visualización
+matplotlib
+seaborn
+
+
+# Requerido para algunas funciones de visualización
+cycler
+kiwisolver
+pillow
