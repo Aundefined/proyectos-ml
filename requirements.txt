@@ -19,3 +19,10 @@ seaborn
 cycler
 kiwisolver
 pillow
+
+io
+json
+base64
+
+traceback
+logging
