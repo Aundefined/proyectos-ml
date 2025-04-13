@@ -285,9 +285,6 @@ def index():
                 })
         
         # Scatter matrix para variables numéricas
-        # Reemplazar el bloque de código de la matriz de dispersión con este código corregido:
-
-        # Scatter matrix para variables numéricas
         scatter_matrix = None
         if len(numeric_cols) >= 2:
             try:
@@ -300,15 +297,49 @@ def index():
                 scatter_df = scatter_df.dropna()
                 
                 if len(scatter_df) > 0:  # Asegurarse de que haya datos después de eliminar NaNs
-                    # Usar pairplot de seaborn en lugar de scatter_matrix de pandas
-                    fig = plt.figure(figsize=(12, 10))
-                    g = sns.pairplot(scatter_df, diag_kind='kde', plot_kws={'alpha': 0.6})
-                    plt.suptitle('Matriz de Dispersión (Variables Numéricas Principales)', y=1.02, fontsize=16)
+                    # Crear matriz de dispersión básica usando pandas
+                    fig, axes = plt.subplots(len(cols_for_scatter), len(cols_for_scatter), figsize=(12, 10))
+                    
+                    # Iterar sobre pares de variables
+                    for i, var1 in enumerate(cols_for_scatter):
+                        for j, var2 in enumerate(cols_for_scatter):
+                            ax = axes[i, j]
+                            
+                            if i == j:  # Diagonal: mostrar histograma
+                                ax.hist(scatter_df[var1], bins=20, color='forestgreen', alpha=0.7)
+                                ax.set_title(var1, fontsize=10)
+                            else:  # No diagonal: mostrar scatter
+                                ax.scatter(scatter_df[var2], scatter_df[var1], 
+                                        alpha=0.7, s=20, edgecolor='k', linewidth=0.5)
+                                
+                                # Añadir correlación
+                                corr = scatter_df[var1].corr(scatter_df[var2])
+                                ax.text(0.05, 0.95, f'r = {corr:.2f}', 
+                                    transform=ax.transAxes, fontsize=9, 
+                                    verticalalignment='top',
+                                    bbox={'facecolor': 'white', 'alpha': 0.8, 'pad': 3})
+                                
+                                # Añadir cuadrícula
+                                ax.grid(True, linestyle='--', alpha=0.3)
+                            
+                            # Etiquetas solo en los bordes
+                            if i == len(cols_for_scatter)-1:
+                                ax.set_xlabel(var2)
+                            if j == 0:
+                                ax.set_ylabel(var1)
+                    
+                    # Ajustar layout
+                    plt.suptitle('Matriz de Dispersión (Variables Numéricas Principales)', 
+                                y=0.98, fontsize=16, fontweight='bold')
                     plt.tight_layout()
-                    scatter_matrix = generar_grafico_base64(g.fig)
-                    plt.close(g.fig)  # Cerrar explícitamente la figura para liberar memoria
+                    
+                    # Convertir a base64
+                    scatter_matrix = generar_grafico_base64(fig)
+                    plt.close(fig)
+                    
             except Exception as e:
                 logger.error(f"Error al generar la matriz de dispersión: {str(e)}")
+                logger.error(traceback.format_exc())
                 scatter_matrix = None
         
         # Analizar outliers
