@@ -20,7 +20,6 @@ cycler
 kiwisolver
 pillow
 
-json
 base64
 
 traceback
