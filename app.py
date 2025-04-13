@@ -3,12 +3,14 @@ import os
 
 # Importar los blueprints
 from predictor_sueldos import predictor_sueldos_bp
+from visualizacion_dataset import visualizacion_dataset_bp
 
 # Crear la aplicación Flask
 app = Flask(__name__)
 
 # Registrar los blueprints
 app.register_blueprint(predictor_sueldos_bp)
+app.register_blueprint(visualizacion_dataset_bp)
 
 @app.route('/')
 def home():
