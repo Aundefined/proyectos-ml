@@ -13,6 +13,11 @@ from sklearn.model_selection import train_test_split
 from sklearn.inspection import permutation_importance
 from sklearn.preprocessing import LabelEncoder, StandardScaler
 from sklearn.metrics import accuracy_score, r2_score
+import traceback  # Asegúrate de importar traceback
+import logging    # Añadir esta importación
+# Configurar el logging
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger(__name__)
 
 # Crear un Blueprint para la visualización de datasets
 visualizacion_dataset_bp = Blueprint('visualizacion_dataset', __name__, url_prefix='/visualizacion-dataset')
@@ -351,5 +356,6 @@ def index():
         return json.loads(json_str)
         
     except Exception as e:
-        import traceback
+        logger.error(f"Error processing dataset: {str(e)}")
+        logger.error(traceback.format_exc())
         return jsonify({'error': str(e), 'traceback': traceback.format_exc()}), 500
