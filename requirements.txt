@@ -19,3 +19,6 @@ seaborn
 cycler
 kiwisolver
 pillow
+
+# Dependencias adicionales para análisis no supervisado
+scipy
