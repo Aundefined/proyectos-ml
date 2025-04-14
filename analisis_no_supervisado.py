@@ -179,8 +179,8 @@ def index():
         return jsonify({'error': 'El archivo debe ser un CSV'}), 400
     
     # Obtener parámetros del formulario
-    # Índice de columna a omitir (si existe)
-    label_index = request.form.get('labelIndex', '')
+    # Columnas a omitir (pueden ser múltiples)
+    columns_to_omit = request.form.getlist('columnsToOmit')
     
     # Límite de filas
     max_rows = request.form.get('maxRows', '')
@@ -204,14 +204,8 @@ def index():
             else:
                 df = pd.read_csv(temp_path, encoding='latin1')
         
-        # Omitir columna de etiqueta si se especificó
-        columns_to_exclude = []
-        if label_index and label_index.isdigit():
-            label_index = int(label_index) - 1  # Convertir a índice base 0
-            if label_index >= 0 and label_index < len(df.columns):
-                columns_to_exclude.append(df.columns[label_index])
-        
-        # Extraer columnas para análisis
+        # Extraer columnas para análisis, omitiendo las seleccionadas
+        columns_to_exclude = [col for col in columns_to_omit if col in df.columns]
         X_columns = [col for col in df.columns if col not in columns_to_exclude]
         X_data = df[X_columns].copy()
         
@@ -442,5 +436,74 @@ def index():
         
     except Exception as e:
         logger.error(f"Error processing dataset: {str(e)}")
+        logger.error(traceback.format_exc())
+        return jsonify({'error': str(e), 'traceback': traceback.format_exc()}), 500
+    
+    
+    
+    
+@analisis_no_supervisado_bp.route('/preview/', methods=['POST'])
+def preview_csv():
+    """Endpoint para obtener una vista previa del CSV cargado"""
+    if 'file' not in request.files:
+        return jsonify({'error': 'No se ha subido ningún archivo'}), 400
+        
+    file = request.files['file']
+    if file.filename == '':
+        return jsonify({'error': 'No se ha seleccionado ningún archivo'}), 400
+        
+    if not file.filename.endswith('.csv'):
+        return jsonify({'error': 'El archivo debe ser un CSV'}), 400
+    
+    try:
+        # Guardar temporalmente el archivo
+        import tempfile
+
+        with tempfile.NamedTemporaryFile(delete=False, suffix=".csv") as temp_file:
+            file.save(temp_file.name)
+            temp_path = temp_file.name
+        
+        # Leer el CSV (primeras 100 filas para la vista previa)
+        try:
+            df = pd.read_csv(temp_path, encoding='utf-8', nrows=100)
+        except UnicodeDecodeError:
+            df = pd.read_csv(temp_path, encoding='latin1', nrows=100)
+        
+        # Preparar los datos para la tabla paginable
+        table_data = []
+        for _, row in df.iterrows():
+            row_dict = {}
+            for col in df.columns:
+                value = row[col]
+                if pd.isna(value):
+                    row_dict[col] = None
+                else:
+                    row_dict[col] = value
+            table_data.append(row_dict)
+        
+        # Obtener información básica
+        columns_list = df.columns.tolist()
+        dtypes_dict = {col: str(df[col].dtype) for col in columns_list}
+        
+        # Eliminar el archivo temporal
+        if os.path.exists(temp_path):
+            os.remove(temp_path)
+        
+        # Preparar el resultado en formato JSON (solo datos básicos)
+        result = {
+            'fileName': file.filename,
+            'rowCount': len(df),
+            'columnCount': len(df.columns),
+            'columns': columns_list,
+            'dtypes': dtypes_dict,
+            'tableData': table_data
+        }
+        
+        # Usar dumps con el encoder personalizado y luego loads para serializar bien
+        json_str = json.dumps(result, cls=NpEncoder)
+        return json.loads(json_str)
+        
+    except Exception as e:
+        logger.error(f"Error previewing CSV: {str(e)}")
         logger.error(traceback.format_exc())
         return jsonify({'error': str(e), 'traceback': traceback.format_exc()}), 500
