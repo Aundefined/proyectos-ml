@@ -7,6 +7,63 @@
 <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
 <link href="https://cdn.jsdelivr.net/npm/select2-bootstrap-5-theme@1.3.0/dist/select2-bootstrap-5-theme.min.css"
     rel="stylesheet" />
+
+<style>
+    /* Estilos para corregir el selector */
+    .select2-container--bootstrap-5 .select2-selection {
+        border: 1px solid #ced4da;
+        background-color: #fff;
+    }
+
+    .select2-container--bootstrap-5 .select2-selection--multiple .select2-selection__rendered {
+        display: flex;
+        flex-wrap: wrap;
+        padding-left: 8px;
+    }
+
+    .select2-container--bootstrap-5 .select2-selection--multiple .select2-selection__choice {
+        background-color: #0d6efd;
+        color: white;
+        margin-top: 5px;
+        margin-right: 5px;
+        padding: 0 5px;
+        border-radius: 4px;
+    }
+
+    .select2-container--bootstrap-5 .select2-dropdown {
+        border-color: #ced4da;
+        background-color: white;
+    }
+
+    .select2-container--bootstrap-5 .select2-dropdown .select2-results__option {
+        color: #212529;
+        padding: 6px 12px;
+    }
+
+    .select2-container--bootstrap-5 .select2-dropdown .select2-results__option--highlighted {
+        background-color: #0d6efd;
+        color: white;
+    }
+
+    .select2-container--bootstrap-5 .select2-selection--multiple {
+        min-height: 38px;
+    }
+
+    .select2-dropdown {
+        max-height: 300px;
+        overflow-y: auto;
+    }
+
+    .select2-container {
+        width: 100% !important;
+    }
+
+    .select2-container--bootstrap-5 .select2-selection--multiple .select2-selection__choice__display {
+        padding-left: 5px;
+        padding-right: 5px;
+        color: white;
+    }
+</style>
 {% endblock %}
 
 {% block content %}
@@ -333,6 +390,7 @@
 
 <script>
     // Modificar el script existente en analisis_no_supervisado.html
+    // Modificar el script existente en analisis_no_supervisado.html
     $(document).ready(function () {
         const uploadForm = document.getElementById('uploadForm');
         const loadingContainer = document.getElementById('loadingContainer');
@@ -343,6 +401,19 @@
         const fileInput = document.getElementById('file');
         const columnsToOmitSelect = document.getElementById('columnsToOmit');
         let dataTable;
+
+        // Inicializar Select2 desde el principio con configuración básica
+        // para evitar que se muestre abierto inicialmente
+        $(columnsToOmitSelect).select2({
+            placeholder: 'Seleccione columnas a omitir',
+            allowClear: true,
+            width: '100%',
+            theme: 'bootstrap-5',
+            dropdownCssClass: 'select2-dropdown-custom', // Clase personalizada para el dropdown
+            selectionCssClass: 'select2-selection-custom' // Clase personalizada para la selección
+        });
+
+        // Resto del código...
 
         // Función para resetear el formulario y la visualización
         function resetForm() {
@@ -363,8 +434,17 @@
             document.getElementById('dataTableHead').innerHTML = '';
             document.getElementById('dataTableBody').innerHTML = '';
 
-            // Limpiar el select de columnas
-            columnsToOmitSelect.innerHTML = '<option value="">Seleccione columnas a omitir</option>';
+            // Resetear select2 en lugar de solo limpiar HTML
+            $(columnsToOmitSelect).empty();
+            $(columnsToOmitSelect).select2('destroy');
+            $(columnsToOmitSelect).select2({
+                placeholder: 'Seleccione columnas a omitir',
+                allowClear: true,
+                width: '100%',
+                theme: 'bootstrap-5',
+                dropdownCssClass: 'select2-dropdown-custom',
+                selectionCssClass: 'select2-selection-custom'
+            });
 
             // Scroll hacia arriba
             window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -375,15 +455,8 @@
 
         // Event listener para cuando se selecciona un archivo
         fileInput.addEventListener('change', function (e) {
-
-            $(columnsToOmitSelect).select2({
-                placeholder: 'Seleccione columnas a omitir',
-                allowClear: true,
-                width: '100%',  // Asegura que el ancho sea 100% para evitar scroll horizontal
-                theme: 'bootstrap-5',  // Usa el tema de Bootstrap 5
-                dropdownCssClass: 'select2-dropdown-dark',  // Clase personalizada para el dropdown
-                selectionCssClass: 'select2-selection-dark'  // Clase personalizada para la selección
-            });
+            // No inicializar Select2 aquí, ya se hizo al cargar la página
+            // Solo se actualizará con nuevos datos
 
             if (fileInput.files.length > 0) {
                 const file = fileInput.files[0];
@@ -433,8 +506,10 @@
                         document.getElementById('columnCount').textContent = data.columnCount;
                         document.getElementById('numericColumnCount').textContent = 'No analizado aún';
 
-                        // Cargar las columnas en el select múltiple
-                        columnsToOmitSelect.innerHTML = '<option value="">Ninguna</option>';
+                        // Resetear y actualizar las columnas en el select múltiple
+                        $(columnsToOmitSelect).empty();  // Vaciar primero
+
+                        // Añadir nuevas opciones
                         data.columns.forEach(column => {
                             const option = document.createElement('option');
                             option.value = column;
@@ -442,11 +517,8 @@
                             columnsToOmitSelect.appendChild(option);
                         });
 
-                        // Activar el select2 para mejorar la experiencia de usuario
-                        $(columnsToOmitSelect).select2({
-                            placeholder: 'Seleccione columnas a omitir',
-                            allowClear: true
-                        });
+                        // Refrescar Select2 para que muestre las nuevas opciones correctamente
+                        $(columnsToOmitSelect).trigger('change');
 
                         // Llenar tabla de datos
                         const tableHead = document.getElementById('dataTableHead');
@@ -493,7 +565,6 @@
             }
         });
 
-        // Event listener para el formulario (análisis completo)
         uploadForm.addEventListener('submit', function (e) {
             e.preventDefault();
 
