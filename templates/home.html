@@ -2,7 +2,44 @@
 
 {% block title %}Proyectos de Machine Learning{% endblock %}
 
+{% block head_styles %}
+<style>
+    /* Estilos específicos para el modal de bienvenida */
+    #welcomeModal .modal-body {
+        color: #212529;
+        font-size: 16px;
+    }
+    
+    #welcomeModal .modal-content {
+        background-color: white;
+        border: 1px solid rgba(0,0,0,.2);
+    }
+    
+    #welcomeModal .modal-title {
+        color: #212529;
+    }
+</style>
+{% endblock %}
+
 {% block content %}
+<!-- Modal de bienvenida -->
+<div class="modal" id="welcomeModal" tabindex="-1" role="dialog" aria-labelledby="welcomeModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="welcomeModalLabel">¡Bienvenid@!</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                Hola, esta web es un proyecto personal en proceso de desarrollo y en constante evolución. No está ni mucho menos acabada y puede contener errores, ¡aún me queda mucho por hacer! Si fuese un videojuego, sería un Early Access 😜
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-primary" data-bs-dismiss="modal">Entendido</button>
+            </div>
+        </div>
+    </div>
+</div>
+
 <div class="jumbotron fall-element fall-delay-1">
     <h1 class="display-4">Bienvenid@ a mis Proyectos de Machine Learning</h1>
     <p class="lead">En este sitio encontrarás diferentes aplicaciones de machine learning implementadas como servicios web.</p>
@@ -10,7 +47,13 @@
     <p>Explora los diferentes proyectos utilizando la barra de navegación superior.</p>
 </div>
 
-<div class="row mt-4">
+<div class="row mb-3 mt-4">
+    <div class="col-12 text-center fall-element fall-delay-2">
+        <p class="text-white small"><i class="bi bi-calendar-check me-1"></i>Primera publicación: 05/04/2025 - Última actualización: 15/04/2025</p>
+    </div>
+</div>
+
+<div class="row mt-2">
     <div class="col-lg-4 col-md-6 col-sm-12 mb-4 fall-element fall-delay-2">
         <div class="card">
             <div class="card-body">
@@ -47,4 +90,37 @@
         <img src="{{ url_for('static', filename='img/logo.png') }}" alt="Logo" width="420" class="logo-img">
     </div>
 </div> -->
+{% endblock %}
+
+{% block scripts %}
+<script>
+    // Esperar a que el DOM esté completamente cargado
+    document.addEventListener('DOMContentLoaded', function() {
+        // Verificar si la clave existe en sessionStorage
+        if (!sessionStorage.getItem('modalShown')) {
+            // Si no existe, mostrar el modal manualmente
+            var modalElement = document.getElementById('welcomeModal');
+            
+            // Crear instancia del modal
+            var modal = new bootstrap.Modal(modalElement);
+            
+            // Mostrar el modal
+            setTimeout(function() {
+                modal.show();
+                
+                // Marcar que el modal ya se mostró
+                sessionStorage.setItem('modalShown', 'true');
+                
+                // Asegurarse de que el botón cierre el modal
+                document.querySelector('#welcomeModal .btn-primary').onclick = function() {
+                    modal.hide();
+                };
+                
+                document.querySelector('#welcomeModal .btn-close').onclick = function() {
+                    modal.hide();
+                };
+            }, 300);
+        }
+    });
+</script>
 {% endblock %}
