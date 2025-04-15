@@ -1,7 +1,8 @@
 body {
     padding-top: 20px;
     padding-bottom: 20px;
-    background-color: #9834eb;
+    background: linear-gradient(180deg, #4A148C 0%, #7B1FA2 100%);
+    background-attachment: fixed;
     color: white;
     opacity: 0;
     transition: opacity 1s ease-in-out;
@@ -20,17 +21,17 @@ body {
     margin-bottom: 15px;
 }
 .btn-primary {
-    background-color: #9834eb;
-    border-color: #9834eb;
+    background-color: #7B1FA2;
+    border-color: #7B1FA2;
 }
 .btn-primary:hover {
-    background-color: #8129d0;
-    border-color: #8129d0;
+    background-color: #6A1B9A;
+    border-color: #6A1B9A;
 }
 .btn-primary:focus, .btn-primary:active {
-    background-color: #7022b8 !important;
-    border-color: #7022b8 !important;
-    box-shadow: 0 0 0 0.25rem rgba(152, 52, 235, 0.5) !important;
+    background-color: #4A148C !important;
+    border-color: #4A148C !important;
+    box-shadow: 0 0 0 0.25rem rgba(123, 31, 162, 0.5) !important;
 }
 /* Estilos para validación de formularios */
 .was-validated .form-control:invalid {
