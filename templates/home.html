@@ -2,24 +2,7 @@
 
 {% block title %}Proyectos de Machine Learning{% endblock %}
 
-{% block head_styles %}
-<style>
-    /* Estilos específicos para el modal de bienvenida */
-    #welcomeModal .modal-body {
-        color: #212529;
-        font-size: 16px;
-    }
-    
-    #welcomeModal .modal-content {
-        background-color: white;
-        border: 1px solid rgba(0,0,0,.2);
-    }
-    
-    #welcomeModal .modal-title {
-        color: #212529;
-    }
-</style>
-{% endblock %}
+
 
 {% block content %}
 <!-- Modal de bienvenida -->
@@ -84,12 +67,13 @@
     <!-- Aquí se pueden añadir más tarjetas para futuros proyectos -->
 </div>
 
-<!-- Logo centrado debajo de las tarjetas -->
-<!-- <div class="row mt-5 mb-5 fall-element fall-delay-5">
-    <div class="col-12 text-center">
-        <img src="{{ url_for('static', filename='img/logo.png') }}" alt="Logo" width="420" class="logo-img">
+<!-- Logo centrado muy cerca del footer -->
+<div class="row text-center fall-element fall-delay-5 logo-container">
+    <div class="col-12">
+        <img src="{{ url_for('static', filename='img/logo.png') }}" alt="Logo" width="210" class="logo-img">
+        <p class="tech-text">Andrai Project</p>
     </div>
-</div> -->
+</div>
 {% endblock %}
 
 {% block scripts %}

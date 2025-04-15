@@ -132,3 +132,48 @@ body {
 .fall-delay-5 {
     animation-delay: 1s;
 }
+
+@import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500&family=Rajdhani:wght@400;500&family=Share+Tech+Mono&display=swap');
+    
+/* Estilos específicos para el modal de bienvenida */
+#welcomeModal .modal-body {
+    color: #212529;
+    font-size: 16px;
+}
+
+#welcomeModal .modal-content {
+    background-color: white;
+    border: 1px solid rgba(0,0,0,.2);
+}
+
+#welcomeModal .modal-title {
+    color: #212529;
+}
+
+/* Estilo para el logo */
+.logo-container {
+    margin-top: 400px; 
+    margin-bottom: 85px;
+}
+
+.logo-img {
+    max-width: 100%;
+    height: auto;
+    /* Sin efectos especiales o filtros */
+}
+
+/* Efecto sutil al pasar el cursor, solo escala */
+.logo-img:hover {
+    transform: scale(1.03);
+    transition: transform 0.3s ease;
+}
+
+/* Estilo tech para el texto del logo */
+.tech-text {
+    font-family: 'Orbitron', 'Rajdhani', 'Share Tech Mono', monospace;
+    letter-spacing: 2px;
+    font-size: 14px;
+    text-transform: uppercase;
+    color: rgba(255, 255, 255, 0.85);
+    margin-top: 10px;
+}
