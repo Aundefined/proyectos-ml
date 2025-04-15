@@ -21,6 +21,11 @@
                         <div class="col-md-6 mb-3">
                             <label for="file" class="form-label">Archivo CSV:</label>
                             <input type="file" class="form-control" id="file" name="file" accept=".csv" required>
+                            <div class="mt-2">
+                                <a href="/static/files/Titanic-Dataset.csv" class="btn btn-outline-success btn-sm" download>
+                                    <i class="bi bi-download"></i> Descargar dataset de ejemplo (Titanic)
+                                </a>
+                            </div>
                         </div>
                         <!-- Modificar esta parte en visualizacion_dataset.html -->
                         <div class="col-md-3 mb-3">
@@ -48,6 +53,8 @@
         </div>
     </div>
 </div>
+
+<!-- Resto del código HTML permanece igual -->
 
 <!-- Spinner para indicar carga -->
 <div id="loadingContainer" class="text-center d-none my-4 fall-element fall-delay-3">
@@ -281,7 +288,7 @@
 <script src="https://cdn.datatables.net/1.13.5/js/dataTables.bootstrap5.min.js"></script>
 
 <script>
-    // Modificar el script existente en visualizacion_dataset.html
+    // El script JavaScript permanece igual...
     $(document).ready(function () {
         const uploadForm = document.getElementById('uploadForm');
         const loadingContainer = document.getElementById('loadingContainer');
