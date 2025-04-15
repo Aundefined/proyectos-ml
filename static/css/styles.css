@@ -118,3 +118,17 @@ body {
     padding: 2rem;
     border-radius: 0.5rem;
 }
+
+/* Estilos para el logo */
+.logo-img {
+    filter: drop-shadow(0px 0px 10px rgba(255, 255, 255, 0.5));
+    transition: transform 0.3s ease;
+}
+.logo-img:hover {
+    transform: scale(1.1);
+}
+
+/* Animación para el quinto elemento con delay */
+.fall-delay-5 {
+    animation-delay: 1s;
+}
