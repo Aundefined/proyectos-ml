@@ -2,7 +2,83 @@
 
 {% block title %}Proyectos de Machine Learning{% endblock %}
 
-
+{% block head_styles %}
+<style>
+    /* Estilos para el carrusel */
+    #projectsCarousel {
+        background: rgba(26, 87, 176, 0.1);
+        border-radius: 10px;
+        padding: 20px;
+        margin-bottom: 30px;
+    }
+    
+    .carousel-item {
+        padding: 20px 0;
+    }
+    
+    .carousel-control-prev-icon,
+    .carousel-control-next-icon {
+        background-color: rgba(0, 0, 0, 0.4);
+        border-radius: 50%;
+        padding: 10px;
+    }
+    
+    .carousel-indicators {
+        bottom: -10px;
+    }
+    
+    .carousel-indicators button {
+        width: 10px;
+        height: 10px;
+        border-radius: 50%;
+        background-color: #1a57b0;
+        margin: 0 5px;
+    }
+    
+    .card-container {
+        display: flex;
+        justify-content: center;
+        gap: 20px;
+        flex-wrap: wrap;
+    }
+    
+    .project-card {
+        max-width: 340px;
+        border: none;
+        border-radius: 10px;
+        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+        transition: transform 0.3s, box-shadow 0.3s;
+    }
+    
+    .project-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
+    }
+    
+    .card-title {
+        font-weight: bold;
+        color: #1a57b0;
+    }
+    
+    /* Logo container */
+    .logo-container {
+        margin-top: 2rem;
+        margin-bottom: 20px; /* Espacio reducido entre el logo y el footer */
+        position: relative;
+        z-index: 10;
+    }
+    
+    .logo-img {
+        margin-bottom: 0.5rem;
+    }
+    
+    .tech-text {
+        color: white;
+        font-size: 1.2rem;
+        margin-bottom: 0;
+    }
+</style>
+{% endblock %}
 
 {% block content %}
 <!-- Modal de bienvenida -->
@@ -27,44 +103,81 @@
     <h1 class="display-4">Bienvenid@ a mis Proyectos de Machine Learning</h1>
     <p class="lead">En este sitio encontrarás diferentes aplicaciones de machine learning implementadas como servicios web.</p>
     <hr class="my-4">
-    <p>Explora los diferentes proyectos utilizando la barra de navegación superior.</p>
+    <p>Explora los diferentes proyectos utilizando la barra de navegación superior o el carrusel a continuación.</p>
 </div>
 
 <div class="row mb-3 mt-4">
     <div class="col-12 text-center fall-element fall-delay-2">
-        <p class="text-white small"><i class="bi bi-calendar-check me-1"></i>Primera publicación: 05/04/2025 - Última actualización: 15/04/2025</p>
+        <p class="text-white small"><i class="bi bi-calendar-check me-1"></i>Primera publicación: 05/04/2025 - Última actualización: 16/04/2025</p>
     </div>
 </div>
 
 <div class="row mt-2">
-    <div class="col-lg-4 col-md-6 col-sm-12 mb-4 fall-element fall-delay-2">
-        <div class="card">
-            <div class="card-body">
-                <h5 class="card-title">Predictor de Sueldos</h5>
-                <p class="card-text">Modelo de regresión que predice el sueldo anual basado en diferentes factores.</p>
-                <a href="/predictor-sueldos" class="btn btn-primary">Ir al predictor</a>
+    <!-- Carrusel de proyectos -->
+    <div class="col-12 mb-5 fall-element fall-delay-2">
+        <div id="projectsCarousel" class="carousel slide" data-bs-ride="carousel">
+            <!-- Indicadores -->
+            <div class="carousel-indicators">
+                <button type="button" data-bs-target="#projectsCarousel" data-bs-slide-to="0" class="active" aria-current="true" aria-label="Proyectos 1"></button>
+                <button type="button" data-bs-target="#projectsCarousel" data-bs-slide-to="1" aria-label="Proyectos 2"></button>
             </div>
+            
+            <!-- Contenido del carrusel -->
+            <div class="carousel-inner">
+                <!-- Primer grupo de proyectos -->
+                <div class="carousel-item active">
+                    <div class="card-container">
+                        <div class="card project-card">
+                            <div class="card-body text-center">
+                                <h5 class="card-title">Predictor de Sueldos</h5>
+                                <p class="card-text">Modelo de regresión que predice el sueldo anual basado en diferentes factores.</p>
+                                <a href="/predictor-sueldos" class="btn btn-primary">Ir al predictor</a>
+                            </div>
+                        </div>
+                        
+                        <div class="card project-card">
+                            <div class="card-body text-center">
+                                <h5 class="card-title">Visualización de Dataset</h5>
+                                <p class="card-text">Analiza y visualiza datasets CSV para entender sus características y relaciones.</p>
+                                <a href="/visualizacion-dataset" class="btn btn-primary">Ir al visualizador</a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Segundo grupo de proyectos -->
+                <div class="carousel-item">
+                    <div class="card-container">
+                        <div class="card project-card">
+                            <div class="card-body text-center">
+                                <h5 class="card-title">Análisis No Supervisado</h5>
+                                <p class="card-text">Explora datasets sin etiquetar mediante visualizaciones, detección de outliers y sugerencias de preprocesamiento.</p>
+                                <a href="/analisis-no-supervisado" class="btn btn-primary">Ir al analizador</a>
+                            </div>
+                        </div>
+                        
+                        <div class="card project-card">
+                            <div class="card-body text-center">
+                                <h5 class="card-title">Connect Four con IA</h5>
+                                <p class="card-text">Juega al clásico juego "Connect Four" contra un modelo de ML entrenado con partidas reales.</p>
+                                <a href="/connect-four" class="btn btn-primary">Jugar ahora</a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Controles del carrusel -->
+            <button class="carousel-control-prev" type="button" data-bs-target="#projectsCarousel" data-bs-slide="prev">
+                <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+                <span class="visually-hidden">Anterior</span>
+            </button>
+            <button class="carousel-control-next" type="button" data-bs-target="#projectsCarousel" data-bs-slide="next">
+                <span class="carousel-control-next-icon" aria-hidden="true"></span>
+                <span class="visually-hidden">Siguiente</span>
+            </button>
         </div>
     </div>
-    <div class="col-lg-4 col-md-6 col-sm-12 mb-4 fall-element fall-delay-3">
-        <div class="card">
-            <div class="card-body">
-                <h5 class="card-title">Visualización de Dataset</h5>
-                <p class="card-text">Analiza y visualiza datasets CSV para entender sus características y relaciones.</p>
-                <a href="/visualizacion-dataset" class="btn btn-primary">Ir al visualizador</a>
-            </div>
-        </div>
-    </div>
-    <div class="col-lg-4 col-md-6 col-sm-12 mb-4 fall-element fall-delay-4">
-        <div class="card">
-            <div class="card-body">
-                <h5 class="card-title">Análisis No Supervisado</h5>
-                <p class="card-text">Explora datasets sin etiquetar mediante visualizaciones, detección de outliers y sugerencias de preprocesamiento.</p>
-                <a href="/analisis-no-supervisado" class="btn btn-primary">Ir al analizador</a>
-            </div>
-        </div>
-    </div>
-    <!-- Aquí se pueden añadir más tarjetas para futuros proyectos -->
 </div>
 
 <!-- Logo centrado muy cerca del footer -->
@@ -105,6 +218,28 @@
                 };
             }, 300);
         }
+        
+        // Inicializar el carrusel con opciones específicas
+        var carousel = new bootstrap.Carousel(document.getElementById('projectsCarousel'), {
+            interval: 6000,  // Cambia cada 6 segundos
+            wrap: true,     // Permite ciclo continuo
+            touch: true,    // Permite control táctil
+            pause: 'hover'  // Pausa al poner el cursor encima
+        });
+        
+        // Añadir efecto de hover a las tarjetas
+        const cards = document.querySelectorAll('.project-card');
+        cards.forEach(card => {
+            card.addEventListener('mouseenter', function() {
+                this.style.transform = 'translateY(-5px)';
+                this.style.boxShadow = '0 10px 20px rgba(0, 0, 0, 0.2)';
+            });
+            
+            card.addEventListener('mouseleave', function() {
+                this.style.transform = 'translateY(0)';
+                this.style.boxShadow = '0 5px 15px rgba(0, 0, 0, 0.1)';
+            });
+        });
     });
 </script>
 {% endblock %}
