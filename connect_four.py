@@ -20,70 +20,31 @@ def index():
     return render_template('connect_four.html')
 
 @connect_four_bp.route('/predict', methods=['POST'])
+@connect_four_bp.route('/predict', methods=['POST'])
 def predict():
-    """Endpoint para hacer predicciones con el modelo"""
     try:
-        # Obtener el estado del tablero desde la petición
         board_state = request.json.get('board_state', {})
         difficulty = request.json.get('difficulty', 'normal')
-        
-        # Transformar el estado del tablero al formato que espera el modelo
-        features_dict = transform_board_state(board_state)
-        
-        # Convertir el diccionario a un DataFrame (el modelo fue entrenado con un DataFrame)
-        features_df = pd.DataFrame([features_dict])
-        
-        # Asegurarnos de que solo pasamos al modelo las características que espera
-        model_features = modelo.feature_names_in_
-        missing_features = [feat for feat in model_features if feat not in features_df.columns]
-        
-        # Si faltan características, añadirlas con valor 0
-        for feat in missing_features:
-            features_df[feat] = 0
-            
-        # Asegurarnos de que las columnas están en el mismo orden que durante el entrenamiento
-        features_df = features_df[model_features]
-        
-        # Realizar la predicción con el modelo
-        if modelo is not None:
-            prediction = int(modelo.predict(features_df)[0])
-            
-            # En modo normal, añadimos algo de aleatoriedad para hacerlo menos predecible
-            # pero mantenemos la predicción del modelo como base
-            if difficulty == 'normal':
-                # 30% de probabilidad de elegir una columna aleatoria 
-                # 70% de probabilidad de usar la predicción del modelo
-                if np.random.random() < 0.3:
-                    # Generar un número entre 0 y 6 (columnas posibles)
-                    random_move = np.random.randint(0, 7)
-                    # Comprobar si la columna está disponible
-                    if is_column_available(board_state, random_move):
-                        prediction = random_move
-            
-            # Validar que la predicción sea una columna válida y disponible (0-6)
-            if 0 <= prediction <= 6 and is_column_available(board_state, prediction):
-                return jsonify({'success': True, 'move': prediction})
-            else:
-                # Si el modelo da una predicción inválida, elegir una columna disponible al azar
-                available_columns = [col for col in range(7) if is_column_available(board_state, col)]
-                if available_columns:
-                    return jsonify({'success': True, 'move': np.random.choice(available_columns)})
-                else:
-                    return jsonify({'success': False, 'error': 'No hay columnas disponibles'})
-        else:
+
+        if modelo is None:
             return jsonify({'success': False, 'error': 'Modelo no disponible'}), 500
+
+        model_features = modelo.feature_names_in_
+
+        # Obtener mejor jugada
+        best_move = get_best_move(board_state, modelo, model_features)
+
+        # Aleatoriedad en modo normal
+        if difficulty == 'normal' and np.random.random() < 0.3:
+            available_columns = [c for c in range(7) if is_column_available(board_state, c)]
+            if available_columns:
+                best_move = np.random.choice(available_columns)
+
+        return jsonify({'success': True, 'move': int(best_move)})
     except Exception as e:
         print(f"Error en la predicción: {str(e)}")
-        # En caso de error, intentar devolver una columna válida
-        try:
-            available_columns = [col for col in range(7) if is_column_available(board_state, col)]
-            if available_columns:
-                return jsonify({'success': True, 'move': np.random.choice(available_columns)})
-            else:
-                return jsonify({'success': False, 'error': 'No hay columnas disponibles'})
-        except:
-            # Si todo falla, devolver columna del medio como último recurso
-            return jsonify({'success': True, 'move': 3})
+        return jsonify({'success': False, 'error': str(e)})
+
 
 def is_column_available(board_state, column):
     """
@@ -136,3 +97,49 @@ def transform_board_state(board_state):
     
     # Convertimos el DataFrame a diccionario
     return features_df.iloc[0].to_dict()
+
+
+def get_best_move(board_state, modelo, model_features):
+    import pandas as pd
+    import numpy as np
+
+    def transform_state(state):
+        board_matrix = [['.'] * 7 for _ in range(6)]
+        for i in range(42):
+            row = i // 7
+            col = i % 7
+            board_matrix[row][col] = state.get(str(i), '.')
+        raw_features = {f'cell_{i}': board_matrix[i // 7][i % 7] for i in range(42)}
+        df = pd.DataFrame([raw_features])
+        df_encoded = pd.get_dummies(df, drop_first=False)
+        for feat in model_features:
+            if feat not in df_encoded.columns:
+                df_encoded[feat] = 0
+        return df_encoded[model_features]
+
+    def get_next_state(state, col, token='X'):
+        new_state = state.copy()
+        for row in reversed(range(6)):
+            idx = row * 7 + col
+            if new_state[str(idx)] == '.':
+                new_state[str(idx)] = token
+                break
+        return new_state
+
+    best_move = None
+    best_score = -float('inf')
+
+    for col in range(7):
+        if not is_column_available(board_state, col):
+            continue
+        next_state = get_next_state(board_state, col)
+        features = transform_state(next_state)
+        try:
+            score = modelo.predict_proba(features).max()
+        except:
+            score = 0
+        if score > best_score:
+            best_score = score
+            best_move = col
+
+    return best_move if best_move is not None else np.random.choice([c for c in range(7) if is_column_available(board_state, c)])
