@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="es">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -9,6 +10,7 @@
     <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
     {% block head_styles %}{% endblock %}
 </head>
+
 <body>
     <div class="container">
         <nav class="navbar navbar-expand-lg navbar-light bg-light mb-4 fall-element">
@@ -23,16 +25,16 @@
                             <a class="nav-link {% if request.path == '/' %}active{% endif %}" href="/">Home</a>
                         </li>
                         <li class="nav-item">
-                            <a class="nav-link {% if request.path == '/predictor-sueldos' %}active{% endif %}" href="/predictor-sueldos">Predictor de Sueldos</a>
+                            <a class="nav-link {% if request.path == '/predictor-sueldos' %}active{% endif %}"
+                                href="/predictor-sueldos">Predictor de Sueldos</a>
                         </li>
                         <li class="nav-item">
-                            <a class="nav-link {% if request.path == '/visualizacion-dataset' %}active{% endif %}" href="/visualizacion-dataset">Visualización de Dataset</a>
+                            <a class="nav-link {% if request.path == '/analisis-integrado' %}active{% endif %}"
+                                href="/analisis-integrado">Análisis Integrado</a>
                         </li>
                         <li class="nav-item">
-                            <a class="nav-link {% if request.path == '/visualizacion-dataset' %}active{% endif %}" href="/analisis-no-supervisado">Análisis no supervisado</a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link {% if request.path == '/connect-four' %}active{% endif %}" href="/connect-four">Connect Four</a>
+                            <a class="nav-link {% if request.path == '/connect-four' %}active{% endif %}"
+                                href="/connect-four">Connect Four</a>
                         </li>
                         <!-- Aquí se pueden añadir más proyectos en el futuro -->
                     </ul>
@@ -57,7 +59,8 @@
                         <i class="bi bi-filetype-py" style="font-size: 1.5rem; color: #3776AB;"></i>
                     </a>
                     <a href="https://scikit-learn.org/" target="_blank" class="mx-2" title="Scikit-learn">
-                        <img src="https://scikit-learn.org/stable/_static/scikit-learn-logo-small.png" alt="Scikit-learn" height="24">
+                        <img src="https://scikit-learn.org/stable/_static/scikit-learn-logo-small.png"
+                            alt="Scikit-learn" height="24">
                     </a>
                 </div>
                 <div class="col-md-4 text-end">
@@ -78,4 +81,5 @@
     <script src="{{ url_for('static', filename='js/home.js') }}"></script>
     {% block scripts %}{% endblock %}
 </body>
+
 </html>

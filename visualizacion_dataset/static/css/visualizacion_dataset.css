@@ -1,0 +1,43 @@
+body {
+    padding: 15px;
+    /* Mantener el fondo degradado de la aplicación principal */
+    background: linear-gradient(180deg, #4A148C 0%, #7B1FA2 100%);
+    background-attachment: fixed;
+    color: white;
+}
+
+.card {
+    background-color: rgba(255, 255, 255, 0.9);
+    color: #333;
+    margin-bottom: 20px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.btn-primary {
+    background-color: #7B1FA2;
+    border-color: #7B1FA2;
+}
+
+.btn-primary:hover {
+    background-color: #6A1B9A;
+    border-color: #6A1B9A;
+}
+
+.card-header.bg-primary {
+    background-color: #7B1FA2 !important;
+}
+
+/* Estilos específicos para esta página */
+.progress-bar {
+    background-color: #7B1FA2;
+}
+
+.tab-content {
+    padding-top: 20px;
+}
+
+/* Correcciones para textos en el contexto del fondo oscuro */
+h2, .lead {
+    color: white !important; /* Uso !important para asegurar que este estilo tenga prioridad */
+    text-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
+}

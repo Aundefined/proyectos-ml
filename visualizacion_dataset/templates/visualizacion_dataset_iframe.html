@@ -1,14 +1,22 @@
-{% extends "layout.html" %}
+{% extends "iframe_layout.html" %}
 
 {% block title %}Visualización de Dataset{% endblock %}
 
 {% block head_styles %}
 <link href="https://cdn.datatables.net/1.13.5/css/dataTables.bootstrap5.min.css" rel="stylesheet">
+<link rel="stylesheet" href="{{ url_for('visualizacion_dataset.static', filename='css/visualizacion_dataset.css') }}">
 {% endblock %}
 
 {% block content %}
 <h2>Visualización de Dataset</h2>
 <p class="lead">Sube un archivo CSV para analizar y visualizar sus características</p>
+<div class="row mb-3">
+    <div class="col-12 text-end">
+        <a href="/visualizacion-dataset" class="btn btn-light" target="_blank">
+            <i class="bi bi-arrows-fullscreen"></i> Ver en pantalla completa
+        </a>
+    </div>
+</div>
 
 <div class="row">
     <div class="col-lg-12 col-md-12 mb-4">

@@ -6,6 +6,9 @@ from predictor_sueldos import predictor_sueldos_bp
 from visualizacion_dataset import visualizacion_dataset_bp
 from analisis_no_supervisado import analisis_no_supervisado_bp
 from connect_four import connect_four_bp
+from integrated_analysis import integrated_analysis_bp
+
+
 
 # Crear la aplicación Flask
 app = Flask(__name__)
@@ -15,6 +18,7 @@ app.register_blueprint(predictor_sueldos_bp)
 app.register_blueprint(visualizacion_dataset_bp)
 app.register_blueprint(analisis_no_supervisado_bp)
 app.register_blueprint(connect_four_bp)
+app.register_blueprint(integrated_analysis_bp)
 
 @app.route('/')
 def home():

@@ -1,0 +1,88 @@
+{% extends "layout.html" %}
+
+{% block title %}Análisis Integrado de Datasets{% endblock %}
+
+{% block head_styles %}
+<link href="https://cdn.datatables.net/1.13.5/css/dataTables.bootstrap5.min.css" rel="stylesheet">
+<link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
+<link href="https://cdn.jsdelivr.net/npm/select2-bootstrap-5-theme@1.3.0/dist/select2-bootstrap-5-theme.min.css" rel="stylesheet" />
+<link rel="stylesheet" href="{{ url_for('integrated_analysis.static', filename='css/integrated_analysis.css') }}">
+{% endblock %}
+
+{% block content %}
+<div class="row fall-element fall-delay-1">
+    <div class="col-12">
+        <h2 class="text-white">Análisis Integrado de Datasets</h2>
+        <p class="lead text-white">Selecciona el tipo de análisis que deseas realizar con tus datasets</p>
+    </div>
+</div>
+
+<div class="row mt-3 fall-element fall-delay-2">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-body">
+                <ul class="nav nav-tabs integration-tabs" id="analysisTypeTabs" role="tablist">
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link active" id="visualizacion-tab" data-bs-toggle="tab" 
+                               data-bs-target="#visualizacion" type="button" role="tab">
+                            <i class="bi bi-bar-chart-line"></i> Visualización de Dataset
+                        </button>
+                    </li>
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link" id="analisis-no-supervisado-tab" data-bs-toggle="tab" 
+                               data-bs-target="#analisis-no-supervisado" type="button" role="tab">
+                            <i class="bi bi-graph-up"></i> Análisis No Supervisado
+                        </button>
+                    </li>
+                </ul>
+                
+                <div class="tab-content p-3" id="analysisTypeTabsContent">
+                    <!-- Visualización de Dataset Tab -->
+                    <div class="tab-pane fade show active" id="visualizacion" role="tabpanel" 
+                         aria-labelledby="visualizacion-tab">
+                        <div class="mb-3">
+                            <p>La visualización de dataset te permite analizar y visualizar datos etiquetados, evaluar la importancia de las características y obtener estadísticas detalladas.</p>
+                        </div>
+                        
+                        <div class="module-container">
+                            <!-- Spinner de carga -->
+                            <div class="loader-container" id="visualizacionLoader">
+                                <div class="loader"></div>
+                            </div>
+                            
+                            <!-- iframe que carga la página de visualización (ruta actualizada) -->
+                            <iframe id="visualizacionIframe" src="/visualizacion-dataset/iframe" 
+                                    sandbox="allow-same-origin allow-scripts allow-forms allow-popups"
+                                    frameborder="0" scrolling="yes"></iframe>
+                        </div>
+                    </div>
+                    
+                    <!-- Análisis No Supervisado Tab -->
+                    <div class="tab-pane fade" id="analisis-no-supervisado" role="tabpanel" 
+                         aria-labelledby="analisis-no-supervisado-tab">
+                        <div class="mb-3">
+                            <p>El análisis no supervisado te permite explorar datasets sin etiquetar, identificar outliers, analizar correlaciones y recibir sugerencias de preprocesamiento.</p>
+                        </div>
+                        
+                        <div class="module-container">
+                            <!-- Spinner de carga -->
+                            <div class="loader-container" id="analisisNoSupervisadoLoader">
+                                <div class="loader"></div>
+                            </div>
+                            
+                            <!-- iframe que carga la página de análisis no supervisado (ruta actualizada) -->
+                            <iframe id="analisisNoSupervisadoIframe" src="/analisis-no-supervisado/iframe" 
+                                    sandbox="allow-same-origin allow-scripts allow-forms allow-popups"
+                                    frameborder="0" scrolling="yes"></iframe>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script src="{{ url_for('integrated_analysis.static', filename='js/integrated_analysis.js') }}"></script>
+{% endblock %}

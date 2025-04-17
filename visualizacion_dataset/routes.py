@@ -491,3 +491,43 @@ def preview_csv():
         logger.error(f"Error previewing CSV: {str(e)}")
         logger.error(traceback.format_exc())
         return jsonify({'error': str(e), 'traceback': traceback.format_exc()}), 500
+    
+# Añadir esta función al archivo visualizacion_dataset/routes.py
+
+@visualizacion_dataset_bp.route('/iframe', methods=['GET', 'POST'])
+def iframe():
+    """Versión para iframe de la visualización de datasets"""
+    if request.method == 'GET':
+        return render_template('visualizacion_dataset_iframe.html')
+    
+    # El resto del código es idéntico al de la función index
+    # Procesar el archivo subido
+    if 'file' not in request.files:
+        return jsonify({'error': 'No se ha subido ningún archivo'}), 400
+        
+    file = request.files['file']
+    if file.filename == '':
+        return jsonify({'error': 'No se ha seleccionado ningún archivo'}), 400
+        
+    if not file.filename.endswith('.csv'):
+        return jsonify({'error': 'El archivo debe ser un CSV'}), 400
+    
+    # Obtener el índice de la etiqueta si se especificó
+    label_index = request.form.get('labelIndex', '')
+    
+    # Obtener el límite de filas si se especificó
+    max_rows = request.form.get('maxRows', '')
+    max_rows = int(max_rows) if max_rows and max_rows.isdigit() else None
+    
+    try:
+        # Aquí va el resto del código de procesamiento, idéntico al de la función index
+        # ...
+        
+        # Al final, devolver el resultado JSON
+        json_str = json.dumps(result, cls=NpEncoder)
+        return json.loads(json_str)
+        
+    except Exception as e:
+        logger.error(f"Error processing dataset: {str(e)}")
+        logger.error(traceback.format_exc())
+        return jsonify({'error': str(e), 'traceback': traceback.format_exc()}), 500

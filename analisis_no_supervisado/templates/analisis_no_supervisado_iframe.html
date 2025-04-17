@@ -1,15 +1,24 @@
-{% extends "layout.html" %}
+{% extends "iframe_layout.html" %}
 
-{% block title %}Visualización de Dataset{% endblock %}
+{% block title %}Análisis No Supervisado{% endblock %}
 
 {% block head_styles %}
 <link href="https://cdn.datatables.net/1.13.5/css/dataTables.bootstrap5.min.css" rel="stylesheet">
+<link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
+<link href="https://cdn.jsdelivr.net/npm/select2-bootstrap-5-theme@1.3.0/dist/select2-bootstrap-5-theme.min.css" rel="stylesheet" />
+<link rel="stylesheet" href="{{ url_for('analisis_no_supervisado.static', filename='css/analisis_no_supervisado.css') }}">
 {% endblock %}
 
 {% block content %}
-<h2>Visualización de Dataset</h2>
-<p class="lead">Sube un archivo CSV para analizar y visualizar sus características</p>
-
+<h2>Análisis Exploratorio para Datos No Etiquetados</h2>
+<p class="lead">Sube un archivo CSV para analizar y obtener insights para preprocesamiento sin supervisión</p>
+<div class="row mb-3">
+    <div class="col-12 text-end">
+        <a href="/visualizacion-dataset" class="btn btn-light" target="_blank">
+            <i class="bi bi-arrows-fullscreen"></i> Ver en pantalla completa
+        </a>
+    </div>
+</div>
 <div class="row">
     <div class="col-lg-12 col-md-12 mb-4">
         <div class="card">
@@ -27,19 +36,19 @@
                             </div>
                         </div>
                         <div class="col-md-3 mb-3">
-                            <label for="labelColumn" class="form-label">Columna etiqueta:</label>
-                            <input type="text" class="form-control" id="labelColumn" name="labelColumn"
-                                placeholder="Nombre de la columna">
-                            <small class="form-text text-muted">Nombre de la columna que contiene la etiqueta (por defecto la última. No
-                                sensible a mayúsculas/minúsculas)</small>
+                            <label for="columnsToOmit" class="form-label">Columnas a omitir:</label>
+                            <select class="form-select" id="columnsToOmit" name="columnsToOmit" multiple="multiple" style="width: 100%;">
+                                <!-- Vacío inicialmente, se llenará con JavaScript -->
+                            </select>
+                            <small class="form-text text-muted">Seleccione las columnas que desea excluir del análisis</small>
                         </div>
                         <div class="col-md-3 mb-3">
-                            <label for="maxRows" class="form-label">Límite de filas (opcional):</label>
-                            <input type="number" class="form-control" id="maxRows" name="maxRows" min="1"
-                                placeholder="Sin límite">
-                            <small class="form-text text-muted">Máximo número de filas a procesar</small>
+                            <label for="maxRows" class="form-label">Límite de filas:</label>
+                            <input type="number" class="form-control" id="maxRows" name="maxRows" min="1" placeholder="Sin límite">
+                            <small class="form-text text-muted">Máximo número de filas</small>
                         </div>
                     </div>
+
                     <button type="submit" class="btn btn-primary" id="btnAnalizar">
                         <i class="bi bi-search"></i> Analizar Dataset
                     </button>
@@ -76,7 +85,7 @@
             <div class="card">
                 <div class="card-header bg-primary text-white">
                     <div class="d-flex justify-content-between align-items-center">
-                        <h5 class="mb-0">Resumen del Dataset: <span id="fileName"></span></h5>
+                        <h5 class="mb-0">Análisis del Dataset: <span id="fileName"></span></h5>
                         <button type="button" class="btn btn-light" id="btnNuevoAnalisis">
                             <i class="bi bi-file-earmark-plus"></i> Nuevo Análisis
                         </button>
@@ -91,15 +100,7 @@
                             <p><strong>Número de columnas:</strong> <span id="columnCount"></span></p>
                         </div>
                         <div class="col-md-4">
-                            <p><strong>Variable objetivo:</strong> <span id="labelColumn"></span></p>
-                        </div>
-                    </div>
-                    <div class="row mt-3">
-                        <div class="col">
-                            <div class="alert alert-info">
-                                <strong>Métrica del modelo:</strong> <span id="modelMetricName"></span>: <span
-                                    id="modelMetricValue"></span>
-                            </div>
+                            <p><strong>Columnas numéricas:</strong> <span id="numericColumnCount"></span></p>
                         </div>
                     </div>
                 </div>
@@ -123,14 +124,19 @@
                                 aria-selected="false">Estadísticas</button>
                         </li>
                         <li class="nav-item" role="presentation">
-                            <button class="nav-link" id="importance-tab" data-bs-toggle="tab"
-                                data-bs-target="#importance" type="button" role="tab" aria-controls="importance"
-                                aria-selected="false">Importancia de Características</button>
+                            <button class="nav-link" id="distribution-tab" data-bs-toggle="tab"
+                                data-bs-target="#distribution" type="button" role="tab" aria-controls="distribution"
+                                aria-selected="false">Distribuciones</button>
                         </li>
                         <li class="nav-item" role="presentation">
-                            <button class="nav-link" id="visualize-tab" data-bs-toggle="tab" data-bs-target="#visualize"
-                                type="button" role="tab" aria-controls="visualize"
-                                aria-selected="false">Visualizaciones</button>
+                            <button class="nav-link" id="correlation-tab" data-bs-toggle="tab"
+                                data-bs-target="#correlation" type="button" role="tab" aria-controls="correlation"
+                                aria-selected="false">Correlaciones</button>
+                        </li>
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link" id="outliers-tab" data-bs-toggle="tab" data-bs-target="#outliers"
+                                type="button" role="tab" aria-controls="outliers"
+                                aria-selected="false">Outliers</button>
                         </li>
                         <li class="nav-item" role="presentation">
                             <button class="nav-link" id="preprocessing-tab" data-bs-toggle="tab"
@@ -172,15 +178,6 @@
 
                             <div class="row mt-4">
                                 <div class="col-md-12">
-                                    <h5 class="card-title">Matriz de Correlación</h5>
-                                    <div class="text-center">
-                                        <img id="correlationPlot" class="img-fluid" style="max-width: 800px;">
-                                    </div>
-                                </div>
-                            </div>
-
-                            <div class="row mt-4">
-                                <div class="col-md-12">
                                     <h5 class="card-title">Valores Faltantes</h5>
                                     <div class="table-responsive">
                                         <table class="table table-striped table-bordered" id="missingValuesTable">
@@ -201,50 +198,96 @@
                             </div>
                         </div>
 
-                        <!-- Pestaña de importancia de características -->
-                        <div class="tab-pane fade" id="importance" role="tabpanel" aria-labelledby="importance-tab">
+                        <!-- Pestaña de distribuciones -->
+                        <div class="tab-pane fade" id="distribution" role="tabpanel" aria-labelledby="distribution-tab">
                             <div class="row">
-                                <div class="col-md-6">
-                                    <h5 class="card-title">Importancia de Características</h5>
-                                    <div class="text-center mb-4">
-                                        <img id="importancePlot" class="img-fluid">
-                                    </div>
-                                </div>
-                                <div class="col-md-6">
-                                    <h5 class="card-title">Tabla de Importancia</h5>
-                                    <table class="table table-striped table-bordered" id="importanceTable">
-                                        <thead>
-                                            <tr>
-                                                <th>Característica</th>
-                                                <th>Importancia</th>
-                                                <th>Visualización</th>
-                                            </tr>
-                                        </thead>
-                                        <tbody id="importanceTableBody">
-                                            <!-- Se llenará dinámicamente -->
-                                        </tbody>
-                                    </table>
-                                </div>
-                            </div>
-                        </div>
-
-                        <!-- Pestaña de visualizaciones -->
-                        <div class="tab-pane fade" id="visualize" role="tabpanel" aria-labelledby="visualize-tab">
-                            <h5 class="card-title">Visualizaciones de las Características Principales</h5>
-
-                            <div class="row">
-                                <div class="col-md-12 mb-4">
-                                    <h6>Gráfico de Dispersión</h6>
-                                    <div id="scatterPlots" class="text-center">
+                                <div class="col-md-12">
+                                    <h5 class="card-title">Distribuciones de Variables Numéricas</h5>
+                                    <div id="histograms" class="row">
                                         <!-- Se llenará dinámicamente -->
                                     </div>
                                 </div>
                             </div>
 
+                            <div class="row mt-4">
+                                <div class="col-md-12">
+                                    <h5 class="card-title">Distribuciones de Variables Categóricas</h5>
+                                    <div id="barplots" class="row">
+                                        <!-- Se llenará dinámicamente -->
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Pestaña de correlaciones -->
+                        <div class="tab-pane fade" id="correlation" role="tabpanel" aria-labelledby="correlation-tab">
                             <div class="row">
                                 <div class="col-md-12">
-                                    <h6>Histogramas</h6>
-                                    <div id="histograms" class="row">
+                                    <h5 class="card-title">Matriz de Correlación</h5>
+                                    <div class="text-center">
+                                        <img id="correlationPlot" class="img-fluid" style="max-width: 800px;">
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="row mt-4">
+                                <div class="col-md-12">
+                                    <h5 class="card-title">Correlaciones Más Fuertes</h5>
+                                    <div class="table-responsive">
+                                        <table class="table table-striped table-bordered" id="topCorrelationsTable">
+                                            <thead>
+                                                <tr>
+                                                    <th>Variable 1</th>
+                                                    <th>Variable 2</th>
+                                                    <th>Correlación</th>
+                                                    <th>Visualización</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody id="topCorrelationsBody">
+                                                <!-- Se llenará dinámicamente -->
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="row mt-4">
+                                <div class="col-md-12">
+                                    <h5 class="card-title">Matrices de Dispersión</h5>
+                                    <div id="scatterPlots" class="text-center">
+                                        <!-- Se llenará dinámicamente -->
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Pestaña de outliers -->
+                        <div class="tab-pane fade" id="outliers" role="tabpanel" aria-labelledby="outliers-tab">
+                            <div class="row">
+                                <div class="col-md-12">
+                                    <h5 class="card-title">Detección de Outliers</h5>
+                                    <div class="table-responsive">
+                                        <table class="table table-striped table-bordered" id="outliersTable">
+                                            <thead>
+                                                <tr>
+                                                    <th>Variable</th>
+                                                    <th>Número de Outliers</th>
+                                                    <th>Porcentaje</th>
+                                                    <th>Visualización</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody id="outliersTableBody">
+                                                <!-- Se llenará dinámicamente -->
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="row mt-4">
+                                <div class="col-md-12">
+                                    <h5 class="card-title">Boxplots para Detección Visual</h5>
+                                    <div id="boxplots" class="row">
                                         <!-- Se llenará dinámicamente -->
                                     </div>
                                 </div>
@@ -269,6 +312,16 @@
                                     </tbody>
                                 </table>
                             </div>
+
+                            <div class="row mt-4">
+                                <div class="col-md-12">
+                                    <h5 class="card-title">Análisis de Dimensionalidad</h5>
+                                    <div class="alert alert-info">
+                                        <strong id="dimensionalityInfo">Información de dimensionalidad:</strong>
+                                        <span id="dimensionalityValue"></span>
+                                    </div>
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -281,5 +334,6 @@
 {% block scripts %}
 <script src="https://cdn.datatables.net/1.13.5/js/jquery.dataTables.min.js"></script>
 <script src="https://cdn.datatables.net/1.13.5/js/dataTables.bootstrap5.min.js"></script>
-<script src="{{ url_for('visualizacion_dataset.static', filename='js/visualizacion_dataset.js') }}"></script>
+<script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
+<script src="{{ url_for('analisis_no_supervisado.static', filename='js/analisis_no_supervisado.js') }}"></script>
 {% endblock %}
