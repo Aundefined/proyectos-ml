@@ -4,6 +4,12 @@
 
 {% block head_styles %}
 <link rel="stylesheet" href="{{ url_for('connect_four.static', filename='css/connect_four.css') }}">
+<!-- CSS del tema (puedes elegir otros temas en highlightjs.org) -->
+<link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/styles/atom-one-dark.min.css">
+<!-- highlight.js -->
+<script src="//cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/highlight.min.js"></script>
+<script>hljs.highlightAll();</script>
+
 {% endblock %}
 
 {% block content %}
@@ -26,7 +32,7 @@
         <div class="board-container">
             <!-- Mensaje de ganador -->
             <div class="winner-message" id="winnerMessage"></div>
-            
+
             <!-- Selectores de columna - AHORA ENCIMA DEL TABLERO -->
             <div class="mb-2">
                 <div id="columnSelectors" class="d-flex gap-2 justify-content-center">
@@ -39,26 +45,26 @@
                     <div class="column-selector" data-column="6"></div>
                 </div>
             </div>
-            
+
             <!-- Tablero de juego -->
             <div class="board" id="gameBoard">
                 <!-- Las celdas se generarán con JavaScript -->
             </div>
         </div>
-        
+
         <!-- Botones de juego -->
         <div class="game-buttons fall-element fall-delay-3">
             <button id="resetButton" class="btn btn-primary">Reiniciar Juego</button>
             <button id="aiFirstButton" class="btn btn-secondary">IA Primero</button>
         </div>
     </div>
-    
+
     <div class="col-lg-4 col-md-12">
         <!-- Información del juego - AHORA AL LADO DEL TABLERO -->
         <div class="game-info fall-element fall-delay-3">
             <h4>Estado del Juego</h4>
             <div class="turn-indicator player-turn" id="turnIndicator">Tu turno</div>
-            
+
             <div class="game-stats text-dark">
                 <p><strong>Fichas jugadas:</strong> <span id="moveCount">0</span></p>
                 <p><strong>Tiempo de juego:</strong> <span id="gameTime">00:00</span></p>
@@ -70,161 +76,192 @@
 <!-- Explicación del modelo -->
 <div class="jumbotron fall-element fall-delay-4">
     <h4>Acerca del Modelo de Machine Learning</h4>
-    <p>Este juego utiliza exclusivamente un árbol de decisión entrenado con datos de partidas de Connect Four para predecir el mejor movimiento en cada situación.</p>
-    
+    <p>Este juego utiliza exclusivamente un árbol de decisión entrenado con datos de partidas de Connect Four para
+        predecir el mejor movimiento en cada situación.</p>
+
     <div class="row mt-3">
         <div class="col-md-6">
             <h5>Niveles de Dificultad</h5>
             <ul>
-                <li><strong>Normal:</strong> Utiliza el modelo con un 30% de aleatoriedad para hacerlo menos predecible.</li>
-                <li><strong>Avanzado:</strong> Utiliza el modelo de forma pura para obtener sus mejores predicciones.</li>
+                <li><strong>Normal:</strong> Utiliza el modelo con un 30% de aleatoriedad para hacerlo menos predecible.
+                </li>
+                <li><strong>Avanzado:</strong> Utiliza el modelo de forma pura para obtener sus mejores predicciones.
+                </li>
             </ul>
         </div>
         <div class="col-md-6">
             <h5>Estadísticas del Modelo</h5>
-            <p>El modelo fue entrenado con un conjunto de datos de <strong>190,000 ejemplos</strong> y alcanzó una precisión del <strong>100%</strong> en el conjunto de prueba.</p>
+            <p>El modelo fue entrenado con un conjunto de datos de <strong>190,000 ejemplos</strong> y alcanzó una
+                precisión del <strong>100%</strong> en el conjunto de prueba.</p>
         </div>
     </div>
-    
-    <p class="code-toggle" data-bs-toggle="collapse" data-bs-target="#modelCode">
+
+
+    <button type="button" class="code-toggle mt-3 btn btn-secondary mb-3 fall-element fall-delay-2"
+        data-bs-toggle="collapse" data-bs-target="#modelCode">
         <i class="bi bi-code-slash"></i> Ver código de entrenamiento
-    </p>
-    
+    </button>
+
+
+
     <div class="collapse" id="modelCode">
-        <pre class="bg-dark text-light p-3 rounded" style="overflow-x: auto;"><code>
-import pandas as pd
-from sklearn.model_selection import train_test_split
-from sklearn.tree import DecisionTreeClassifier
+        <pre><code class="language-python">
+            import pandas as pd
+            from sklearn.model_selection import train_test_split
+            from sklearn.tree import DecisionTreeClassifier
 
-# Carga de datos
-df = pd.read_csv("connect_four_dataset.csv")
+            # Carga de datos
+            df = pd.read_csv("connect_four_dataset.csv")
 
-# Separación de características y variable objetivo
-X, y = remove_labels(df, "move")
+            # Separación de características y variable objetivo
+            X, y = remove_labels(df, "move")
 
-# Preprocesamiento
-X_encoded = pd.get_dummies(X, drop_first=False)
+            # Preprocesamiento
+            X_encoded = pd.get_dummies(X, drop_first=False)
 
-# División en conjuntos de entrenamiento y prueba
-X_train, X_test, y_train, y_test = train_test_split(X_encoded, y, test_size=0.4, random_state=42)
+            # División en conjuntos de entrenamiento y prueba
+            X_train, X_test, y_train, y_test = train_test_split(X_encoded, y, test_size=0.4, random_state=42)
 
-# Entrenamiento del modelo DecisionTree
-clf_tree = DecisionTreeClassifier(max_depth=4, random_state=41)
-clf_tree.fit(X_train, y_train)
+            # Entrenamiento del modelo Random Forest
+            clf_tree = RandomForestClassifier(max_depth=12,n_estimators=100,n_jobs=-1, random_state=41)
+            clf_tree.fit(X_train, y_train)
 
-# Guardado del modelo entrenado
-import cloudpickle
-with open('modelo_connect-four.pkl', 'wb') as f:
-    cloudpickle.dump(clf_tree, f)</code></pre>
+            y_pred_train=clf_tree.predict(X_train)
+            y_pred_test=clf_tree.predict(X_test)
+
+            print("F1 Score train:", f1_score(y_train,y_pred_train,average="weighted"))
+            print("F1 Score test:", f1_score(y_test,y_pred_test ,average="weighted"))
+
+            # Guardado del modelo entrenado
+            import cloudpickle
+            with open('modelo_connect-four.pkl', 'wb') as f:
+            cloudpickle.dump(clf_tree, f)
+        </code></pre>
     </div>
-    
-    <p class="code-toggle mt-3" data-bs-toggle="collapse" data-bs-target="#datasetCode">
-        <i class="bi bi-database"></i> Ver generación del dataset
+
+    <p>
+        <button type="button" class="code-toggle mt-3 btn btn-secondary mb-3 fall-element fall-delay-2"
+            data-bs-toggle="collapse" data-bs-target="#datasetCode">
+            <i class="bi bi-code-slash"></i> Ver generación del dataset
+        </button>
     </p>
-    
+
+
     <div class="collapse" id="datasetCode">
-        <pre class="bg-dark text-light p-3 rounded" style="overflow-x: auto;"><code>
-from easyAI import TwoPlayerGame, AI_Player, Negamax
-import random
-import csv
+        <pre><code class="language-python">
+            from easyAI import TwoPlayerGame, AI_Player, Negamax
+            import random
+            import csv
+            
+            ROWS, COLS = 6, 7
+            
+            class ConnectFour(TwoPlayerGame):
+                def __init__(self, players):
+                    self.players = players
+                    self.board = [['.' for _ in range(COLS)] for _ in range(ROWS)]
+                    self.current_player = 1
+                    self.history = []  # Para almacenar jugadas
+            
+                def possible_moves(self):
+                    return [str(c) for c in range(COLS) if self.board[0][c] == '.']
+            
+                def make_move(self, move):
+                    col = int(move)
+                    for row in reversed(range(ROWS)):
+                        if self.board[row][col] == '.':
+                            self.board[row][col] = self.get_current_player_token()
+                            # Agregar jugador actual como parte de la historia
+                            self.history.append((self.get_flattened_board(), col, self.current_player))
+                            break
+            
+            
+                def unmake_move(self, move):
+                    col = int(move)
+                    for row in range(ROWS):
+                        if self.board[row][col] != '.':
+                            self.board[row][col] = '.'
+                            self.history.pop()
+                            break
+            
+                def is_over(self):
+                    return self.winner() is not None or not any('.' in row for row in self.board)
+            
+                def show(self):
+                    for row in self.board:
+                        print(' '.join(row))
+                    print("0 1 2 3 4 5 6\n")
+            
+                def scoring(self):
+                    winner = self.winner()
+                    if winner == self.get_current_player_token():
+                        return 100
+                    elif winner == self.get_opponent_token():
+                        return -100
+                    return 0
+            
+                def get_current_player_token(self):
+                    return ['X', 'O'][self.current_player - 1]
+            
+                def get_opponent_token(self):
+                    return ['O', 'X'][self.current_player - 1]
+            
+                def get_flattened_board(self):
+                    return [cell for row in self.board for cell in row]
+            
+                def winner(self):
+                    directions = [(1, 0), (0, 1), (1, 1), (1, -1)]
+                    for r in range(ROWS):
+                        for c in range(COLS):
+                            token = self.board[r][c]
+                            if token == '.':
+                                continue
+                            for dr, dc in directions:
+                                if all(
+                                    0 <= r + i * dr < ROWS and
+                                    0 <= c + i * dc < COLS and
+                                    self.board[r + i * dr][c + i * dc] == token
+                                    for i in range(4)
+                                ):
+                                    return token
+                    return None
 
-ROWS, COLS = 6, 7
 
-class ConnectFour(TwoPlayerGame):
-    def __init__(self, players):
-        self.players = players
-        self.board = [['.' for _ in range(COLS)] for _ in range(ROWS)]
-        self.current_player = 1
-        self.history = []  # Para almacenar jugadas
-        
-    def possible_moves(self):
-        return [str(c) for c in range(COLS) if self.board[0][c] == '.']
-        
-    def make_move(self, move):
-        col = int(move)
-        for row in reversed(range(ROWS)):
-            if self.board[row][col] == '.':
-                self.board[row][col] = self.get_current_player_token()
-                self.history.append((self.get_flattened_board(), col))
-                break
+                    # Función para simular una partida y devolver ejemplos
+                    def simular_partida(_):
+                        game = ConnectFour([AI_Player(Negamax(2)), AI_Player(Negamax(2))])
+                        game.play()
+                        ganador = game.winner()
+
+                        partida = []
+                        for estado, move, jugador in game.history:
+                            ficha_jugador = 'X' if jugador == 1 else 'O'
+                            if ganador == ficha_jugador:
+                                resultado = 1
+                            elif ganador is None:
+                                resultado = 0
+                            else:
+                                resultado = -1
+                            fila = estado + [move, resultado]
+                            partida.append(fila)
+                        return partida
+
+                    # 🔁 Paralelización
+                    n_partidas = 50000
+                    resultados = Parallel(n_jobs=-1)(delayed(simular_partida)(_) for _ in range(n_partidas))
+
+                    # Aplanar lista de listas
+                    dataset = [fila for partida in resultados for fila in partida]
+
+                    # Guardar CSV
+                    header = [f'cell_{i}' for i in range(ROWS * COLS)] + ['move', 'outcome']
+                    with open("connect_four_dataset.csv", "w", newline="") as f:
+                        writer = csv.writer(f)
+                        writer.writerow(header)
+                        writer.writerows(dataset)
+
+                    print(f"✔ Dataset generado con {len(dataset)} ejemplos en total.")
                 
-    def unmake_move(self, move):
-        col = int(move)
-        for row in range(ROWS):
-            if self.board[row][col] != '.':
-                self.board[row][col] = '.'
-                self.history.pop()
-                break
-                
-    def is_over(self):
-        return self.winner() is not None or not any('.' in row for row in self.board)
-        
-    def show(self):
-        for row in self.board:
-            print(' '.join(row))
-        print("0 1 2 3 4 5 6\n")
-        
-    def scoring(self):
-        winner = self.winner()
-        if winner == self.get_current_player_token():
-            return 100
-        elif winner == self.get_opponent_token():
-            return -100
-        return 0
-        
-    def get_current_player_token(self):
-        return ['X', 'O'][self.current_player - 1]
-        
-    def get_opponent_token(self):
-        return ['O', 'X'][self.current_player - 1]
-        
-    def get_flattened_board(self):
-        return [cell for row in self.board for cell in row]
-        
-    def winner(self):
-        directions = [(1, 0), (0, 1), (1, 1), (1, -1)]
-        for r in range(ROWS):
-            for c in range(COLS):
-                token = self.board[r][c]
-                if token == '.':
-                    continue
-                for dr, dc in directions:
-                    if all(
-                        0 <= r + i * dr < ROWS and
-                        0 <= c + i * dc < COLS and
-                        self.board[r + i * dr][c + i * dc] == token
-                        for i in range(4)
-                    ):
-                        return token
-        return None
-
-# 🔄 Simulación de partidas y generación de dataset
-dataset = []
-n_partidas = 10000  # Puedes aumentar esto si quieres más datos
-
-for _ in range(n_partidas):
-    game = ConnectFour([AI_Player(Negamax(2)), AI_Player(Negamax(2))])
-    game.play()
-
-    ganador = game.winner()  # 'X', 'O' o None
-    if ganador not in ('X', 'O'):
-        continue  # Si fue empate, no guardamos nada
-
-    for i, (estado, move) in enumerate(game.history):
-        jugador = 'X' if i % 2 == 0 else 'O'  # Turnos alternos
-
-        if jugador == ganador:
-            fila = estado + [move, 1]  # Solo guardamos jugadas ganadoras
-            dataset.append(fila)
-
-# Guardar en CSV
-header = [f'cell_{i}' for i in range(ROWS * COLS)] + ['move']
-with open("connect_four_dataset.csv", "w", newline="") as f:
-    writer = csv.writer(f)
-    writer.writerow(header)
-    writer.writerows(dataset)
-
-print(f"✔ Dataset generado con {len(dataset)} jugadas ganadoras guardadas.")</code></pre>
+        </code></pre>
     </div>
 </div>
 

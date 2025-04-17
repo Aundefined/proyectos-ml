@@ -5,6 +5,12 @@
 
 {% block head_styles %}
 <link rel="stylesheet" href="{{ url_for('predictor_sueldos.static', filename='css/predictor_sueldos.css') }}">
+<!-- CSS del tema (puedes elegir otros temas en highlightjs.org) -->
+<link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/styles/atom-one-dark.min.css">
+<!-- highlight.js -->
+<script src="//cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/highlight.min.js"></script>
+<script>hljs.highlightAll();</script>
+
 {% endblock %}
 
 {% block content %}
@@ -126,7 +132,7 @@
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <div class="modal-body">
-                <pre class="bg-dark text-light p-3 rounded" style="overflow-x: auto;"><code>
+                <pre><code class="language-python">
 import pandas as pd
 from sklearn.model_selection import train_test_split
 from sklearn.ensemble import RandomForestRegressor
