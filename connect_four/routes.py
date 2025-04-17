@@ -2,17 +2,18 @@ from flask import Blueprint, render_template, request, jsonify
 import pandas as pd
 import numpy as np
 import cloudpickle
+import joblib
 
 # Crear un Blueprint para el juego de Connect Four
 from . import connect_four_bp
 
 # Cargar el modelo entrenado
 try:
-    with open('ml-models/modelo_connect-four.pkl', 'rb') as f:
-        modelo = cloudpickle.load(f)
+    modelo = joblib.load('ml-models/modelo_connect_four_neural_network.joblib')
 except Exception as e:
     print(f"Error al cargar el modelo: {e}")
     modelo = None
+
 
 @connect_four_bp.route('/', methods=['GET'])
 def index():
@@ -115,30 +116,10 @@ def get_best_move(board_state, modelo, model_features):
             if feat not in df_encoded.columns:
                 df_encoded[feat] = 0
         return df_encoded[model_features]
+    
+    features = transform_state(board_state)
+    move = modelo.predict(features)[0]
+    moveInt = int(move)
+    return moveInt
 
-    def get_next_state(state, col, token='X'):
-        new_state = state.copy()
-        for row in reversed(range(6)):
-            idx = row * 7 + col
-            if new_state[str(idx)] == '.':
-                new_state[str(idx)] = token
-                break
-        return new_state
-
-    best_move = None
-    best_score = -float('inf')
-
-    for col in range(7):
-        if not is_column_available(board_state, col):
-            continue
-        next_state = get_next_state(board_state, col)
-        features = transform_state(next_state)
-        try:
-            score = modelo.predict_proba(features).max()
-        except:
-            score = 0
-        if score > best_score:
-            best_score = score
-            best_move = col
-
-    return best_move if best_move is not None else np.random.choice([c for c in range(7) if is_column_available(board_state, c)])
+    
