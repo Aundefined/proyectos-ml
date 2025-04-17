@@ -21,7 +21,7 @@ logger = logging.getLogger(__name__)
 
 
 # Crear un Blueprint para la visualización de datasets
-visualizacion_dataset_bp = Blueprint('visualizacion_dataset', __name__, url_prefix='/visualizacion-dataset')
+from . import visualizacion_dataset_bp
 
 # Clase personalizada para manejar la serialización de NaN
 class NpEncoder(json.JSONEncoder):

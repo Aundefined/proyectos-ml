@@ -4,7 +4,7 @@ import cloudpickle
 import math
 
 # Crear un Blueprint para el predictor de sueldos
-predictor_sueldos_bp = Blueprint('predictor_sueldos', __name__, url_prefix='/predictor-sueldos')
+from . import predictor_sueldos_bp
 
 # Cargar el modelo entrenado
 with open('modelo_sueldos.pkl', 'rb') as f:

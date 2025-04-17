@@ -18,7 +18,7 @@ logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
 # Crear un Blueprint para el análisis no supervisado
-analisis_no_supervisado_bp = Blueprint('analisis_no_supervisado', __name__, url_prefix='/analisis-no-supervisado')
+from . import analisis_no_supervisado_bp
 
 # Clase para manejar la serialización de NaN y otros tipos numpy
 class NpEncoder(json.JSONEncoder):

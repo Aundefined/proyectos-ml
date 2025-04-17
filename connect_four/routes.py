@@ -4,7 +4,7 @@ import numpy as np
 import cloudpickle
 
 # Crear un Blueprint para el juego de Connect Four
-connect_four_bp = Blueprint('connect_four', __name__, url_prefix='/connect-four')
+from . import connect_four_bp
 
 # Cargar el modelo entrenado
 try:

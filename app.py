@@ -16,7 +16,6 @@ app.register_blueprint(visualizacion_dataset_bp)
 app.register_blueprint(analisis_no_supervisado_bp)
 app.register_blueprint(connect_four_bp)
 
-
 @app.route('/')
 def home():
     """Página principal con navegación a los diferentes proyectos"""
