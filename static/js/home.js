@@ -1,5 +1,5 @@
- // Esperar a que el DOM esté completamente cargado
- document.addEventListener('DOMContentLoaded', function() {
+// Esperar a que el DOM esté completamente cargado
+document.addEventListener('DOMContentLoaded', function() {
     // Verificar si la clave existe en sessionStorage
     if (!sessionStorage.getItem('modalShown')) {
         // Si no existe, mostrar el modal manualmente
@@ -15,16 +15,43 @@
             // Marcar que el modal ya se mostró
             sessionStorage.setItem('modalShown', 'true');
             
-            // Asegurarse de que el botón cierre el modal
-            document.querySelector('#welcomeModal .btn-primary').onclick = function() {
+            // Asegurarse de que el botón cierre el modal correctamente
+            document.querySelector('#welcomeModal .btn-primary').addEventListener('click', function() {
                 modal.hide();
-            };
+                // Eliminar manualmente el backdrop y restaurar el body
+                const backdrop = document.querySelector('.modal-backdrop');
+                if (backdrop) {
+                    backdrop.remove();
+                }
+                document.body.classList.remove('modal-open');
+                document.body.style.overflow = '';
+                document.body.style.paddingRight = '';
+            });
             
-            document.querySelector('#welcomeModal .btn-close').onclick = function() {
+            document.querySelector('#welcomeModal .btn-close').addEventListener('click', function() {
                 modal.hide();
-            };
+                // Eliminar manualmente el backdrop y restaurar el body
+                const backdrop = document.querySelector('.modal-backdrop');
+                if (backdrop) {
+                    backdrop.remove();
+                }
+                document.body.classList.remove('modal-open');
+                document.body.style.overflow = '';
+                document.body.style.paddingRight = '';
+            });
         }, 300);
     }
+    
+    // También manejar el evento oculto del modal para limpiar
+    document.getElementById('welcomeModal').addEventListener('hidden.bs.modal', function () {
+        const backdrop = document.querySelector('.modal-backdrop');
+        if (backdrop) {
+            backdrop.remove();
+        }
+        document.body.classList.remove('modal-open');
+        document.body.style.overflow = '';
+        document.body.style.paddingRight = '';
+    });
     
     // Inicializar el carrusel con opciones específicas
     var carousel = new bootstrap.Carousel(document.getElementById('projectsCarousel'), {
@@ -49,10 +76,8 @@
     });
 });
 
-
-
-   // Script para el efecto de fading al cargar la página
-   document.addEventListener('DOMContentLoaded', function() {
+// Script para el efecto de fading al cargar la página
+document.addEventListener('DOMContentLoaded', function() {
     setTimeout(function() {
         document.body.classList.add('loaded');
     }, 20); // Pequeño retraso para asegurar que la transición se active
