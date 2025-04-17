@@ -249,9 +249,6 @@ $(document).ready(function () {
                 // Llenar información básica
                 document.getElementById('fileName').textContent = data.fileName;
                 document.getElementById('rowCount').textContent = data.rowCount;
-                if (data.rowsLimited) {
-                    document.getElementById('rowCount').textContent += ` (limitado a las primeras ${data.maxRowsApplied} filas)`;
-                }
                 document.getElementById('columnCount').textContent = data.columnCount;
                 document.getElementById('numericColumnCount').textContent = data.numericColumnCount;
 

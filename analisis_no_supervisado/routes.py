@@ -203,7 +203,26 @@ def index():
                 df = pd.read_csv(temp_path, encoding='latin1', nrows=max_rows)
             else:
                 df = pd.read_csv(temp_path, encoding='latin1')
-        
+                
+    
+        try:
+        # Primero intentamos con la misma codificación que usaste para el dataframe
+            encoding_used = 'utf-8' if 'utf-8' in locals() else 'latin1'
+
+            # Método 1: Contar líneas sin cargar todo el dataset en memoria
+            with open(temp_path, 'r', encoding=encoding_used) as f:
+                # Restamos 1 para no contar la línea de encabezado
+                row_count_total = sum(1 for _ in f) - 1
+
+            # Alternativa usando pandas (más eficiente)
+            # row_count_total = pd.read_csv(temp_path, encoding=encoding_used, usecols=[0]).shape[0]
+    
+        except Exception as e:
+            # Si hay un error al contar, dejar como None o el mismo valor que rowCount
+            row_count_total = None
+            print(f"Error al contar filas totales: {str(e)}")
+            
+            
         # Extraer columnas para análisis, omitiendo las seleccionadas
         columns_to_exclude = [col for col in columns_to_omit if col in df.columns]
         X_columns = [col for col in df.columns if col not in columns_to_exclude]
@@ -408,7 +427,7 @@ def index():
         # Añadir información sobre el límite de filas aplicado
         result = {
             'fileName': file.filename,
-            'rowCount': len(df),
+            'rowCount': f"{len(df)} de {row_count_total}",
             'rowsLimited': max_rows is not None,
             'maxRowsApplied': max_rows,
             'columnCount': len(df.columns),
@@ -468,6 +487,23 @@ def preview_csv():
             df = pd.read_csv(temp_path, encoding='utf-8', nrows=100)
         except UnicodeDecodeError:
             df = pd.read_csv(temp_path, encoding='latin1', nrows=100)
+            
+        try:
+        # Primero intentamos con la misma codificación que usaste para el dataframe
+            encoding_used = 'utf-8' if 'utf-8' in locals() else 'latin1'
+
+            # Método 1: Contar líneas sin cargar todo el dataset en memoria
+            with open(temp_path, 'r', encoding=encoding_used) as f:
+                # Restamos 1 para no contar la línea de encabezado
+                row_count_total = sum(1 for _ in f) - 1
+
+            # Alternativa usando pandas (más eficiente)
+            # row_count_total = pd.read_csv(temp_path, encoding=encoding_used, usecols=[0]).shape[0]
+    
+        except Exception as e:
+            # Si hay un error al contar, dejar como None o el mismo valor que rowCount
+            row_count_total = None
+            print(f"Error al contar filas totales: {str(e)}")
         
         # Preparar los datos para la tabla paginable
         table_data = []
@@ -492,7 +528,7 @@ def preview_csv():
         # Preparar el resultado en formato JSON (solo datos básicos)
         result = {
             'fileName': file.filename,
-            'rowCount': len(df),
+            'rowCount': f"{len(df)} de {row_count_total}",
             'columnCount': len(df.columns),
             'columns': columns_list,
             'dtypes': dtypes_dict,
