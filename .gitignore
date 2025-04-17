@@ -9,4 +9,3 @@ ENV/
 .venv
 env/
 .DS_Store
-*.pkl
