@@ -7,7 +7,7 @@ import math
 from . import predictor_sueldos_bp
 
 # Cargar el modelo entrenado
-with open('modelo_sueldos.pkl', 'rb') as f:
+with open('ml-models/modelo_sueldos.pkl', 'rb') as f:
     modelo = cloudpickle.load(f)
 
 @predictor_sueldos_bp.route('/', methods=['GET', 'POST'])

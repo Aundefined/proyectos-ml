@@ -8,7 +8,7 @@ from . import connect_four_bp
 
 # Cargar el modelo entrenado
 try:
-    with open('modelo_connect-four.pkl', 'rb') as f:
+    with open('ml-models/modelo_connect-four.pkl', 'rb') as f:
         modelo = cloudpickle.load(f)
 except Exception as e:
     print(f"Error al cargar el modelo: {e}")
@@ -19,7 +19,6 @@ def index():
     """Página para el juego de Connect Four"""
     return render_template('connect_four.html')
 
-@connect_four_bp.route('/predict', methods=['POST'])
 @connect_four_bp.route('/predict', methods=['POST'])
 def predict():
     try:
