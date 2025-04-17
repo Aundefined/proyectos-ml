@@ -2,6 +2,11 @@
 
 {% block title %}Predictor de Sueldos{% endblock %}
 
+
+{% block head_styles %}
+<link rel="stylesheet" href="{{ url_for('predictor_sueldos.static', filename='css/predictor_sueldos.css') }}">
+{% endblock %}
+
 {% block content %}
 <h2 class="text-white fall-element fall-delay-1">Predictor de Sueldos</h2>
 <p class="lead text-white fall-element fall-delay-1">Completa el formulario para obtener una predicción de sueldo anual</p>
@@ -169,35 +174,8 @@ with open('modelo_sueldos.pkl', 'wb') as f:
         </div>
     </div>
 </div>
+{% endblock %}
 
-<script>
-
-document.addEventListener('DOMContentLoaded', function() {
-    // Función para realizar el scroll
-    function scrollToResults() {
-        const resultadoSection = document.getElementById('resultadoSection');
-        if (resultadoSection) {
-            // Usar un tiempo de espera más largo para dispositivos móviles
-            setTimeout(function() {
-                // Método alternativo para hacer scroll
-                window.scrollTo({
-                    top: resultadoSection.offsetTop - 20, // Un poco de margen en la parte superior
-                    behavior: 'smooth'
-                });
-            }, 800); // Aumentado a 800ms para dar más tiempo en dispositivos móviles
-        }
-    }
-
-    // Primera intención: al cargar el DOM
-    scrollToResults();
-    
-    // Segunda intención: después de que todas las imágenes y recursos se hayan cargado
-    window.addEventListener('load', function() {
-        scrollToResults();
-    });
-    
-    // Tercera intención: un tiempo adicional para estar seguros
-    setTimeout(scrollToResults, 1500);
-});
-</script>
+{% block scripts %}
+<script src="{{ url_for('predictor_sueldos.static', filename='js/predictor_sueldos.js') }}"></script>
 {% endblock %}

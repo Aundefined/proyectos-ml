@@ -1,0 +1,138 @@
+.board-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    margin-top: 20px;
+    position: relative;
+}
+
+.board {
+    background-color: #1a57b0;
+    border-radius: 10px;
+    padding: 15px;
+    display: inline-grid;
+    grid-template-columns: repeat(7, 1fr);
+    grid-gap: 8px;
+    box-shadow: 0 8px 16px rgba(0,0,0,0.3);
+}
+
+.cell {
+    width: 60px;
+    height: 60px;
+    background-color: #fff;
+    border-radius: 50%;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.cell:hover {
+    background-color: #eaeaea;
+}
+
+.cell.player {
+    background-color: #e63946;
+    cursor: default;
+}
+
+.cell.ai {
+    background-color: #ffbe0b;
+    cursor: default;
+}
+
+.column-selector {
+    width: 60px;
+    height: 30px;
+    background-color: rgba(255,255,255,0.3);
+    border-radius: 5px;
+    margin-bottom: 5px;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.column-selector:hover {
+    background-color: rgba(255,255,255,0.5);
+}
+
+.game-info {
+    background-color: #fff;
+    border-radius: 10px;
+    padding: 20px;
+    margin-top: 20px;
+    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+    height: auto;
+}
+
+.turn-indicator {
+    text-align: center;
+    font-size: 1.2rem;
+    padding: 10px;
+    margin-bottom: 15px;
+    border-radius: 5px;
+}
+
+.player-turn {
+    background-color: rgba(230, 57, 70, 0.2);
+    border: 1px solid #e63946;
+}
+
+.ai-turn {
+    background-color: rgba(255, 190, 11, 0.2);
+    border: 1px solid #ffbe0b;
+}
+
+.game-buttons {
+    display: flex;
+    justify-content: center;
+    gap: 10px;
+    margin-top: 15px;
+}
+
+.winner-message {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background-color: rgba(0, 0, 0, 0.8);
+    color: white;
+    padding: 20px 40px;
+    border-radius: 10px;
+    font-size: 1.5rem;
+    z-index: 10;
+    display: none;
+}
+
+/* Animación para la ficha cayendo */
+@keyframes dropToken {
+    from { transform: translateY(-300px); }
+    to { transform: translateY(0); }
+}
+
+.animate-drop {
+    animation: dropToken 0.5s ease-in;
+}
+
+/* Estilo para la explicación del modelo */
+.model-explanation {
+    margin-top: 30px;
+    background-color: rgba(255, 255, 255, 0.9);
+    border-radius: 10px;
+    padding: 20px;
+}
+
+.code-toggle {
+    cursor: pointer;
+    color: #1a57b0;
+    text-decoration: underline;
+}
+
+.difficulty-selector {
+    margin-bottom: 20px;
+    color: white;
+}
+
+/* Ajustes responsive para que el panel de info no se superponga */
+@media (max-width: 991px) {
+    .game-info {
+        margin-top: 30px;
+    }
+}
