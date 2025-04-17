@@ -2,83 +2,10 @@
 
 {% block title %}Proyectos de Machine Learning{% endblock %}
 
-{% block head_styles %}
-<style>
-    /* Estilos para el carrusel */
-    #projectsCarousel {
-        background: rgba(26, 87, 176, 0.1);
-        border-radius: 10px;
-        padding: 20px;
-        margin-bottom: 30px;
-    }
-    
-    .carousel-item {
-        padding: 20px 0;
-    }
-    
-    .carousel-control-prev-icon,
-    .carousel-control-next-icon {
-        background-color: rgba(0, 0, 0, 0.4);
-        border-radius: 50%;
-        padding: 10px;
-    }
-    
-    .carousel-indicators {
-        bottom: -10px;
-    }
-    
-    .carousel-indicators button {
-        width: 10px;
-        height: 10px;
-        border-radius: 50%;
-        background-color: #1a57b0;
-        margin: 0 5px;
-    }
-    
-    .card-container {
-        display: flex;
-        justify-content: center;
-        gap: 20px;
-        flex-wrap: wrap;
-    }
-    
-    .project-card {
-        max-width: 340px;
-        border: none;
-        border-radius: 10px;
-        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
-        transition: transform 0.3s, box-shadow 0.3s;
-    }
-    
-    .project-card:hover {
-        transform: translateY(-5px);
-        box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
-    }
-    
-    .card-title {
-        font-weight: bold;
-        color: #1a57b0;
-    }
-    
-    /* Logo container */
-    .logo-container {
-        margin-top: 2rem;
-        margin-bottom: 20px; /* Espacio reducido entre el logo y el footer */
-        position: relative;
-        z-index: 10;
-    }
-    
-    .logo-img {
-        margin-bottom: 0.5rem;
-    }
-    
-    .tech-text {
-        color: white;
-        font-size: 1.2rem;
-        margin-bottom: 0;
-    }
-</style>
-{% endblock %}
+
+<link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
+{% block head_styles %}{% endblock %}
+
 
 {% block content %}
 <!-- Modal de bienvenida -->
