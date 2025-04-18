@@ -1,4 +1,4 @@
-from flask import Flask, render_template
+from flask import Flask, render_template, redirect, request
 import os
 
 # Importar los blueprints
@@ -19,6 +19,12 @@ app.register_blueprint(visualizacion_dataset_bp)
 app.register_blueprint(analisis_no_supervisado_bp)
 app.register_blueprint(connect_four_bp)
 app.register_blueprint(integrated_analysis_bp)
+
+@app.before_request
+def before_request():
+    if not request.is_secure and not app.debug:
+        url = request.url.replace('http://', 'https://', 1)
+        return redirect(url, code=301)
 
 @app.route('/')
 def home():
