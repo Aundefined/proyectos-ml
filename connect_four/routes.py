@@ -11,7 +11,7 @@ from . import connect_four_bp
 try:
     modelo = joblib.load('ml-models/modelo_connect-four.joblib')
 except Exception as e:
-    print(f"Error al cargar el modelo: {e}")
+    print(f"Error al cargar el modelo connect four: {e}")
     modelo = None
 
 

@@ -10,7 +10,7 @@ from . import predictor_sueldos_bp
 try:
     modelo = joblib.load('ml-models/modelo_sueldos.joblib')
 except Exception as e:
-    print(f"Error al cargar el modelo: {e}")
+    print(f"Error al cargar el modelo sueldos: {e}")
     modelo = None
 
 @predictor_sueldos_bp.route('/', methods=['GET', 'POST'])
