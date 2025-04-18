@@ -1,6 +1,6 @@
 from flask import Blueprint, render_template, request
 import pandas as pd
-import cloudpickle
+import joblib
 import math
 
 # Crear un Blueprint para el predictor de sueldos
@@ -8,9 +8,7 @@ from . import predictor_sueldos_bp
 
 # Cargar el modelo entrenado
 try:
-    import cloudpickle
-    with open('ml-models/modelo_sueldos.pkl', 'rb') as f:
-        modelo = cloudpickle.load(f)
+    modelo = joblib.load('ml-models/modelo_sueldos.joblib')
 except Exception as e:
     print(f"Error al cargar el modelo: {e}")
     modelo = None
