@@ -7,8 +7,13 @@ import math
 from . import predictor_sueldos_bp
 
 # Cargar el modelo entrenado
-with open('ml-models/modelo_sueldos.pkl', 'rb') as f:
-    modelo = cloudpickle.load(f)
+try:
+    import cloudpickle
+    with open('ml-models/modelo_sueldos.pkl', 'rb') as f:
+        modelo = cloudpickle.load(f)
+except Exception as e:
+    print(f"Error al cargar el modelo: {e}")
+    modelo = None
 
 @predictor_sueldos_bp.route('/', methods=['GET', 'POST'])
 def index():
