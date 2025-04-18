@@ -8,7 +8,9 @@ from . import predictor_sueldos_bp
 
 # Cargar el modelo entrenado
 try:
-    modelo = joblib.load('ml-models/modelo_sueldos.joblib')
+    import cloudpickle
+    with open('ml-models/modelo_sueldos.pkl', 'rb') as f:
+        modelo = cloudpickle.load(f)
 except Exception as e:
     print(f"Error al cargar el modelo sueldos: {e}")
     modelo = None

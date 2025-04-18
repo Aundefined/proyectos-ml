@@ -9,7 +9,9 @@ from . import connect_four_bp
 
 # Cargar el modelo entrenado
 try:
-    modelo = joblib.load('ml-models/modelo_connect-four.joblib')
+    import cloudpickle
+    with open('ml-models/modelo_connect-four.pkl', 'rb') as f:
+        modelo = cloudpickle.load(f)
 except Exception as e:
     print(f"Error al cargar el modelo connect four: {e}")
     modelo = None
