@@ -9,7 +9,9 @@ from . import connect_four_bp
 
 # Cargar el modelo entrenado
 try:
-    modelo = joblib.load('ml-models/modelo_connect_four_neural_network.joblib')
+    import cloudpickle
+    with open('ml-models/modelo_connect-four.pkl', 'rb') as f:
+        modelo = cloudpickle.load(f)
 except Exception as e:
     print(f"Error al cargar el modelo: {e}")
     modelo = None
@@ -67,59 +69,104 @@ def transform_board_state(board_state):
         board_state: Diccionario con el estado del tablero (formato del frontend)
         
     Returns:
-        Un diccionario con las características en el formato que espera el modelo
+        Un DataFrame con las características en el formato que espera el modelo
     """
-    # Primero, convertimos el estado del tablero a una representación en matriz 6x7
-    board_matrix = [['.'] * 7 for _ in range(6)]
+    # Creamos un diccionario para almacenar las características one-hot encoding
+    features = {}
     
-    # Llenamos la matriz con el estado actual
+    # Para cada celda del tablero (0-41)
     for i in range(42):
-        row = i // 7
-        col = i % 7
+        # Inicializamos todos los valores posibles como False
+        features[f'cell_{i}_.'] = False
+        features[f'cell_{i}_O'] = False
+        features[f'cell_{i}_X'] = False
+        
+        # Obtenemos el valor de la celda si existe en board_state
         if str(i) in board_state:
-            board_matrix[row][col] = board_state[str(i)]
+            cell_value = board_state[str(i)]
+            # Marcamos como True la característica correspondiente
+            features[f'cell_{i}_{cell_value}'] = True
+        else:
+            # Si no hay valor, asumimos que está vacía ('.')
+            features[f'cell_{i}_.'] = True
     
-    # Ahora convertimos esta matriz al formato que espera el modelo
-    # Siguiendo exactamente el formato del entrenamiento en el notebook:
-    # Debemos crear columnas como 'cell_0', 'cell_1', etc. 
-    # donde cada celda tiene un valor '.', 'O', o 'X'
-    raw_features = {}
-    for i in range(42):
-        row = i // 7
-        col = i % 7
-        raw_features[f'cell_{i}'] = board_matrix[row][col]
-    
-    # Creamos un DataFrame con estas características
-    df = pd.DataFrame([raw_features])
-    
-    # Aplicamos pd.get_dummies para obtener exactamente el mismo formato que en el entrenamiento
-    features_df = pd.get_dummies(df, drop_first=False)
-    
-    # Convertimos el DataFrame a diccionario
-    return features_df.iloc[0].to_dict()
+    # Convertimos a DataFrame para asegurar el formato correcto
+    return pd.DataFrame([features])
 
 
-def get_best_move(board_state, modelo, model_features):
-    import pandas as pd
-    import numpy as np
-
-    def transform_state(state):
-        board_matrix = [['.'] * 7 for _ in range(6)]
-        for i in range(42):
-            row = i // 7
-            col = i % 7
-            board_matrix[row][col] = state.get(str(i), '.')
-        raw_features = {f'cell_{i}': board_matrix[i // 7][i % 7] for i in range(42)}
-        df = pd.DataFrame([raw_features])
-        df_encoded = pd.get_dummies(df, drop_first=False)
-        for feat in model_features:
-            if feat not in df_encoded.columns:
-                df_encoded[feat] = 0
-        return df_encoded[model_features]
+def get_best_move(board_state, modelo, model_features=None):
+    """
+    Determina el mejor movimiento según el modelo
     
-    features = transform_state(board_state)
-    move = modelo.predict(features)[0]
-    moveInt = int(move)
-    return moveInt
+    Args:
+        board_state: Estado actual del tablero
+        modelo: Modelo entrenado para predecir movimientos
+        model_features: Lista opcional de características que espera el modelo
+        
+    Returns:
+        Índice del mejor movimiento (0-41)
+    """
+    # Obtenemos las características en el formato esperado (ya como DataFrame)
+    features_df = transform_board_state(board_state)
+    
+    debug_dataframe(features_df)
+    
+    # Aseguramos que todas las columnas estén presentes y en el orden correcto
+    if model_features is not None:
+        # Añadimos cualquier columna faltante
+        for feature in model_features:
+            if feature not in features_df.columns:
+                features_df[feature] = False
+        # Ordenamos las columnas para que coincidan con el modelo
+        features_df = features_df[model_features]
+    
+    # Hacemos la predicción
+    try:
+        move = modelo.predict(features_df)[0]
+        moveInt= int(move)
+        return moveInt
+    except Exception as e:
+        print(f"Error en la predicción: {e}")
+        print(f"Forma de los datos: {features_df.shape}")
+        print(f"Primeras columnas: {list(features_df.columns)[:5]}")
+        # En caso de error, devolver un movimiento por defecto o gestionar el error
+        return -1  # Código de error
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
     
+# Opciones de depuración del df.    
+# Opción 1: Convierte a HTML y guárdalo en un archivo
+def debug_dataframe(df, filename="debug_df.html"):
+    with open(filename, "w") as f:
+        f.write(df.to_html())
+    print(f"DataFrame guardado en {filename}")
+
+# Opción 2: Imprime un resumen más completo
+def print_df_debug(df):
+    print(f"Shape: {df.shape}")
+    print("\nPrimeras 5 filas:")
+    print(df.head().to_string())
+    print("\nColumnas:")
+    for i, col in enumerate(df.columns):
+        print(f"{i}: {col}")
+    print("\nValores de la primera fila:")
+    for col in df.columns:
+        print(f"{col}: {df.iloc[0][col]}")
+
+# Opción 3: Guarda en CSV para revisar en Excel
+def save_debug_csv(df, filename="debug_df.csv"):
+    df.to_csv(filename)
+    print(f"DataFrame guardado en {filename}")
