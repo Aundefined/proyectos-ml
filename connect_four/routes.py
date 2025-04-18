@@ -109,7 +109,6 @@ def get_best_move(board_state, modelo, model_features=None):
     # Obtenemos las características en el formato esperado (ya como DataFrame)
     features_df = transform_board_state(board_state)
     
-    debug_dataframe(features_df)
     
     # Aseguramos que todas las columnas estén presentes y en el orden correcto
     if model_features is not None:
