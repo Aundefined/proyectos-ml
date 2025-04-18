@@ -1,5 +1,6 @@
 from flask import Flask, render_template, redirect, request
 import os
+from werkzeug.middleware.proxy_fix import ProxyFix
 
 # Importar los blueprints
 from predictor_sueldos import predictor_sueldos_bp
@@ -19,6 +20,8 @@ app.register_blueprint(visualizacion_dataset_bp)
 app.register_blueprint(analisis_no_supervisado_bp)
 app.register_blueprint(connect_four_bp)
 app.register_blueprint(integrated_analysis_bp)
+
+app.wsgi_app = ProxyFix(app.wsgi_app, x_proto=1, x_host=1)
 
 @app.before_request
 def before_request():
