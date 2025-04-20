@@ -1,6 +1,6 @@
 {% extends "layout.html" %}
 
-{% block title %}Connect Four - Juega contra IA{% endblock %}
+{% block title %}Connect Four - Juega contra IA CNN{% endblock %}
 
 {% block head_styles %}
 <link rel="stylesheet" href="{{ url_for('connect_four.static', filename='css/connect_four.css') }}">
@@ -13,8 +13,8 @@
 {% endblock %}
 
 {% block content %}
-<h2 class="text-white fall-element fall-delay-1">Connect Four - Juega contra IA</h2>
-<p class="lead text-white fall-element fall-delay-1">¡Intenta conectar 4 fichas en línea antes que la IA!</p>
+<h2 class="text-white fall-element fall-delay-1">Connect Four - Juega contra IA CNN</h2>
+<p class="lead text-white fall-element fall-delay-1">¡Intenta conectar 4 fichas en línea antes que la IA con CNN!</p>
 
 <!-- Selector de dificultad -->
 <div class="difficulty-selector fall-element fall-delay-2">
@@ -76,7 +76,7 @@
 <!-- Explicación del modelo -->
 <div class="jumbotron fall-element fall-delay-4">
     <h4>Acerca del Modelo de Machine Learning</h4>
-    <p>Este juego utiliza exclusivamente un árbol de decisión entrenado con datos de partidas de Connect Four para
+    <p>Este juego utiliza una Red Neuronal Convolucional (CNN) entrenada con datos de partidas de Connect Four para
         predecir el mejor movimiento en cada situación.</p>
 
     <div class="row mt-3">
@@ -91,8 +91,8 @@
         </div>
         <div class="col-md-6">
             <h5>Estadísticas del Modelo</h5>
-            <p>El modelo fue entrenado con un conjunto de datos de <strong>190,000 ejemplos</strong> y alcanzó una
-                precisión del <strong>100%</strong> en el conjunto de prueba.</p>
+            <p>El modelo CNN fue entrenado con un conjunto de datos de <strong>2 millones de ejemplos</strong> y alcanzó una
+                precisión del <strong>66%</strong> en el conjunto de validación.</p>
         </div>
     </div>
 
@@ -106,161 +106,66 @@
 
     <div class="collapse" id="modelCode">
         <pre><code class="language-python">
-            import pandas as pd
-            from sklearn.model_selection import train_test_split
-            from sklearn.tree import DecisionTreeClassifier
+import tensorflow as tf
+import pandas as pd
+from sklearn.model_selection import train_test_split
 
-            # Carga de datos
-            df = pd.read_csv("connect_four_dataset.csv")
+# Carga de datos balanceados
+df = pd.read_csv("connect_four_dataset_entrenamiento.csv")
 
-            # Separación de características y variable objetivo
-            X, y = remove_labels(df, "move")
+# Balanceo de clases (aproximadamente 285,714 ejemplos por columna)
+df_balanceado = pd.DataFrame()
+filas_por_clase = 2000000 // 7  
+for valor in range(7):
+    df_clase = df[df["column"] == valor].sample(n=filas_por_clase, random_state=42)
+    df_balanceado = pd.concat([df_balanceado, df_clase])
 
-            # Preprocesamiento
-            X_encoded = pd.get_dummies(X, drop_first=False)
+# Preparación de datos
+df_balanceado.drop(['move_number','outcome','game_id'], axis=1, inplace=True)
+cell_columns = [f'cell_{i}' for i in range(42)]
+df_balanceado[cell_columns] = df_balanceado[cell_columns].replace({'.': 0, 'X': 1, 'O': -1})
 
-            # División en conjuntos de entrenamiento y prueba
-            X_train, X_test, y_train, y_test = train_test_split(X_encoded, y, test_size=0.4, random_state=42)
+# Separación de características y variable objetivo
+X = df_balanceado.iloc[:, 0:42]  # Celdas del tablero
+y = df_balanceado['column']
+y_onehot = pd.get_dummies(y, drop_first=False)
 
-            # Entrenamiento del modelo Random Forest
-            clf_tree = RandomForestClassifier(max_depth=12,n_estimators=100,n_jobs=-1, random_state=41)
-            clf_tree.fit(X_train, y_train)
+# División en conjuntos de entrenamiento y prueba
+X_train, X_test, y_train, y_test = train_test_split(X, y_onehot, test_size=0.4, random_state=42)
 
-            y_pred_train=clf_tree.predict(X_train)
-            y_pred_test=clf_tree.predict(X_test)
+# Arquitectura CNN
+model = tf.keras.Sequential([
+    # Reshape para convertir 42 elementos en un tablero 7x6x1
+    tf.keras.layers.Reshape((6, 7, 1), input_shape=(42,)),
+    tf.keras.layers.Conv2D(32, kernel_size=(3, 3), activation='relu'),
+    tf.keras.layers.Conv2D(64, kernel_size=(3, 3), activation='relu'),
+    tf.keras.layers.Flatten(),
+    tf.keras.layers.Dense(64, activation='relu'),
+    tf.keras.layers.Dense(7, activation='softmax')
+])
 
-            print("F1 Score train:", f1_score(y_train,y_pred_train,average="weighted"))
-            print("F1 Score test:", f1_score(y_test,y_pred_test ,average="weighted"))
+# Compilación
+model.compile(
+    optimizer='adam',
+    loss='categorical_crossentropy',
+    metrics=['accuracy']
+)
 
-            # Guardado del modelo entrenado
-            import cloudpickle
-            with open('modelo_connect-four.pkl', 'wb') as f:
-            cloudpickle.dump(clf_tree, f)
-        </code></pre>
-    </div>
+# Entrenamiento
+history = model.fit(
+    X_train,
+    y_train,
+    batch_size=64,
+    epochs=50,
+    validation_data=(X_test, y_test),
+    callbacks=[
+        tf.keras.callbacks.EarlyStopping(patience=5, restore_best_weights=True),
+        tf.keras.callbacks.ReduceLROnPlateau(factor=0.5, patience=3)
+    ]
+)
 
-    <p>
-        <button type="button" class="code-toggle mt-3 btn btn-secondary mb-3 fall-element fall-delay-2"
-            data-bs-toggle="collapse" data-bs-target="#datasetCode">
-            <i class="bi bi-code-slash"></i> Ver generación del dataset
-        </button>
-    </p>
-
-
-    <div class="collapse" id="datasetCode">
-        <pre><code class="language-python">
-            from easyAI import TwoPlayerGame, AI_Player, Negamax
-            import random
-            import csv
-            
-            ROWS, COLS = 6, 7
-            
-            class ConnectFour(TwoPlayerGame):
-                def __init__(self, players):
-                    self.players = players
-                    self.board = [['.' for _ in range(COLS)] for _ in range(ROWS)]
-                    self.current_player = 1
-                    self.history = []  # Para almacenar jugadas
-            
-                def possible_moves(self):
-                    return [str(c) for c in range(COLS) if self.board[0][c] == '.']
-            
-                def make_move(self, move):
-                    col = int(move)
-                    for row in reversed(range(ROWS)):
-                        if self.board[row][col] == '.':
-                            self.board[row][col] = self.get_current_player_token()
-                            # Agregar jugador actual como parte de la historia
-                            self.history.append((self.get_flattened_board(), col, self.current_player))
-                            break
-            
-            
-                def unmake_move(self, move):
-                    col = int(move)
-                    for row in range(ROWS):
-                        if self.board[row][col] != '.':
-                            self.board[row][col] = '.'
-                            self.history.pop()
-                            break
-            
-                def is_over(self):
-                    return self.winner() is not None or not any('.' in row for row in self.board)
-            
-                def show(self):
-                    for row in self.board:
-                        print(' '.join(row))
-                    print("0 1 2 3 4 5 6\n")
-            
-                def scoring(self):
-                    winner = self.winner()
-                    if winner == self.get_current_player_token():
-                        return 100
-                    elif winner == self.get_opponent_token():
-                        return -100
-                    return 0
-            
-                def get_current_player_token(self):
-                    return ['X', 'O'][self.current_player - 1]
-            
-                def get_opponent_token(self):
-                    return ['O', 'X'][self.current_player - 1]
-            
-                def get_flattened_board(self):
-                    return [cell for row in self.board for cell in row]
-            
-                def winner(self):
-                    directions = [(1, 0), (0, 1), (1, 1), (1, -1)]
-                    for r in range(ROWS):
-                        for c in range(COLS):
-                            token = self.board[r][c]
-                            if token == '.':
-                                continue
-                            for dr, dc in directions:
-                                if all(
-                                    0 <= r + i * dr < ROWS and
-                                    0 <= c + i * dc < COLS and
-                                    self.board[r + i * dr][c + i * dc] == token
-                                    for i in range(4)
-                                ):
-                                    return token
-                    return None
-
-
-                    # Función para simular una partida y devolver ejemplos
-                    def simular_partida(_):
-                        game = ConnectFour([AI_Player(Negamax(2)), AI_Player(Negamax(2))])
-                        game.play()
-                        ganador = game.winner()
-
-                        partida = []
-                        for estado, move, jugador in game.history:
-                            ficha_jugador = 'X' if jugador == 1 else 'O'
-                            if ganador == ficha_jugador:
-                                resultado = 1
-                            elif ganador is None:
-                                resultado = 0
-                            else:
-                                resultado = -1
-                            fila = estado + [move, resultado]
-                            partida.append(fila)
-                        return partida
-
-                    # 🔁 Paralelización
-                    n_partidas = 50000
-                    resultados = Parallel(n_jobs=-1)(delayed(simular_partida)(_) for _ in range(n_partidas))
-
-                    # Aplanar lista de listas
-                    dataset = [fila for partida in resultados for fila in partida]
-
-                    # Guardar CSV
-                    header = [f'cell_{i}' for i in range(ROWS * COLS)] + ['move', 'outcome']
-                    with open("connect_four_dataset.csv", "w", newline="") as f:
-                        writer = csv.writer(f)
-                        writer.writerow(header)
-                        writer.writerows(dataset)
-
-                    print(f"✔ Dataset generado con {len(dataset)} ejemplos en total.")
-                
+# Guardado del modelo
+model.save('modelo_cnn_connect-four')
         </code></pre>
     </div>
 </div>
