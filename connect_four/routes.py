@@ -13,15 +13,7 @@ try:
     print("Modelo CNN cargado correctamente")
 except Exception as e:
     print(f"Error al cargar el modelo CNN connect four: {e}")
-    # Intentar cargar como un archivo pickle (respaldo)
-    try:
-        with open('ml-models/modelo_cnn_connect-four.pkl', 'rb') as f:
-            modelo = cloudpickle.load(f)
-        print("Modelo cargado como pickle")
-    except Exception as e2:
-        print(f"Error al cargar el modelo mediante pickle: {e2}")
-        modelo = None
-
+   
 
 @connect_four_bp.route('/', methods=['GET'])
 def index():
