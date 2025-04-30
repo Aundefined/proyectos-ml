@@ -7,12 +7,33 @@ import tensorflow as tf
 from . import connect_four_bp
 
 # Cargar el modelo entrenado CNN
+import os
+
+# Al inicio de tu archivo
+print("DIAGNÓSTICO DE RAILWAY:")
+print(f"Directorio actual: {os.getcwd()}")
+if os.path.exists('ml-models'):
+    print(f"Contenido de ml-models: {os.listdir('ml-models')}")
+else:
+    print("¡El directorio ml-models NO existe!")
+    try:
+        os.makedirs('ml-models', exist_ok=True)
+        print("Directorio ml-models creado")
+    except Exception as e:
+        print(f"Error al crear directorio: {e}")
+
+# Modifica tu bloque de carga
 try:
-    # Para modelos TensorFlow, usar el método de carga apropiado
-    modelo = tf.keras.models.load_model('ml-models/mejor_modelo_cnn.keras')
-    print("Modelo CNN cargado correctamente")
+    model_path = 'ml-models/mejor_modelo_cnn.keras'
+    if os.path.exists(model_path):
+        modelo = tf.keras.models.load_model(model_path)
+        print(f"Modelo CNN cargado correctamente desde {model_path}")
+    else:
+        print(f"El archivo {model_path} NO existe!")
+        modelo = None
 except Exception as e:
     print(f"Error al cargar el modelo CNN connect four: {e}")
+    modelo = None
    
 
 @connect_four_bp.route('/', methods=['GET'])
@@ -24,20 +45,25 @@ def index():
 @connect_four_bp.route('/predict', methods=['POST'])
 def predict():
     try:
+        if modelo is None:
+            print("Modelo no disponible - usando jugada aleatoria")
+            board_state = request.json.get('board_state', {})
+            available_columns = [c for c in range(7) if is_column_available(board_state, c)]
+            # Si no hay modelo, jugar en la columna central (3) cuando sea posible
+            if 3 in available_columns:
+                best_move = 3
+            elif available_columns:
+                best_move = np.random.choice(available_columns)
+            else:
+                return jsonify({'success': False, 'error': 'No hay columnas disponibles'}), 400
+            return jsonify({'success': True, 'move': int(best_move)})
+            
+        # Código original cuando el modelo está disponible
         board_state = request.json.get('board_state', {})
         difficulty = request.json.get('difficulty', 'normal')
-
-        if modelo is None:
-            return jsonify({'success': False, 'error': 'Modelo no disponible'}), 500
-
-        # Obtener mejor jugada
         best_move = get_best_move(board_state, modelo)
-
-        # Aleatoriedad en modo normal
-        if difficulty == 'normal' and np.random.random() < 0.3:
-            available_columns = [c for c in range(7) if is_column_available(board_state, c)]
-            if available_columns:
-                best_move = np.random.choice(available_columns)
+        
+        # Resto del código...
 
         return jsonify({'success': True, 'move': int(best_move)})
     except Exception as e:
