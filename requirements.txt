@@ -1,5 +1,3 @@
-flask
-werkzeug
 
 
 # Dependencias del modelo y datos
@@ -23,5 +21,10 @@ pillow
 # Dependencias adicionales para análisis no supervisado
 scipy
 
-tensorflow
+
 keras
+
+Flask==2.0.3
+gunicorn==20.1.0
+tensorflow==2.6.0
+Werkzeug==2.0.3
