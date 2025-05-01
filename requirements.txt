@@ -1,27 +1,27 @@
-flask
-werkzeug
+flask==3.1.0
+werkzeug==3.1.3
 
 
 # Dependencias del modelo y datos
-pandas
-scikit-learn
-joblib
-cloudpickle
-numpy
+pandas==2.2.3
+scikit-learn==1.6.1
+joblib==1.4.2
+cloudpickle==3.1.1
+numpy==1.23.5
 
 
 # Visualización
-matplotlib
-seaborn
+matplotlib==3.9.4
+seaborn==0.13.2
 
 
 # Requerido para algunas funciones de visualización
-cycler
-kiwisolver
-pillow
+cycler==0.12.1
+kiwisolver==1.4.7
+pillow==11.2.1
 
 # Dependencias adicionales para análisis no supervisado
-scipy
+scipy==1.13.1
 
-tensorflow
-keras
+tensorflow==2.6.0
+keras==2.6.0
