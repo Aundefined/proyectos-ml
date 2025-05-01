@@ -6,20 +6,40 @@ import tensorflow as tf
 # Crear un Blueprint para el juego de Connect Four
 from . import connect_four_bp
 
-# Cargar el modelo entrenado CNN
+# Esta clase es un adaptador para hacer que TFLite funcione como tu modelo Keras
+class TFLiteModelAdapter:
+    def __init__(self, model_path):
+        self.interpreter = tf.lite.Interpreter(model_path=model_path)
+        self.interpreter.allocate_tensors()
+        self.input_details = self.interpreter.get_input_details()
+        self.output_details = self.interpreter.get_output_details()
+    
+    def predict(self, input_data, verbose=0):
+        # Asegurar que los datos tienen el formato correcto
+        input_data = np.array(input_data, dtype=np.float32)
+        
+        # Establecer los datos de entrada
+        self.interpreter.set_tensor(self.input_details[0]['index'], input_data)
+        
+        # Ejecutar la inferencia
+        self.interpreter.invoke()
+        
+        # Obtener resultados
+        return self.interpreter.get_tensor(self.output_details[0]['index'])
+
+# Cargar el modelo entrenado - MODIFICADO PARA USAR TFLITE
 try:
-    # Para modelos TensorFlow, usar el método de carga apropiado
-    modelo = tf.keras.models.load_model('ml-models/mejor_modelo_cnn.keras')
-    print("Modelo CNN cargado correctamente")
+    # Cargar el modelo TFLite
+    modelo = TFLiteModelAdapter('ml-models/modelo_conecta4.tflite')
+    print("Modelo TFLite cargado correctamente")
 except Exception as e:
-    print(f"Error al cargar el modelo CNN connect four: {e}")
-   
+    print(f"Error al cargar el modelo TFLite: {e}")
+    modelo = None
 
 @connect_four_bp.route('/', methods=['GET'])
 def index():
     """Página para el juego de Connect Four"""
     return render_template('connect_four.html')
-
 
 @connect_four_bp.route('/predict', methods=['POST'])
 def predict():
@@ -120,6 +140,5 @@ def get_best_move(board_state, modelo):
         return best_move
     except Exception as e:
         print(f"Error en la predicción: {e}")
-        # En caso de error, devolver una columna disponible aleatoria o -1
-        available_columns = [c for c in range(7) if is_column_available(board_state, c)]
-        return np.random.choice(available_columns) if available_columns else -1
+        # En caso de error, devolver -1
+        return -1
