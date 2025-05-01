@@ -23,5 +23,5 @@ pillow
 # Dependencias adicionales para análisis no supervisado
 scipy
 
-tensorflow==2.6.0
+tensorflow
 keras
