@@ -6,7 +6,7 @@ import tensorflow as tf
 # Crear un Blueprint para el juego de Connect Four
 from . import connect_four_bp
 
-# Esta clase es un adaptador para hacer que TFLite funcione como tu modelo Keras
+# Esta clase es un adaptador para hacer que TFLite funcione como tu modelo RL
 class TFLiteModelAdapter:
     def __init__(self, model_path):
         self.interpreter = tf.lite.Interpreter(model_path=model_path)
@@ -27,13 +27,13 @@ class TFLiteModelAdapter:
         # Obtener resultados
         return self.interpreter.get_tensor(self.output_details[0]['index'])
 
-# Cargar el modelo entrenado - MODIFICADO PARA USAR TFLITE
+# Cargar el modelo entrenado con RL
 try:
     # Cargar el modelo TFLite
-    modelo = TFLiteModelAdapter('ml-models/modelo_conecta4.tflite')
-    print("Modelo TFLite cargado correctamente")
+    modelo = TFLiteModelAdapter('ml-models/connect4_ep13000_win39.tflite')
+    print("Modelo TFLite RL cargado correctamente")
 except Exception as e:
-    print(f"Error al cargar el modelo TFLite: {e}")
+    print(f"Error al cargar el modelo TFLite RL: {e}")
     modelo = None
 
 @connect_four_bp.route('/', methods=['GET'])
@@ -51,13 +51,7 @@ def predict():
             return jsonify({'success': False, 'error': 'Modelo no disponible'}), 500
 
         # Obtener mejor jugada
-        best_move = get_best_move(board_state, modelo)
-
-        # Aleatoriedad en modo normal
-        if difficulty == 'normal' and np.random.random() < 0.3:
-            available_columns = [c for c in range(7) if is_column_available(board_state, c)]
-            if available_columns:
-                best_move = np.random.choice(available_columns)
+        best_move = get_best_move(board_state, modelo, difficulty)
 
         return jsonify({'success': True, 'move': int(best_move)})
     except Exception as e:
@@ -69,7 +63,6 @@ def is_column_available(board_state, column):
     """
     Verifica si una columna tiene espacio disponible
     """
-    # La columna tiene espacio si al menos una posición en la columna está vacía
     for row in range(6):  # 6 filas
         cell_index = row * 7 + column  # Convertir coordenadas (fila, columna) a índice
         if str(cell_index) in board_state and board_state[str(cell_index)] == '.':
@@ -78,67 +71,79 @@ def is_column_available(board_state, column):
     return False
 
 
-def transform_board_state_for_cnn(board_state):
+def transform_board_state_for_rl(board_state):
     """
-    Transforma el estado del tablero al formato que espera el modelo CNN
+    Transforma el estado del tablero al formato que espera el modelo RL (matriz 6x7)
     
     Args:
         board_state: Diccionario con el estado del tablero (formato del frontend)
         
     Returns:
-        Un array 1D con 42 elementos (como en el entrenamiento)
+        Una matriz numpy 6x7 con el estado del tablero
     """
-    # Crear un array para las 42 celdas (6 filas × 7 columnas)
-    features = np.zeros(42, dtype=np.float32)
+    # Crear matriz 6x7 para el tablero (0=vacío, 1=jugador, -1=IA)
+    board = np.zeros((6, 7), dtype=np.float32)
     
-    # Para cada celda del tablero (0-41)
+    # Para cada celda del tablero
     for i in range(42):
-        # Obtenemos el valor de la celda del board_state
+        row = i // 7
+        col = i % 7
+        
         if str(i) in board_state:
             cell_value = board_state[str(i)]
-            # Transformar los valores como en el entrenamiento: '.' → 0, 'X' → 1, 'O' → -1
-            if cell_value == 'X':
-                features[i] = 1
-            elif cell_value == 'O':
-                features[i] = -1
+            # Transformar los valores: '.' → 0, 'X' → 1, 'O' → -1
+            # Nota: En el entrenamiento RL, PLAYER_1 (agente) = 1, PLAYER_2 (oponente) = -1
+            # Pero en la app web, el jugador es 'O' y la IA es 'X'
+            # Así que invertimos los valores para mantener consistencia con el entrenamiento
+            if cell_value == 'X':  # IA (modelo)
+                board[row][col] = 1
+            elif cell_value == 'O':  # Jugador humano
+                board[row][col] = -1
             # Para '.' ya está inicializado como 0
     
-    # Devolver el array como una matriz 2D (batch de 1)
-    return np.array([features], dtype=np.float32)
+    return board
 
 
-def get_best_move(board_state, modelo):
+def get_best_move(board_state, modelo, difficulty):
     """
-    Determina el mejor movimiento según el modelo CNN
+    Determina el mejor movimiento según el modelo RL
     
     Args:
         board_state: Estado actual del tablero
-        modelo: Modelo CNN entrenado para predecir movimientos
+        modelo: Modelo RL entrenado
+        difficulty: Nivel de dificultad seleccionado
         
     Returns:
         Índice de la mejor columna (0-6)
     """
-    # Convertir el estado del tablero al formato que espera el modelo CNN
-    features = transform_board_state_for_cnn(board_state)
+    # Obtener columnas disponibles
+    available_columns = [c for c in range(7) if is_column_available(board_state, c)]
     
-    # Hacemos la predicción con el modelo CNN
+    if not available_columns:
+        # Si no hay columnas disponibles, devolver -1
+        return -1
+    
+    # En modo normal, añadimos aleatoriedad
+    if difficulty == 'normal' and np.random.random() < 0.3:
+        return np.random.choice(available_columns)
+    
     try:
-        # Predicción de probabilidades para cada columna
-        predictions = modelo.predict(features, verbose=0)[0]
+        # Convertir el estado del tablero al formato que espera el modelo RL
+        board = transform_board_state_for_rl(board_state)
         
-        # Filtrar columnas no disponibles
-        available_columns = [c for c in range(7) if is_column_available(board_state, c)]
+        # Hacer predicción con el modelo
+        q_values = modelo.predict(np.expand_dims(board, axis=0), verbose=0)[0]
         
-        if not available_columns:
-            # Si no hay columnas disponibles (tablero lleno), devolvemos -1
-            return -1
+        # Aplicar máscara para movimientos inválidos (asignar valores muy bajos)
+        for col in range(7):
+            if col not in available_columns:
+                q_values[col] = -float('inf')
         
-        # Seleccionar la columna disponible con mayor probabilidad
-        available_predictions = [(col, predictions[col]) for col in available_columns]
-        best_move = max(available_predictions, key=lambda x: x[1])[0]
+        # Seleccionar columna con mayor valor Q
+        best_move = np.argmax(q_values)
         
         return best_move
     except Exception as e:
         print(f"Error en la predicción: {e}")
-        # En caso de error, devolver -1
-        return -1
+        # En caso de error, elegir una columna aleatoria
+        return np.random.choice(available_columns)

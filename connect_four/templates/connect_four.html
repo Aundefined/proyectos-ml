@@ -1,6 +1,6 @@
 {% extends "layout.html" %}
 
-{% block title %}Connect Four - Juega contra IA CNN{% endblock %}
+{% block title %}Connect Four - Juega contra IA con Aprendizaje por Refuerzo{% endblock %}
 
 {% block head_styles %}
 <link rel="stylesheet" href="{{ url_for('connect_four.static', filename='css/connect_four.css') }}">
@@ -13,8 +13,8 @@
 {% endblock %}
 
 {% block content %}
-<h2 class="text-white fall-element fall-delay-1">Connect Four - Juega contra IA CNN</h2>
-<p class="lead text-white fall-element fall-delay-1">¡Intenta conectar 4 fichas en línea antes que la IA con CNN!</p>
+<h2 class="text-white fall-element fall-delay-1">Connect Four - Juega contra IA con Reinforcement Learning</h2>
+<p class="lead text-white fall-element fall-delay-1">¡Intenta conectar 4 fichas en línea antes que la IA entrenada con Deep Q-Learning!</p>
 
 <!-- Selector de dificultad -->
 <div class="difficulty-selector fall-element fall-delay-2">
@@ -23,7 +23,10 @@
         <option value="normal" selected>Normal</option>
         <option value="hard">Avanzado</option>
     </select>
-    <p class="text-white-50 small">Ambos niveles utilizan el modelo de ML, con diferentes configuraciones.</p>
+    <p class="text-white-50 small">
+        Normal: El modelo RL con 30% de aleatoriedad.
+        Avanzado: El modelo RL puro.
+    </p>
 </div>
 
 <div class="row fall-element fall-delay-2">
@@ -75,31 +78,29 @@
 
 <!-- Explicación del modelo -->
 <div class="jumbotron fall-element fall-delay-4">
-    <h4>Acerca del Modelo de Machine Learning</h4>
-    <p>Este juego utiliza una Red Neuronal Convolucional (CNN) entrenada con datos de partidas de Connect Four para
-        predecir el mejor movimiento en cada situación.</p>
+    <h4>Acerca del Modelo de Reinforcement Learning</h4>
+    <p>Este juego utiliza una Red Neuronal entrenada con <strong>Deep Q-Learning</strong>, un algoritmo de aprendizaje por refuerzo que permite al agente aprender a tomar decisiones jugando contra sí mismo.</p>
 
     <div class="row mt-3">
         <div class="col-md-6">
-            <h5>Niveles de Dificultad</h5>
-            <ul>
-                <li><strong>Normal:</strong> Utiliza el modelo con un 30% de aleatoriedad para hacerlo menos predecible.
-                </li>
-                <li><strong>Avanzado:</strong> Utiliza el modelo de forma pura para obtener sus mejores predicciones.
-                </li>
-            </ul>
+            <h5>¿Qué es el Reinforcement Learning?</h5>
+            <p>El aprendizaje por refuerzo es un tipo de aprendizaje automático donde un agente aprende a tomar decisiones óptimas a través de la interacción con un entorno, recibiendo recompensas o castigos según los resultados de sus acciones.</p>
+            <p>A diferencia del modelo CNN anterior (entrenado con datos de partidas), este modelo ha aprendido por experiencia propia, descubriendo estrategias por sí mismo.</p>
         </div>
         <div class="col-md-6">
-            <h5>Estadísticas del Modelo</h5>
-            <p>El modelo CNN fue entrenado con un conjunto de datos de <strong>2 millones de ejemplos</strong> y alcanzó una
-                precisión del <strong>66%</strong> en el conjunto de validación.</p>
+            <h5>Arquitectura DQN</h5>
+            <ul>
+                <li><strong>Deep Q-Network:</strong> El modelo utiliza redes convolucionales para procesar el tablero como una imagen 6x7 y predecir el valor Q (calidad) de cada posible acción.</li>
+                <li><strong>Entrenamiento:</strong> El modelo se entrenó durante 20,000 episodios, mejorando continuamente a través de su propia experiencia.</li>
+                <li><strong>Recompensas:</strong> +10 por ganar, +1 por empate, -5 por perder, y -10 por intentar un movimiento inválido.</li>
+            </ul>
         </div>
     </div>
 
 
     <button type="button" class="code-toggle mt-3 btn btn-secondary mb-3 fall-element fall-delay-2"
         data-bs-toggle="collapse" data-bs-target="#modelCode">
-        <i class="bi bi-code-slash"></i> Ver código de entrenamiento
+        <i class="bi bi-code-slash"></i> Ver código de entrenamiento RL
     </button>
 
 
@@ -107,65 +108,65 @@
     <div class="collapse" id="modelCode">
         <pre><code class="language-python">
 import tensorflow as tf
-import pandas as pd
-from sklearn.model_selection import train_test_split
+import numpy as np
+from collections import deque
+import random
 
-# Carga de datos balanceados
-df = pd.read_csv("connect_four_dataset_entrenamiento.csv")
+# Parámetros del entrenamiento RL
+GAMMA = 0.99              # Factor de descuento
+MEMORY_SIZE = 50000       # Tamaño del buffer de experiencias
+BATCH_SIZE = 64           # Tamaño del batch para entrenamiento
+EPSILON_START = 1.0       # Epsilon inicial (exploración)
+EPSILON_MIN = 0.1         # Epsilon mínimo
+EPSILON_DECAY = 0.9995    # Tasa de decaimiento de epsilon
+LEARNING_RATE = 0.0001    # Tasa de aprendizaje
 
-# Balanceo de clases (aproximadamente 285,714 ejemplos por columna)
-df_balanceado = pd.DataFrame()
-filas_por_clase = 2000000 // 7  
-for valor in range(7):
-    df_clase = df[df["column"] == valor].sample(n=filas_por_clase, random_state=42)
-    df_balanceado = pd.concat([df_balanceado, df_clase])
-
-# Preparación de datos
-df_balanceado.drop(['move_number','outcome','game_id'], axis=1, inplace=True)
-cell_columns = [f'cell_{i}' for i in range(42)]
-df_balanceado[cell_columns] = df_balanceado[cell_columns].replace({'.': 0, 'X': 1, 'O': -1})
-
-# Separación de características y variable objetivo
-X = df_balanceado.iloc[:, 0:42]  # Celdas del tablero
-y = df_balanceado['column']
-y_onehot = pd.get_dummies(y, drop_first=False)
-
-# División en conjuntos de entrenamiento y prueba
-X_train, X_test, y_train, y_test = train_test_split(X, y_onehot, test_size=0.4, random_state=42)
-
-# Arquitectura CNN
+# Crear el modelo Deep Q-Network
 model = tf.keras.Sequential([
-    # Reshape para convertir 42 elementos en un tablero 7x6x1
-    tf.keras.layers.Reshape((6, 7, 1), input_shape=(42,)),
-    tf.keras.layers.Conv2D(32, kernel_size=(3, 3), activation='relu'),
-    tf.keras.layers.Conv2D(64, kernel_size=(3, 3), activation='relu'),
+    # Reshape para convertir a 6x7x1
+    tf.keras.layers.Reshape((6, 7, 1), input_shape=(6, 7)),
+    
+    # Capas convolucionales
+    tf.keras.layers.Conv2D(64, (3, 3), padding='same', activation='relu'),
+    tf.keras.layers.BatchNormalization(),
+    tf.keras.layers.Conv2D(128, (3, 3), padding='same', activation='relu'),
+    tf.keras.layers.BatchNormalization(),
+    tf.keras.layers.Conv2D(128, (3, 3), padding='same', activation='relu'),
+    tf.keras.layers.BatchNormalization(),
+    
+    # Capas densas
     tf.keras.layers.Flatten(),
-    tf.keras.layers.Dense(64, activation='relu'),
-    tf.keras.layers.Dense(7, activation='softmax')
+    tf.keras.layers.Dense(256, activation='relu'),
+    tf.keras.layers.Dense(128, activation='relu'),
+    tf.keras.layers.Dense(7)  # Q-valores para cada acción (columna)
 ])
 
-# Compilación
-model.compile(
-    optimizer='adam',
-    loss='categorical_crossentropy',
-    metrics=['accuracy']
-)
-
-# Entrenamiento
-history = model.fit(
-    X_train,
-    y_train,
-    batch_size=64,
-    epochs=50,
-    validation_data=(X_test, y_test),
-    callbacks=[
-        tf.keras.callbacks.EarlyStopping(patience=5, restore_best_weights=True),
-        tf.keras.callbacks.ReduceLROnPlateau(factor=0.5, patience=3)
-    ]
-)
-
-# Guardado del modelo
-model.save('modelo_cnn_connect-four')
+# Entrenamiento principal con estrategia epsilon-greedy
+for episode in range(EPISODES):
+    state = env.reset()
+    done = False
+    
+    while not done:
+        # Seleccionar acción (exploración vs explotación)
+        if random.random() < epsilon:
+            action = random.choice(env.valid_moves)  # Exploración
+        else:
+            q_values = model.predict(state)[0]  # Explotación
+            action = np.argmax(q_values)
+            
+        # Ejecutar acción en el entorno
+        next_state, reward, done, info = env.step(action)
+        
+        # Almacenar experiencia y entrenar la red
+        replay_buffer.add(state, action, reward, next_state, done)
+        state = next_state
+        
+        # Actualizar red con lotes de experiencias pasadas
+        batch = replay_buffer.sample(BATCH_SIZE)
+        # [Cálculo de objetivos Q y actualización de pesos]
+        
+    # Reducir epsilon para favorecer más explotación
+    epsilon = max(EPSILON_MIN, epsilon * EPSILON_DECAY)
         </code></pre>
     </div>
 </div>
