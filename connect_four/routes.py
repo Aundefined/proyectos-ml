@@ -30,7 +30,7 @@ class TFLiteModelAdapter:
 # Cargar el modelo entrenado con RL
 try:
     # Cargar el modelo TFLite
-    modelo = TFLiteModelAdapter('ml-models/connect4_ep13500_win33.tflite')
+    modelo = TFLiteModelAdapter('ml-models/connect4_ep8500_win44.tflite')
     print("Modelo TFLite RL cargado correctamente")
 except Exception as e:
     print(f"Error al cargar el modelo TFLite RL: {e}")
