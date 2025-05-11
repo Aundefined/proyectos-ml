@@ -1,7 +1,6 @@
 from flask import Blueprint, render_template, request
 import pandas as pd
 import joblib
-import math
 
 # Crear un Blueprint para el predictor de sueldos
 from . import predictor_sueldos_bp
@@ -75,32 +74,20 @@ def index():
             if genero not in ['Masculino', 'Femenino', 'Otro']:
                 raise ValueError("Género no válido")
             
-            # Crear DataFrame con el mismo formato que se usó para entrenar
-            nuevo_dato = {
+            # Crear DataFrame con formato ORIGINAL (no con dummies)
+            # El pipeline se encarga de aplicar las transformaciones
+            nuevo_dato = pd.DataFrame({
                 'Edad': [edad],
                 'Experiencia_Anios': [experiencia],
                 'Horas_Semanales': [horas],
-                'Nivel_Educativo_Doctorado': [1 if educacion == 'Doctorado' else 0],
-                'Nivel_Educativo_Licenciatura': [1 if educacion == 'Licenciatura' else 0],
-                'Nivel_Educativo_Máster': [1 if educacion == 'Máster' else 0],
-                'Industria_Finanzas': [1 if industria == 'Finanzas' else 0],
-                'Industria_Manufactura': [1 if industria == 'Manufactura' else 0],
-                'Industria_Retail': [1 if industria == 'Retail' else 0],
-                'Industria_Salud': [1 if industria == 'Salud' else 0],
-                'Industria_Tecnología': [1 if industria == 'Tecnología' else 0],
-                'Ubicación_EE.UU.': [1 if ubicacion == 'EE.UU.' else 0],
-                'Ubicación_Europa': [1 if ubicacion == 'Europa' else 0],
-                'Ubicación_Latinoamérica': [1 if ubicacion == 'Latinoamérica' else 0],
-                'Género_Masculino': [1 if genero == 'Masculino' else 0],
-                'Género_Otro': [1 if genero == 'Otro' else 0]
-            }
+                'Nivel_Educativo': [educacion],
+                'Industria': [industria],
+                'Ubicación': [ubicacion],
+                'Género': [genero]
+            })
             
-            nuevo_dato_df = pd.DataFrame(nuevo_dato)
-            
-            # Realizar predicción
-            prediccion_log = modelo.predict(nuevo_dato_df)
-            # Invertir la transformación logarítmica para obtener el sueldo en escala original
-            sueldo_predicho = math.exp(prediccion_log[0]) - 1
+            # Realizar predicción - El Pipeline aplica automáticamente Box-Cox y devuelve el valor real
+            sueldo_predicho = modelo.predict(nuevo_dato)[0]
             
             resultado = {
                 'sueldo': round(sueldo_predicho, 2),

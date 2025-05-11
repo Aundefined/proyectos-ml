@@ -11,6 +11,33 @@
     margin-bottom: 15px;
 }
 
+/* Estilos para los botones de modales */
+.d-flex.gap-2 {
+    gap: 0.5rem !important;
+}
+
+/* Estilos para las modales */
+.modal-dialog.modal-xl {
+    max-width: 90vw;
+}
+
+.modal-body img {
+    border-radius: 8px;
+    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+}
+
+/* Estilos para el código en las modales */
+pre code {
+    font-size: 0.85rem;
+    line-height: 1.4;
+}
+
+@media (max-width: 768px) {
+    pre code {
+        font-size: 0.75rem;
+    }
+}
+
 /* Estilos para validación de formularios */
 .was-validated .form-control:invalid {
     border-color: #dc3545;
@@ -41,4 +68,22 @@
 .was-validated .form-control:invalid~.invalid-feedback,
 .was-validated .form-select:invalid~.invalid-feedback {
     display: block;
+}
+
+/* Estilos para los botones de modales */
+.d-flex.gap-2 {
+    gap: 0.5rem !important;
+}
+
+/* Responsive para botones en móvil */
+@media (max-width: 768px) {
+    .d-flex.flex-wrap.gap-2 {
+        flex-direction: column;
+    }
+    
+    .d-flex.flex-wrap.gap-2 > .btn,
+    .d-flex.flex-wrap.gap-2 > a.btn {
+        width: 100%;
+        margin-bottom: 0.5rem;
+    }
 }

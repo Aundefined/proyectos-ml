@@ -2,7 +2,6 @@
 
 {% block title %}Predictor de Sueldos{% endblock %}
 
-
 {% block head_styles %}
 <link rel="stylesheet" href="{{ url_for('predictor_sueldos.static', filename='css/predictor_sueldos.css') }}">
 <!-- CSS del tema (puedes elegir otros temas en highlightjs.org) -->
@@ -17,11 +16,27 @@
 {% block content %}
 <h2 class="text-white fall-element fall-delay-1">Predictor de Sueldos</h2>
 <p class="lead text-white fall-element fall-delay-1">Completa el formulario para obtener una predicción de sueldo anual</p>
+<div class="text-white-50 mb-4 fall-element fall-delay-1">
+    <i class="bi bi-info-circle me-1"></i>
+    <small>Ejercicio de regresión | Dataset generado con ChatGPT</small>
+</div>
 
-<!-- Botón para mostrar el código de entrenamiento -->
-<button type="button" class="btn btn-secondary mb-3 fall-element fall-delay-2" data-bs-toggle="modal" data-bs-target="#modeloModal">
-    <i class="bi bi-code-slash"></i> Cómo entrené el modelo
-</button>
+
+<!-- Botones para modales -->
+<!-- Botones para modales y descarga -->
+<div class="d-flex flex-wrap gap-2 mb-3 fall-element fall-delay-2">
+    <button type="button" class="btn btn-secondary" data-bs-toggle="modal" data-bs-target="#modeloModal">
+        <i class="bi bi-code-slash"></i> Cómo entrené el modelo
+    </button>
+    <button type="button" class="btn btn-info" data-bs-toggle="modal" data-bs-target="#graficoModal">
+        <i class="bi bi-graph-up"></i> Ver análisis de datos
+    </button>
+    <a href="{{ url_for('predictor_sueldos.static', filename='images/dataset_sueldos.csv') }}" 
+       class="btn btn-success" 
+       download="dataset_sueldos.csv">
+        <i class="bi bi-download"></i> Descargar dataset
+    </a>
+</div>
 
 {% if error %}
 <div class="alert alert-danger alert-dismissible fade show fall-element fall-delay-1" role="alert">
@@ -124,56 +139,112 @@
     </div>
 </div>
 
-<!-- Modal con el código de entrenamiento -->
+<!-- Modal con el código de entrenamiento actualizado -->
 <div class="modal fade" id="modeloModal" tabindex="-1" aria-labelledby="modeloModalLabel" aria-hidden="true">
     <div class="modal-dialog modal-lg modal-dialog-scrollable modal-fullscreen-sm-down">
         <div class="modal-content">
             <div class="modal-header">
-                <h5 class="modal-title" id="modeloModalLabel">Código de Entrenamiento del Modelo</h5>
+                <h5 class="modal-title" id="modeloModalLabel">Código de Entrenamiento del Modelo (Pipeline)</h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <div class="modal-body">
                 <pre><code class="language-python">
 import pandas as pd
-from sklearn.model_selection import train_test_split
+import numpy as np
+from sklearn.model_selection import train_test_split, RandomizedSearchCV
+from sklearn.compose import ColumnTransformer, TransformedTargetRegressor
+from sklearn.preprocessing import OneHotEncoder, PowerTransformer
+from sklearn.pipeline import Pipeline
 from sklearn.ensemble import RandomForestRegressor
+from scipy.stats import randint
 
-def remove_labels(df, label_name):
-    X = df.drop(label_name, axis=1)
-    y = df[label_name].copy()
-    return (X, y)
+# Cargar datos
+df_origin = pd.read_csv("dataset_sueldos.csv")
+df = df_origin.copy()
 
-
-# Carga de datos
-df = pd.read_csv("dataset_sueldos.csv")
-df_copy = df.copy()
-
-# Preprocesamiento
-df_copy = pd.get_dummies(df_copy, columns=["Nivel_Educativo", "Industria","Ubicación","Género"], drop_first=True)
-
-# Transformación logarítmica del sueldo
-df_copy["Sueldo_Anual"] = df_copy["Sueldo_Anual"].apply(math.log1p)
-
-# Separación de características y variable objetivo
-X, y = remove_labels(df_copy, "Sueldo_Anual")
-
-# División en conjuntos de entrenamiento y prueba
+# Preparar los datos
+X, y = df.drop(['Sueldo_Anual'], axis=1), df['Sueldo_Anual']
 X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.4, random_state=42)
 
-# Entrenamiento del modelo RandomForest
-clf_tree = RandomForestRegressor(
-    random_state=42, 
-    n_estimators=500,
-    max_depth=4,
-    min_samples_split=5,  
-    max_features='sqrt')
+# Definir las columnas por tipo
+numeric_features = ['Edad', 'Experiencia_Anios', 'Horas_Semanales']
+categorical_features = ['Nivel_Educativo', 'Industria','Ubicación','Género']
 
-clf_tree.fit(X_train, y_train)
+# Crear el preprocessor para las features
+preprocessor = ColumnTransformer([
+    ('numeric', 'passthrough', numeric_features),
+    ('categorical', OneHotEncoder(drop='first'), categorical_features)
+])
 
-# Guardado del modelo entrenado
+# Pipeline completo con preprocessor + modelo
+ml_pipeline = Pipeline([
+    ('preprocessor', preprocessor),
+    ('model', RandomForestRegressor(random_state=42))
+])
+
+# Añadir Box-Cox al target con TransformedTargetRegressor
+final_model = TransformedTargetRegressor(
+    regressor=ml_pipeline,
+    transformer=PowerTransformer(method='box-cox')
+)
+
+# Definir parámetros para RandomizedSearchCV
+param_distributions = {
+    'regressor__model__n_estimators': randint(20, 200),
+    'regressor__model__max_depth': [None] + list(range(5, 30)),
+    'regressor__model__min_samples_split': randint(2, 20),
+    'regressor__model__min_samples_leaf': randint(1, 10),
+    'regressor__model__max_features': ['sqrt', 'log2', None],
+    'regressor__model__bootstrap': [True, False]
+}
+
+# Búsqueda de hiperparámetros
+random_search = RandomizedSearchCV(
+    estimator=final_model,
+    param_distributions=param_distributions,
+    n_iter=50,
+    cv=5,
+    scoring='neg_mean_squared_error',
+    n_jobs=-1,
+    verbose=1,
+    random_state=42
+)
+
+# Entrenar modelo
+print("Iniciando optimización de hiperparámetros...")
+random_search.fit(X_train, y_train)
+best_model = random_search.best_estimator_
+
+# Guardar modelo
 import cloudpickle
 with open('modelo_sueldos.pkl', 'wb') as f:
-    cloudpickle.dump(clf_tree, f)</code></pre>
+    cloudpickle.dump(best_model, f)
+
+# Evaluar modelo
+from sklearn.metrics import r2_score
+y_pred = best_model.predict(X_test)
+print(f"R² en test: {r2_score(y_test, y_pred):.4f}")</code></pre>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal para el gráfico -->
+<div class="modal fade" id="graficoModal" tabindex="-1" aria-labelledby="graficoModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-xl modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="graficoModalLabel">Análisis de Datos del Modelo</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body text-center">
+                <img src="{{ url_for('predictor_sueldos.static', filename='images/analisis_modelo.png') }}" 
+                     class="img-fluid" 
+                     alt="Análisis del modelo de predicción de sueldos"
+                     style="max-height: 70vh; object-fit: contain;">
             </div>
             <div class="modal-footer">
                 <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
