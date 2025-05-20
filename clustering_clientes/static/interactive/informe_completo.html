@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+        <html>
+        <head>
+            <title>Informe Completo de Clustering</title>
+            <style>
+                body { font-family: Arial, sans-serif; margin: 20px; }
+                h1, h2, h3 { color: #2c3e50; }
+                .section { margin-bottom: 30px; }
+                .visualization { margin: 20px 0; }
+                table { border-collapse: collapse; width: 100%; }
+                th, td { border: 1px solid #ddd; padding: 8px; text-align: left; }
+                th { background-color: #f2f2f2; }
+            </style>
+            <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+        </head>
+        <body>
+            <h1>Informe Completo de Análisis de Clustering</h1>
+            
+            <div class="section">
+                <h2>1. Resumen del Modelo</h2>
+                <p>Se ha utilizado el algoritmo DBSCAN con eps=8.956 y min_samples=28. El dataset contiene 99912 registros.</p>
+                <p>Distribución de clusters:</p>
+                <ul>
+        <li>Cluster 0: 36140 registros (36.17%)</li>
+<li>Cluster 1: 63772 registros (63.83%)</li>
+
+                </ul>
+            </div>
+            
+            <div class="section">
+                <h2>2. Evaluación del Modelo</h2>
+                <table>
+                    <tr>
+                        <th>Métrica</th>
+                        <th>Valor</th>
+                    </tr>
+        
+                </table>
+            </div>
+            
+            <div class="section">
+                <h2>3. Perfiles de Cluster</h2>
+        <h3>Cluster 0</h3>
+<pre>Cluster 0 (36140 clientes, 36.2% del total):
+- LAST_VISIT_DAYS: 362.55 (52.8% menor que la media global)
+- VEHICLE_AGE: 3.64 (25.3% menor que la media global)
+- CURRENT_MILEAGE: 43090.32 (3.4% menor que la media global)
+- BRAND: predomina 'MARCA_A' (53.5%)
+- LANGUAGE: predomina 'ESP' (85.1%)
+- GENDER: predomina 'HOMBRE' (60.7%)
+- COMUNIDAD_AUTONOMA: predomina 'Comunidad de Madrid' (19.1%)
+- CAR_MODEL: predomina 'MODELO_B' (26.6%)
+- FUEL: predomina 'GASOLINA' (74.1%)
+- VEHICLE_AGE_RANGE: predomina '1' (34.7%)
+</pre>
+<h3>Cluster 1</h3>
+<pre>Cluster 1 (63772 clientes, 63.8% del total):
+- LAST_VISIT_DAYS: 999.00 (29.9% mayor que la media global)
+- VEHICLE_AGE: 5.57 (14.4% mayor que la media global)
+- CURRENT_MILEAGE: 45747.07 (2.5% mayor que la media global)
+- BRAND: predomina 'MARCA_B' (55.0%)
+- LANGUAGE: predomina 'ESP' (87.1%)
+- GENDER: predomina 'HOMBRE' (61.3%)
+- COMUNIDAD_AUTONOMA: predomina 'Andalucía' (21.1%)
+- CAR_MODEL: predomina 'MODELO_B' (29.6%)
+- FUEL: predomina 'GASOLINA' (57.9%)
+- VEHICLE_AGE_RANGE: predomina '3' (56.3%)
+</pre>
+
+            </div>
+            
+            <div class="section">
+                <h2>4. Visualizaciones</h2>
+                <p>Las siguientes visualizaciones muestran las relaciones entre diferentes variables por cluster.</p>
+            </div>
+        </body>
+        </html>
+        

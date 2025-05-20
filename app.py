@@ -8,6 +8,7 @@ from visualizacion_dataset import visualizacion_dataset_bp
 from analisis_no_supervisado import analisis_no_supervisado_bp
 from connect_four import connect_four_bp
 from integrated_analysis import integrated_analysis_bp
+from clustering_clientes import clustering_clientes_bp
 
 
 
@@ -20,6 +21,7 @@ app.register_blueprint(visualizacion_dataset_bp)
 app.register_blueprint(analisis_no_supervisado_bp)
 app.register_blueprint(connect_four_bp)
 app.register_blueprint(integrated_analysis_bp)
+app.register_blueprint(clustering_clientes_bp)
 
 app.wsgi_app = ProxyFix(app.wsgi_app, x_proto=1, x_host=1)
 

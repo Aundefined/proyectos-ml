@@ -1,0 +1,339 @@
+{% extends "layout.html" %}
+
+{% block title %}Clustering de Clientes{% endblock %}
+
+{% block head_styles %}
+<link rel="stylesheet" href="{{ url_for('clustering_clientes.static', filename='css/clustering_clientes.css') }}">
+<!-- CSS del tema (puedes elegir otros temas en highlightjs.org) -->
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/styles/atom-one-dark.min.css">
+
+<!-- highlight.js -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/highlight.min.js"></script>
+<script>hljs.highlightAll();</script>
+{% endblock %}
+
+{% block content %}
+<h2 class="text-white fall-element fall-delay-1">Clustering de Clientes</h2>
+<p class="lead text-white fall-element fall-delay-1">Análisis de segmentación de clientes mediante técnicas no
+    supervisadas</p>
+<div class="text-white-50 mb-4 fall-element fall-delay-1">
+    <i class="bi bi-info-circle me-1"></i>
+    <small>Ejercicio de clustering | Dataset anónimo de clientes de concesionario</small>
+</div>
+
+<!-- Botones para modales -->
+<div class="d-flex flex-wrap gap-2 mb-3 fall-element fall-delay-2">
+    <button type="button" class="btn btn-secondary" data-bs-toggle="modal" data-bs-target="#modeloModal">
+        <i class="bi bi-code-slash"></i> Cómo entrené el modelo
+    </button>
+    <button type="button" class="btn btn-info" data-bs-toggle="modal" data-bs-target="#galeriaPrincipal">
+        <i class="bi bi-graph-up"></i> Ver análisis de datos
+    </button>
+</div>
+
+<!-- Contenido principal -->
+<div class="row">
+    <div class="col-12">
+        <div class="p-4 bg-white rounded shadow text-dark fall-element fall-delay-2">
+            <p>
+                Para este ejercicio he utilizado una base de datos real de clientes extraída del entorno laboral. Por
+                motivos de confidencialidad, he anonimizado tanto las marcas como los modelos de vehículos, ya que no se
+                ha solicitado autorización ni a la empresa ni al cliente propietario de los datos.
+            </p>
+            <p>
+                El análisis revela principalmente dos grandes grupos de comportamiento: uno formado por clientes que
+                realizan las visitas al taller de forma regular y otro compuesto por aquellos que no lo hacen o lo hacen
+                con una frecuencia muy baja.
+            </p>
+            <p>
+                Los clientes que no acuden al taller tienden a tener vehículos más antiguos, mayor kilometraje acumulado
+                y mayor tiempo desde la última visita registrada. También se observa una mayor proporción de vehículos
+                diésel entre ellos. En cambio, el grupo que sí acude con regularidad muestra perfiles más variados,
+                incluyendo modelos más recientes y una distribución más equilibrada de tipos de combustible.
+            </p>
+            <p>
+                Este tipo de segmentación puede ser de gran utilidad para diseñar campañas de retención, ajustar
+                servicios postventa o incluso anticipar riesgos de abandono del cliente.
+            </p>
+
+            <div class="text-center my-4">
+                <img src="{{ url_for('clustering_clientes.static', filename='images/cluster_analysis.png') }}"
+                    class="img-fluid rounded shadow" alt="Vista previa de los clusters" style="max-height: 800px;">
+            </div>
+        </div>
+
+
+    </div>
+</div>
+
+<!-- Modal con el código de análisis de clustering -->
+<div class="modal fade" id="modeloModal" tabindex="-1" aria-labelledby="modeloModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg modal-dialog-scrollable modal-fullscreen-sm-down">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="modeloModalLabel">Código de Análisis de Clustering</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <pre><code class="language-python">
+import pandas as pd
+from sklearn.pipeline import Pipeline
+from sklearn.compose import ColumnTransformer
+from sklearn.preprocessing import RobustScaler, OneHotEncoder, LabelEncoder
+from sklearn.cluster import KMeans,DBSCAN
+from sklearn.impute import SimpleImputer
+import matplotlib.pyplot as plt
+import seaborn as sns
+from sklearn.metrics import silhouette_score
+import plotly.express as px
+import plotly.graph_objects as go
+from plotly.subplots import make_subplots
+import hdbscan
+from sklearn.ensemble import IsolationForest
+
+columnas = ["BRAND", "LANGUAGE", "GENDER", "AGE", "PROVINCE", "CAR_MODEL", 
+            "FUEL", "VEHICLE_AGE", "VEHICLE_AGE_RANGE",
+            "VISIT_WORKSHOP_DATE", "CURRENT_MILEAGE"]
+
+df = pd.read_csv("CLIENT_CLUSTERING_2.csv", sep=";", header=None, names=columnas)
+
+df = df[df["VEHICLE_AGE"] >= 0]
+df = df[df["GENDER"] > 0]
+df = df[(df["AGE"] > 18) & (df["AGE"] < 80)]
+df = df[(df["PROVINCE"] >= 1) & (df["PROVINCE"] <= 52)]
+
+def agrupar_fuel(f):
+    if pd.isna(f):
+        return "OTRO"  
+    f = f.upper()
+    if f == "ESS":
+        return "GASOLINA"
+    elif f == "DIESEL":
+        return "DIESEL"
+    elif f == "ELEC":
+        return "ELECTRICO"
+    else:
+        return "OTRO"
+    
+def extraer_modelo_raiz(texto):
+    if pd.isna(texto):
+        return "DESCONOCIDO"  
+
+    excluidos = {"NEW", "II", "III", "IV", "V", "BREAK", "VP", "VU", "VAN", "MCV", "E-TECH"}
+    palabras = texto.upper().split()
+
+    for palabra in palabras:
+        if palabra not in excluidos:
+            return palabra
+
+    return texto  
+
+df["FUEL"] = df["FUEL"].apply(agrupar_fuel)
+
+codigos_provincias = {
+    1: "Álava",
+    2: "Albacete",
+    3: "Alicante",
+    etc...
+}
+
+df["PROVINCE"] = df["PROVINCE"].map(codigos_provincias)
+
+codigo_a_comunidad = {
+    # Andalucía
+    4: "Andalucía",    # Almería
+    11: "Andalucía",   # Cádiz
+    14: "Andalucía",   # Córdoba
+    18: "Andalucía",   # Granada
+    21: "Andalucía",   # Huelva
+    23: "Andalucía",   # Jaén
+    29: "Andalucía",   # Málaga
+    41: "Andalucía",   # Sevilla
+    
+    # Aragón
+    22: "Aragón",      # Huesca
+    44: "Aragón",      # Teruel
+    50: "Aragón",      # Zaragoza
+    etc...
+}
+
+
+df['COMUNIDAD_AUTONOMA'] = df['PROVINCE'].apply(lambda x: codigo_a_comunidad.get(x, "Desconocido"))
+
+df = df.drop('PROVINCE', axis=1)
+
+df["CAR_MODEL"] = df["CAR_MODEL"].apply(extraer_modelo_raiz)
+
+modelos_unicos = df["CAR_MODEL"].unique()
+
+modelos_anonimos = {modelo: f"MODELO_{chr(65+i)}" for i, modelo in enumerate(modelos_unicos)}
+
+df["CAR_MODEL"] = df["CAR_MODEL"].map(modelos_anonimos)
+
+mapeo_rangos = {
+    "0 a 2": 0,
+    "0 a 4": 1,
+    "3 a 4": 2,
+    "5 a 10": 3
+}
+
+df["VEHICLE_AGE_RANGE"] = df["VEHICLE_AGE_RANGE"].map(mapeo_rangos)
+
+df["VISIT_WORKSHOP_DATE"] = pd.to_datetime(df["VISIT_WORKSHOP_DATE"])
+
+
+hoy = pd.Timestamp.today()
+df["LAST_VISIT_DAYS"] = (hoy - df["VISIT_WORKSHOP_DATE"]).dt.days
+
+
+df["LAST_VISIT_DAYS"] = df["LAST_VISIT_DAYS"].fillna(999)
+
+df.drop("VISIT_WORKSHOP_DATE",axis=1,inplace=True)
+
+df["BRAND"] = df["BRAND"].map({1: "MARCA_A", 2: "MARCA_B"})
+
+df["GENDER"] = df["GENDER"].map({1: "HOMBRE", 2: "MUJER"})
+
+df.to_csv("CLIENT_CLUSTERING_LIMPIO.csv", index=False)
+
+
+
+
+
+num_cols = ["VEHICLE_AGE", "CURRENT_MILEAGE"]
+cat_cols = ["BRAND", "LANGUAGE", "GENDER","CAR_MODEL","FUEL","COMUNIDAD_AUTONOMA"]
+pass_cols = ["AGE", "VEHICLE_AGE_RANGE","LAST_VISIT_DAYS"]
+
+
+
+num_pipeline = Pipeline([
+    ("imputer", SimpleImputer(strategy="mean")),
+    ("scaler", RobustScaler())
+])
+
+
+cat_pipeline = Pipeline([
+    ("encoder", OneHotEncoder(handle_unknown="ignore"))
+])
+
+preprocessor = ColumnTransformer([
+    ("num", num_pipeline, num_cols),
+    ("cat", cat_pipeline, cat_cols),
+    ("pass", "passthrough", pass_cols)
+])
+
+X_preprocessed = preprocessor.fit_transform(df)
+
+
+pipeline = Pipeline([
+    ("preprocessing", preprocessor),
+    ("clustering", DBSCAN(eps=8.956, min_samples=28)) 
+])
+
+
+clusters = pipeline.fit_predict(df)
+df["cluster"] = clusters</code></pre>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal principal para la galería -->
+<div class="modal fade" id="galeriaPrincipal" tabindex="-1" aria-labelledby="galeriaModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-xl modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="galeriaModalLabel">Galería de Análisis de Datos</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <ul class="nav nav-tabs" id="galeriaTab" role="tablist">
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link active" id="informe-tab" data-bs-toggle="tab" data-bs-target="#informe"
+                            type="button" role="tab" aria-controls="informe" aria-selected="true">Informe</button>
+                    </li>
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link" id="categorias-tab" data-bs-toggle="tab" data-bs-target="#categorias"
+                            type="button" role="tab" aria-controls="categorias"
+                            aria-selected="false">Categorías</button>
+                    </li>
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link" id="relaciones-tab" data-bs-toggle="tab" data-bs-target="#relaciones"
+                            type="button" role="tab" aria-controls="relaciones"
+                            aria-selected="false">Relaciones</button>
+                    </li>
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link" id="interactivo-tab" data-bs-toggle="tab" data-bs-target="#interactivo"
+                            type="button" role="tab" aria-controls="interactivo" aria-selected="false">Gráfico
+                            3D</button>
+                    </li>
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link" id="distribucion-tab" data-bs-toggle="tab"
+                            data-bs-target="#distribucion" type="button" role="tab" aria-controls="distribucion"
+                            aria-selected="false">Distribuciones</button>
+                    </li>
+                </ul>
+
+                <div class="tab-content p-3 border border-top-0 rounded-bottom" id="galeriaTabContent">
+                    <!-- INFORME -->
+                    <div class="tab-pane fade show active" id="informe" role="tabpanel" aria-labelledby="informe-tab">
+                        <iframe
+                            src="{{ url_for('clustering_clientes.static', filename='interactive/informe_completo.html') }}"
+                            class="w-100 rounded shadow-sm" style="height:800px;"></iframe>
+                    </div>
+
+                    <!-- CATEGORÍAS -->
+                    <div class="tab-pane fade" id="categorias" role="tabpanel" aria-labelledby="categorias-tab">
+                        <iframe
+                            src="{{ url_for('clustering_clientes.static', filename='interactive/barras_BRAND.html') }}"
+                            class="w-100 rounded shadow-sm mb-3" style="height:500px;"></iframe>
+                        <iframe
+                            src="{{ url_for('clustering_clientes.static', filename='interactive/barras_FUEL.html') }}"
+                            class="w-100 rounded shadow-sm mb-3" style="height:500px;"></iframe>
+                        <iframe
+                            src="{{ url_for('clustering_clientes.static', filename='interactive/barras_CAR_MODEL.html') }}"
+                            class="w-100 rounded shadow-sm mb-3" style="height:500px;"></iframe>
+                        <iframe
+                            src="{{ url_for('clustering_clientes.static', filename='interactive/barras_COMUNIDAD_AUTONOMA.html') }}"
+                            class="w-100 rounded shadow-sm" style="height:500px;"></iframe>
+                    </div>
+
+                    <!-- RELACIONES -->
+                    <div class="tab-pane fade" id="relaciones" role="tabpanel" aria-labelledby="relaciones-tab">
+                        <iframe
+                            src="{{ url_for('clustering_clientes.static', filename='interactive/last_visit_vs_mileage.html') }}"
+                            class="w-100 rounded shadow-sm" style="height:600px;"></iframe>
+                    </div>
+
+                    <!-- GRÁFICO 3D -->
+                    <div class="tab-pane fade" id="interactivo" role="tabpanel" aria-labelledby="interactivo-tab">
+                        <iframe src="{{ url_for('clustering_clientes.static', filename='interactive/pca_3d.html') }}"
+                            class="w-100 rounded shadow-sm" style="height:600px;"></iframe>
+                    </div>
+
+                    <!-- DISTRIBUCIONES -->
+                    <div class="tab-pane fade" id="distribucion" role="tabpanel" aria-labelledby="distribucion-tab">
+                        <iframe
+                            src="{{ url_for('clustering_clientes.static', filename='interactive/last_visit_distribution.html') }}"
+                            class="w-100 rounded shadow-sm mb-3" style="height:600px;"></iframe>
+                        <iframe
+                            src="{{ url_for('clustering_clientes.static', filename='interactive/mileage_distribution.html') }}"
+                            class="w-100 rounded shadow-sm" style="height:600px;"></iframe>
+                    </div>
+                </div>
+
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script src="{{ url_for('clustering_clientes.static', filename='js/clustering_clientes.js') }}"></script>
+{% endblock %}

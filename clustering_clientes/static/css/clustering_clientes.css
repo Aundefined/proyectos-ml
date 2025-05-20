@@ -1,0 +1,61 @@
+/* Estilos específicos para la sección de clustering de clientes */
+.tab-content {
+    background-color: white;
+    border-radius: 0 0 .25rem .25rem;
+    min-height: 400px;
+}
+
+.tab-pane {
+    padding: 20px;
+}
+
+.tab-pane img {
+    max-height: 500px;
+    object-fit: contain;
+    margin: 0 auto;
+}
+
+/* Estilo para el iframe del gráfico interactivo */
+.ratio-16x9 {
+    border: 1px solid #ddd;
+    background-color: #f8f9fa;
+    border-radius: 5px;
+}
+
+/* Estilos para los botones de modales */
+.d-flex.gap-2 {
+    gap: 0.5rem !important;
+}
+
+/* Estilos para las modales */
+.modal-xl {
+    max-width: 90vw;
+}
+
+.modal-body img {
+    border-radius: 8px;
+    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+}
+
+/* Estilos para el código en las modales */
+pre code {
+    font-size: 0.85rem;
+    line-height: 1.4;
+}
+
+@media (max-width: 768px) {
+    pre code {
+        font-size: 0.75rem;
+    }
+    
+    /* Responsive para botones en móvil */
+    .d-flex.flex-wrap.gap-2 {
+        flex-direction: column;
+    }
+    
+    .d-flex.flex-wrap.gap-2 > .btn,
+    .d-flex.flex-wrap.gap-2 > a.btn {
+        width: 100%;
+        margin-bottom: 0.5rem;
+    }
+}
