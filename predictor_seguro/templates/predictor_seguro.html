@@ -1,0 +1,252 @@
+{% extends "layout.html" %}
+
+{% block title %}Predictor de Precio de Seguro{% endblock %}
+
+{% block head_styles %}
+<link rel="stylesheet" href="{{ url_for('predictor_seguro.static', filename='css/predictor_seguro.css') }}">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/styles/atom-one-dark.min.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/highlight.min.js"></script>
+<script>hljs.highlightAll();</script>
+{% endblock %}
+
+{% block content %}
+<h2 class="text-white fall-element fall-delay-1">Predictor de Precio de Seguro</h2>
+<p class="lead text-white fall-element fall-delay-1">Completa el formulario para obtener una predicción del precio anual
+    del seguro</p>
+<div class="text-white-50 mb-4 fall-element fall-delay-1">
+    <i class="bi bi-info-circle me-1"></i>
+    <small>Ejemplo de predicción de precios de seguros médicos</small>
+</div>
+
+<!-- Botones de modales y descarga -->
+<div class="d-flex flex-wrap gap-2 mb-3 fall-element fall-delay-2">
+    <button type="button" class="btn btn-secondary" data-bs-toggle="modal" data-bs-target="#modeloModal">
+        <i class="bi bi-code-slash"></i> Cómo entrené el modelo
+    </button>
+    <button type="button" class="btn btn-info" data-bs-toggle="modal" data-bs-target="#graficoModal">
+        <i class="bi bi-graph-up"></i> Ver análisis de datos
+    </button>
+    <a href="{{ url_for('predictor_seguro.static', filename='dataset_seguro.csv') }}" class="btn btn-success"
+        download="dataset_seguro.csv">
+        <i class="bi bi-download"></i> Descargar dataset
+    </a>
+</div>
+
+{% if error %}
+<div class="alert alert-danger alert-dismissible fade show fall-element fall-delay-1" role="alert">
+    <strong>Error:</strong> {{ error }}
+    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+</div>
+{% endif %}
+
+<div class="row">
+    <div class="col-lg-6 col-md-12 mb-4">
+        <form method="POST" action="/predictor-seguro"
+            class="p-4 bg-white rounded shadow-sm text-dark fall-element fall-delay-2">
+            <div class="form-group">
+                <label for="bmi">Índice de Masa Corporal (BMI):</label>
+                <input type="number" class="form-control" id="bmi" name="bmi" required step="0.01" min="10" max="60"
+                    placeholder="Ej: 27.5" value="{{ form_data.bmi }}">
+            </div>
+            <div class="form-group">
+                <label for="age">Edad:</label>
+                <input type="number" class="form-control" id="age" name="age" required min="18" max="100"
+                    placeholder="Ej: 35" value="{{ form_data.age }}">
+            </div>
+            <div class="form-group">
+                <label for="children">Número de hijos:</label>
+                <input type="number" class="form-control" id="children" name="children" required min="0" max="10"
+                    placeholder="Ej: 2" value="{{ form_data.children }}">
+            </div>
+            <div class="form-group">
+                <label for="smoker">¿Fuma?</label>
+                <select class="form-control" id="smoker" name="smoker" required>
+                    <option value="" {% if not form_data.smoker %}selected{% endif %} disabled>Selecciona una opción
+                    </option>
+                    <option value="yes" {% if form_data.smoker=='yes' %}selected{% endif %}>Sí</option>
+                    <option value="no" {% if form_data.smoker=='no' %}selected{% endif %}>No</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label for="sex">Sexo:</label>
+                <select class="form-control" id="sex" name="sex" required>
+                    <option value="" {% if not form_data.sex %}selected{% endif %} disabled>Selecciona una opción
+                    </option>
+                    <option value="male" {% if form_data.sex=='male' %}selected{% endif %}>Masculino</option>
+                    <option value="female" {% if form_data.sex=='female' %}selected{% endif %}>Femenino</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label for="region">Región:</label>
+                <select class="form-control" id="region" name="region" required>
+                    <option value="" {% if not form_data.region %}selected{% endif %} disabled>Selecciona una región
+                    </option>
+                    <option value="northeast" {% if form_data.region=='northeast' %}selected{% endif %}>Noreste</option>
+                    <option value="northwest" {% if form_data.region=='northwest' %}selected{% endif %}>Noroeste
+                    </option>
+                    <option value="southeast" {% if form_data.region=='southeast' %}selected{% endif %}>Sureste</option>
+                    <option value="southwest" {% if form_data.region=='southwest' %}selected{% endif %}>Suroeste
+                    </option>
+                </select>
+            </div>
+            <button type="submit" class="btn btn-primary">Predecir Precio</button>
+            <button type="button" class="btn btn-outline-secondary ms-2" id="resetBtn">
+                <i class="bi bi-arrow-clockwise"></i> Resetear
+            </button>
+
+        </form>
+    </div>
+    <div class="col-lg-6 col-md-12">
+        {% if resultado %}
+        <div id="resultadoSection" class="resultado fall-element fall-delay-3">
+            <h3>Resultado de la Predicción</h3>
+            <div class="alert alert-success">
+                <h4>Precio estimado del seguro:</h4>
+                <p class="display-5">{{ "{:,.2f}".format(resultado.precio) }} €</p>
+            </div>
+            <h5>Datos utilizados:</h5>
+            <ul class="list-group">
+                {% for campo, valor in resultado.datos.items() %}
+                <li class="list-group-item d-flex justify-content-between align-items-center">
+                    {{ campo }}
+                    <span class="badge bg-primary rounded-pill">{{ valor }}</span>
+                </li>
+                {% endfor %}
+            </ul>
+        </div>
+        {% endif %}
+    </div>
+</div>
+
+<!-- Modal: Código de Entrenamiento -->
+<div class="modal fade" id="modeloModal" tabindex="-1" aria-labelledby="modeloModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg modal-dialog-scrollable modal-fullscreen-sm-down">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="modeloModalLabel">Código de Entrenamiento del Modelo (Random Forest)</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <pre><code class="language-python">
+import pandas as pd
+import numpy as np
+from sklearn.model_selection import train_test_split
+from sklearn.compose import ColumnTransformer, TransformedTargetRegressor
+from sklearn.preprocessing import StandardScaler, OrdinalEncoder, OneHotEncoder, PowerTransformer
+from sklearn.pipeline import Pipeline
+from sklearn.linear_model import LinearRegression 
+from sklearn.ensemble import RandomForestRegressor
+import sys
+import os
+
+df_origin=pd.read_csv("insurance.csv")
+
+X, y = df.drop(['charges'], axis=1), df['charges']
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.4, random_state=42)
+
+# Definir las columnas por tipo
+numeric_features = ['bmi', 'age', 'children']
+ordinal_features = ['smoker']
+categorical_features = ['sex', 'region']
+
+# Crear el preprocessor para las features
+preprocessor = ColumnTransformer([
+    ('numeric', 'passthrough', numeric_features),
+    ('ordinal', OrdinalEncoder(categories=[['no', 'yes']]), ordinal_features),
+    ('categorical', OneHotEncoder(drop='first'), categorical_features)
+])
+
+# Crear el modelo base RandomForest
+model = RandomForestRegressor(random_state=42)
+
+# Pipeline completo con preprocessor + modelo
+ml_pipeline = Pipeline([
+    ('preprocessor', preprocessor),
+    ('model', model)
+])
+
+# Añadir Box-Cox al target con TransformedTargetRegressor
+final_model = TransformedTargetRegressor(
+    regressor=ml_pipeline,
+    transformer=PowerTransformer(method='box-cox')
+)
+
+param_distributions = {
+    'regressor__model__n_estimators': randint(20, 200),
+    'regressor__model__max_depth': [None] + list(range(5, 30)),
+    'regressor__model__min_samples_split': randint(2, 20),
+    'regressor__model__min_samples_leaf': randint(1, 10),
+    'regressor__model__max_features': ['sqrt', 'log2', None],
+    'regressor__model__bootstrap': [True, False]
+}
+
+random_search = RandomizedSearchCV(
+    estimator=final_model,
+    param_distributions=param_distributions,
+    n_iter=50,  # Número de combinaciones a probar
+    cv=5,
+    scoring='neg_mean_squared_error',
+    n_jobs=-1,
+    verbose=1,
+    random_state=42
+)
+
+
+random_search.fit(X_train, y_train)
+
+# Mejor modelo encontrado
+best_model = random_search.best_estimator_
+print(f"\nMejores parámetros: {random_search.best_params_}")
+print(f"Mejor score CV: {-random_search.best_score_:.2f}")
+
+print("Mejores parámetros encontrados:")
+for param, value in random_search.best_params_.items():
+    print(f"{param}: {value}")
+
+y_pred = best_model.predict(X_test)
+
+mse = mean_squared_error(y_test, y_pred)
+rmse = np.sqrt(mse)
+r2 = r2_score(y_test, y_pred)
+mae = mean_absolute_error(y_test, y_pred)
+
+print(f"\nResultados en test set:")
+print(f"MSE: {mse:.2f}")
+print(f"RMSE: {rmse:.2f}")
+print(f"R²: {r2:.4f}")
+print(f"MAE: {mae:.2f}")
+
+
+                </code></pre>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal: Gráfico de Análisis -->
+<div class="modal fade" id="graficoModal" tabindex="-1" aria-labelledby="graficoModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-xl modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="graficoModalLabel">Análisis de Datos del Modelo</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body text-center">
+                <img src="{{ url_for('predictor_seguro.static', filename='images/analisis_modelo.png') }}"
+                    class="img-fluid" alt="Análisis del modelo de predicción de seguro"
+                    style="max-height: 70vh; object-fit: contain;">
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script src="{{ url_for('predictor_seguro.static', filename='js/predictor_seguro.js') }}"></script>
+{% endblock %}

@@ -15,7 +15,8 @@
 
 {% block content %}
 <h2 class="text-white fall-element fall-delay-1">Predictor de Sueldos</h2>
-<p class="lead text-white fall-element fall-delay-1">Completa el formulario para obtener una predicción de sueldo anual</p>
+<p class="lead text-white fall-element fall-delay-1">Completa el formulario para obtener una predicción de sueldo anual
+</p>
 <div class="text-white-50 mb-4 fall-element fall-delay-1">
     <i class="bi bi-info-circle me-1"></i>
     <small>Ejercicio de regresión | Dataset generado con ChatGPT</small>
@@ -31,9 +32,8 @@
     <button type="button" class="btn btn-info" data-bs-toggle="modal" data-bs-target="#graficoModal">
         <i class="bi bi-graph-up"></i> Ver análisis de datos
     </button>
-    <a href="{{ url_for('predictor_sueldos.static', filename='images/dataset_sueldos.csv') }}" 
-       class="btn btn-success" 
-       download="dataset_sueldos.csv">
+    <a href="{{ url_for('predictor_sueldos.static', filename='images/dataset_sueldos.csv') }}" class="btn btn-success"
+        download="dataset_sueldos.csv">
         <i class="bi bi-download"></i> Descargar dataset
     </a>
 </div>
@@ -47,75 +47,94 @@
 
 <div class="row">
     <div class="col-lg-6 col-md-12 mb-4">
-        <form method="POST" action="/predictor-sueldos" class="p-4 bg-white rounded shadow-sm text-dark fall-element fall-delay-2">
+        <form method="POST" action="/predictor-sueldos"
+            class="p-4 bg-white rounded shadow-sm text-dark fall-element fall-delay-2">
             <div class="form-group">
                 <label for="edad">Edad:</label>
-                <input type="number" class="form-control" id="edad" name="edad" required min="18" max="70" placeholder="Ej: 30" value="{{ form_data.edad }}">
+                <input type="number" class="form-control" id="edad" name="edad" required min="18" max="70"
+                    placeholder="Ej: 30" value="{{ form_data.edad }}">
                 <div class="invalid-feedback">Por favor ingresa una edad entre 18 y 70 años.</div>
             </div>
-            
+
             <div class="form-group">
                 <label for="experiencia">Años de Experiencia:</label>
-                <input type="number" class="form-control" id="experiencia" name="experiencia" required min="0" max="50" placeholder="Ej: 5" value="{{ form_data.experiencia }}">
+                <input type="number" class="form-control" id="experiencia" name="experiencia" required min="0" max="50"
+                    placeholder="Ej: 5" value="{{ form_data.experiencia }}">
                 <div class="invalid-feedback">Por favor ingresa años de experiencia entre 0 y 50.</div>
             </div>
-            
+
             <div class="form-group">
                 <label for="horas">Horas Semanales:</label>
-                <input type="number" class="form-control" id="horas" name="horas" required min="10" max="80" placeholder="Ej: 40" value="{{ form_data.horas }}">
+                <input type="number" class="form-control" id="horas" name="horas" required min="10" max="80"
+                    placeholder="Ej: 40" value="{{ form_data.horas }}">
                 <div class="invalid-feedback">Por favor ingresa horas semanales entre 10 y 80.</div>
             </div>
-            
+
             <div class="form-group">
                 <label for="educacion">Nivel Educativo:</label>
                 <select class="form-control" id="educacion" name="educacion" required>
-                    <option value="" {% if not form_data.educacion %}selected{% endif %} disabled>Selecciona nivel educativo</option>
-                    <option value="Licenciatura" {% if form_data.educacion == 'Licenciatura' %}selected{% endif %}>Licenciatura</option>
-                    <option value="Máster" {% if form_data.educacion == 'Máster' %}selected{% endif %}>Máster</option>
-                    <option value="Doctorado" {% if form_data.educacion == 'Doctorado' %}selected{% endif %}>Doctorado</option>
+                    <option value="" {% if not form_data.educacion %}selected{% endif %} disabled>Selecciona nivel
+                        educativo</option>
+                    <option value="Licenciatura" {% if form_data.educacion=='Licenciatura' %}selected{% endif %}>
+                        Licenciatura</option>
+                    <option value="Máster" {% if form_data.educacion=='Máster' %}selected{% endif %}>Máster</option>
+                    <option value="Doctorado" {% if form_data.educacion=='Doctorado' %}selected{% endif %}>Doctorado
+                    </option>
                 </select>
                 <div class="invalid-feedback">Por favor selecciona un nivel educativo.</div>
             </div>
-            
+
             <div class="form-group">
                 <label for="industria">Industria:</label>
                 <select class="form-control" id="industria" name="industria" required>
-                    <option value="" {% if not form_data.industria %}selected{% endif %} disabled>Selecciona una industria</option>
-                    <option value="Tecnología" {% if form_data.industria == 'Tecnología' %}selected{% endif %}>Tecnología</option>
-                    <option value="Finanzas" {% if form_data.industria == 'Finanzas' %}selected{% endif %}>Finanzas</option>
-                    <option value="Salud" {% if form_data.industria == 'Salud' %}selected{% endif %}>Salud</option>
-                    <option value="Manufactura" {% if form_data.industria == 'Manufactura' %}selected{% endif %}>Manufactura</option>
-                    <option value="Retail" {% if form_data.industria == 'Retail' %}selected{% endif %}>Retail</option>
+                    <option value="" {% if not form_data.industria %}selected{% endif %} disabled>Selecciona una
+                        industria</option>
+                    <option value="Tecnología" {% if form_data.industria=='Tecnología' %}selected{% endif %}>Tecnología
+                    </option>
+                    <option value="Finanzas" {% if form_data.industria=='Finanzas' %}selected{% endif %}>Finanzas
+                    </option>
+                    <option value="Salud" {% if form_data.industria=='Salud' %}selected{% endif %}>Salud</option>
+                    <option value="Manufactura" {% if form_data.industria=='Manufactura' %}selected{% endif %}>
+                        Manufactura</option>
+                    <option value="Retail" {% if form_data.industria=='Retail' %}selected{% endif %}>Retail</option>
                 </select>
                 <div class="invalid-feedback">Por favor selecciona una industria.</div>
             </div>
-            
+
             <div class="form-group">
                 <label for="ubicacion">Ubicación:</label>
                 <select class="form-control" id="ubicacion" name="ubicacion" required>
-                    <option value="" {% if not form_data.ubicacion %}selected{% endif %} disabled>Selecciona una ubicación</option>
-                    <option value="EE.UU." {% if form_data.ubicacion == 'EE.UU.' %}selected{% endif %}>EE.UU.</option>
-                    <option value="Europa" {% if form_data.ubicacion == 'Europa' %}selected{% endif %}>Europa</option>
-                    <option value="Latinoamérica" {% if form_data.ubicacion == 'Latinoamérica' %}selected{% endif %}>Latinoamérica</option>
+                    <option value="" {% if not form_data.ubicacion %}selected{% endif %} disabled>Selecciona una
+                        ubicación</option>
+                    <option value="EE.UU." {% if form_data.ubicacion=='EE.UU.' %}selected{% endif %}>EE.UU.</option>
+                    <option value="Europa" {% if form_data.ubicacion=='Europa' %}selected{% endif %}>Europa</option>
+                    <option value="Latinoamérica" {% if form_data.ubicacion=='Latinoamérica' %}selected{% endif %}>
+                        Latinoamérica</option>
                 </select>
                 <div class="invalid-feedback">Por favor selecciona una ubicación.</div>
             </div>
-            
+
             <div class="form-group">
                 <label for="genero">Género:</label>
                 <select class="form-control" id="genero" name="genero" required>
-                    <option value="" {% if not form_data.genero %}selected{% endif %} disabled>Selecciona un género</option>
-                    <option value="Masculino" {% if form_data.genero == 'Masculino' %}selected{% endif %}>Masculino</option>
-                    <option value="Femenino" {% if form_data.genero == 'Femenino' %}selected{% endif %}>Femenino</option>
-                    <option value="Otro" {% if form_data.genero == 'Otro' %}selected{% endif %}>Otro</option>
+                    <option value="" {% if not form_data.genero %}selected{% endif %} disabled>Selecciona un género
+                    </option>
+                    <option value="Masculino" {% if form_data.genero=='Masculino' %}selected{% endif %}>Masculino
+                    </option>
+                    <option value="Femenino" {% if form_data.genero=='Femenino' %}selected{% endif %}>Femenino</option>
+                    <option value="Otro" {% if form_data.genero=='Otro' %}selected{% endif %}>Otro</option>
                 </select>
                 <div class="invalid-feedback">Por favor selecciona un género.</div>
             </div>
-            
+
             <button type="submit" class="btn btn-primary">Predecir Sueldo</button>
+            <button type="button" class="btn btn-outline-secondary ms-2" id="resetBtn">
+                <i class="bi bi-arrow-clockwise"></i> Resetear
+            </button>
+
         </form>
     </div>
-    
+
     <div class="col-lg-6 col-md-12">
         {% if resultado %}
         <div id="resultadoSection" class="resultado fall-element fall-delay-3">
@@ -124,7 +143,7 @@
                 <h4>Sueldo Anual Estimado:</h4>
                 <p class="display-5">{{ "{:,.2f}".format(resultado.sueldo) }} €</p>
             </div>
-            
+
             <h5>Datos utilizados:</h5>
             <ul class="list-group">
                 {% for campo, valor in resultado.datos.items() %}
@@ -241,10 +260,9 @@ print(f"R² en test: {r2_score(y_test, y_pred):.4f}")</code></pre>
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <div class="modal-body text-center">
-                <img src="{{ url_for('predictor_sueldos.static', filename='images/analisis_modelo.png') }}" 
-                     class="img-fluid" 
-                     alt="Análisis del modelo de predicción de sueldos"
-                     style="max-height: 70vh; object-fit: contain;">
+                <img src="{{ url_for('predictor_sueldos.static', filename='images/analisis_modelo.png') }}"
+                    class="img-fluid" alt="Análisis del modelo de predicción de sueldos"
+                    style="max-height: 70vh; object-fit: contain;">
             </div>
             <div class="modal-footer">
                 <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
