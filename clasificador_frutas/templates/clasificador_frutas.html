@@ -1,0 +1,280 @@
+{% extends "layout.html" %}
+
+{% block title %}Clasificador de Frutas{% endblock %}
+
+{% block head_styles %}
+<link rel="stylesheet" href="{{ url_for('clasificador_frutas.static', filename='css/clasificador_frutas.css') }}">
+<!-- CSS del tema para highlight.js -->
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/styles/atom-one-dark.min.css">
+
+<!-- highlight.js -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/highlight.min.js"></script>
+<script>hljs.highlightAll();</script>
+{% endblock %}
+
+{% block content %}
+<h2 class="text-white fall-element fall-delay-1">Clasificador de Frutas</h2>
+<p class="lead text-white fall-element fall-delay-1">Identifica el estado de frutas usando inteligencia artificial</p>
+<div class="text-white-50 mb-4 fall-element fall-delay-1">
+    <i class="bi bi-info-circle me-1"></i>
+    <small>Transfer Learning con MobileNetV2 | Clasificación de imágenes</small>
+</div>
+
+<!-- Información sobre las clases disponibles -->
+<div class="alert alert-info fall-element fall-delay-2">
+    <h5><i class="bi bi-info-circle-fill"></i> Frutas soportadas:</h5>
+    <div class="row mt-3">
+        <div class="col-md-4">
+            <h6>🍑 Melocotones</h6>
+            <ul class="list-unstyled">
+                <li>✓ Frescos</li>
+                <li>✓ Podridos</li>
+            </ul>
+        </div>
+        <div class="col-md-4">
+            <h6>🍓 Fresas</h6>
+            <ul class="list-unstyled">
+                <li>✓ Frescas</li>
+                <li>✓ Podridas</li>
+            </ul>
+        </div>
+        <div class="col-md-4">
+            <h6>🥭 Granadas</h6>
+            <ul class="list-unstyled">
+                <li>✓ Frescas</li>
+                <li>✓ Podridas</li>
+            </ul>
+        </div>
+    </div>
+    <small class="text-muted">El modelo solo puede clasificar estas frutas. Por favor, no suba imágenes de otras frutas.</small>
+</div>
+
+<!-- Botones para modales -->
+<div class="d-flex flex-wrap gap-2 mb-3 fall-element fall-delay-2">
+    <button type="button" class="btn btn-secondary" data-bs-toggle="modal" data-bs-target="#modeloModal">
+        <i class="bi bi-code-slash"></i> Cómo entrené el modelo
+    </button>
+    <button type="button" class="btn btn-info" data-bs-toggle="modal" data-bs-target="#graficoModal">
+        <i class="bi bi-graph-up"></i> Ver análisis del modelo
+    </button>
+</div>
+
+{% if error %}
+<div class="alert alert-danger alert-dismissible fade show fall-element fall-delay-1" role="alert">
+    <strong>Error:</strong> {{ error }}
+    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+</div>
+{% endif %}
+
+<div class="row">
+    <div class="col-lg-6 col-md-12 mb-4">
+        <form method="POST" action="/clasificador-frutas" enctype="multipart/form-data"
+            class="p-4 bg-white rounded shadow-sm text-dark fall-element fall-delay-2">
+            
+            <h5 class="mb-3">Subir imagen de fruta</h5>
+            
+            <div class="form-group mb-3">
+                <label for="imagen" class="form-label">Seleccione una imagen:</label>
+                <input type="file" class="form-control" id="imagen" name="imagen" 
+                       accept="image/*" required>
+                <div class="form-text">
+                    <small>Formatos aceptados: PNG, JPG, JPEG, GIF, BMP (máx. 5MB)</small>
+                </div>
+                <div class="invalid-feedback">Por favor seleccione una imagen.</div>
+            </div>
+
+            <!-- Vista previa de la imagen -->
+            <div class="form-group mb-3">
+                <div id="imagePreview" class="text-center" style="display: none;">
+                    <img id="preview" src="" alt="Vista previa" class="img-fluid rounded" 
+                         style="max-height: 300px;">
+                </div>
+            </div>
+
+            <button type="submit" class="btn btn-primary">
+                <i class="bi bi-cloud-upload"></i> Clasificar Imagen
+            </button>
+            <button type="button" class="btn btn-outline-secondary ms-2" id="resetBtn">
+                <i class="bi bi-arrow-clockwise"></i> Limpiar
+            </button>
+        </form>
+    </div>
+
+    <div class="col-lg-6 col-md-12">
+        {% if resultado %}
+        <div id="resultadoSection" class="resultado fall-element fall-delay-3">
+            <h3>Resultado de la Clasificación</h3>
+            
+            <div class="alert {% if resultado.es_fresca %}alert-success{% else %}alert-warning{% endif %}">
+                <h4><i class="bi {% if resultado.es_fresca %}bi-check-circle-fill{% else %}bi-exclamation-triangle-fill{% endif %}"></i> 
+                    {{ resultado.clase_predicha }}</h4>
+                <p class="mb-0">Confianza: <strong>{{ "%.2f"|format(resultado.confianza) }}%</strong></p>
+            </div>
+
+            <h5>Probabilidades por clase:</h5>
+            <div class="mb-3">
+                {% for clase, prob in resultado.probabilidades.items() %}
+                <div class="mb-2">
+                    <div class="d-flex justify-content-between">
+                        <span>{{ clase }}</span>
+                        <span>{{ "%.2f"|format(prob) }}%</span>
+                    </div>
+                    <div class="progress" style="height: 20px;">
+                        <div class="progress-bar {% if 'Fresc' in clase %}bg-success{% else %}bg-warning{% endif %}" 
+                             role="progressbar" 
+                             style="width: {{ prob }}%"
+                             data-width="{{ prob }}">
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+
+            <div class="mt-3">
+                <small class="text-muted">
+                    <i class="bi bi-file-image"></i> Archivo analizado: {{ resultado.nombre_archivo }}
+                </small>
+            </div>
+        </div>
+        {% endif %}
+    </div>
+</div>
+
+<!-- Modal con el código de entrenamiento -->
+<div class="modal fade" id="modeloModal" tabindex="-1" aria-labelledby="modeloModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg modal-dialog-scrollable modal-fullscreen-sm-down">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="modeloModalLabel">Código de Entrenamiento (Transfer Learning)</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <pre><code class="language-python">
+import os
+import numpy as np
+from tensorflow.keras.preprocessing.image import ImageDataGenerator
+from tensorflow.keras.applications import MobileNetV2
+from tensorflow.keras.models import Sequential
+from tensorflow.keras.layers import Dense, Dropout, GlobalAveragePooling2D
+from tensorflow.keras.optimizers import Adam
+from tensorflow.keras.callbacks import EarlyStopping, ModelCheckpoint
+import tensorflow as tf
+
+# 1. PREPARAR LOS DATOS
+base_dir = 'archive'  # Carpeta con las 6 clases de frutas
+
+# Crear generadores con preprocesamiento para MobileNetV2
+datagen = ImageDataGenerator(
+    preprocessing_function=tf.keras.applications.mobilenet_v2.preprocess_input,
+    rotation_range=20,
+    width_shift_range=0.2,
+    height_shift_range=0.2,
+    shear_range=0.1,
+    zoom_range=0.1,
+    horizontal_flip=True,
+    validation_split=0.2
+)
+
+# Generadores de datos
+train_generator = datagen.flow_from_directory(
+    base_dir,
+    target_size=(224, 224),
+    batch_size=32,
+    class_mode='categorical',
+    subset='training'
+)
+
+validation_generator = datagen.flow_from_directory(
+    base_dir,
+    target_size=(224, 224),
+    batch_size=32,
+    class_mode='categorical',
+    subset='validation'
+)
+
+# 2. CREAR MODELO CON TRANSFER LEARNING
+# Cargar modelo base pre-entrenado
+base_model = MobileNetV2(weights='imagenet', include_top=False, 
+                        input_shape=(224, 224, 3))
+
+# Congelar el modelo base
+for layer in base_model.layers:
+    layer.trainable = False
+
+# Construir modelo completo
+model = Sequential([
+    base_model,                          
+    GlobalAveragePooling2D(),            
+    Dense(256, activation='relu', 
+          kernel_regularizer=tf.keras.regularizers.l2(0.001)),
+    Dropout(0.4),
+    Dense(6, activation='softmax')  # 6 clases
+])
+
+# 3. COMPILAR
+model.compile(
+    optimizer=Adam(learning_rate=0.001),
+    loss='categorical_crossentropy',
+    metrics=['accuracy']
+)
+
+# 4. CALLBACKS
+checkpoint = ModelCheckpoint(
+    'mejor_modelo_frutas_transfer.h5',
+    monitor='val_accuracy',
+    save_best_only=True,
+    mode='max'
+)
+
+early_stopping = EarlyStopping(
+    monitor='val_loss',
+    patience=5,
+    restore_best_weights=True
+)
+
+# 5. ENTRENAR
+history = model.fit(
+    train_generator,
+    steps_per_epoch=train_generator.samples // 32,
+    validation_data=validation_generator,
+    validation_steps=validation_generator.samples // 32,
+    epochs=20,
+    callbacks=[early_stopping, checkpoint]
+)
+
+# 6. EVALUAR
+evaluation = model.evaluate(validation_generator)
+print(f"Validation Accuracy: {evaluation[1]}")
+</code></pre>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal para el gráfico -->
+<div class="modal fade" id="graficoModal" tabindex="-1" aria-labelledby="graficoModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-xl modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="graficoModalLabel">Análisis del Modelo</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body text-center">
+                <img src="{{ url_for('clasificador_frutas.static', filename='images/analisis_frutas.png') }}"
+                    class="img-fluid" alt="Análisis del modelo de clasificación de frutas"
+                    style="max-height: 70vh; object-fit: contain;">
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script src="{{ url_for('clasificador_frutas.static', filename='js/clasificador_frutas.js') }}"></script>
+{% endblock %}

@@ -1,0 +1,121 @@
+/* Estilos específicos para el clasificador de frutas */
+.resultado {
+    margin-top: 20px;
+    padding: 15px;
+    border-radius: 5px;
+    background-color: rgba(255, 255, 255, 0.9);
+    color: #333;
+}
+
+.form-group {
+    margin-bottom: 15px;
+}
+
+/* Estilos para la vista previa de imagen */
+#imagePreview {
+    margin: 20px 0;
+    padding: 10px;
+    border: 2px dashed #ddd;
+    border-radius: 5px;
+    background-color: #f8f9fa;
+}
+
+#imagePreview img {
+    max-width: 100%;
+    height: auto;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+}
+
+/* Estilos para el input de archivo */
+.form-control[type="file"] {
+    padding: 0.375rem 0.75rem;
+}
+
+/* Estilos para los botones de modales */
+.d-flex.gap-2 {
+    gap: 0.5rem !important;
+}
+
+/* Estilos para las modales */
+.modal-dialog.modal-xl {
+    max-width: 90vw;
+}
+
+.modal-body img {
+    border-radius: 8px;
+    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+}
+
+/* Estilos para el código en las modales */
+pre code {
+    font-size: 0.85rem;
+    line-height: 1.4;
+}
+
+/* Estilos para las alertas de resultado */
+.alert h4 {
+    margin-bottom: 0.5rem;
+}
+
+/* Estilos para las barras de progreso */
+.progress {
+    background-color: rgba(0,0,0,0.1);
+}
+
+.progress-bar {
+    transition: width 0.6s ease;
+}
+
+/* Estilos para la información de frutas */
+.alert-info h6 {
+    font-weight: bold;
+    margin-bottom: 0.5rem;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    pre code {
+        font-size: 0.75rem;
+    }
+    
+    .d-flex.flex-wrap.gap-2 {
+        flex-direction: column;
+    }
+    
+    .d-flex.flex-wrap.gap-2 > .btn {
+        width: 100%;
+        margin-bottom: 0.5rem;
+    }
+}
+
+/* Animación para las barras de progreso */
+.progress-bar {
+    animation: progressAnimation 1s ease-out;
+}
+
+@keyframes progressAnimation {
+    from {
+        width: 0 !important;
+    }
+}
+
+/* Validación de formularios */
+.was-validated .form-control:invalid {
+    border-color: #dc3545;
+}
+
+.was-validated .form-control:valid {
+    border-color: #198754;
+}
+
+.invalid-feedback {
+    display: none;
+    width: 100%;
+    margin-top: 0.25rem;
+    font-size: 0.875em;
+    color: #dc3545;
+}
+
+.was-validated .form-control:invalid~.invalid-feedback {
+    display: block;
+}
