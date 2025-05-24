@@ -1,0 +1,388 @@
+{% extends "layout.html" %}
+
+{% block title %}Predictor de Champiñones{% endblock %}
+
+{% block head_styles %}
+<link rel="stylesheet" href="{{ url_for('predictor_champinones.static', filename='css/predictor_champinones.css') }}">
+<!-- CSS del tema para highlight.js -->
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/styles/atom-one-dark.min.css">
+
+<!-- highlight.js -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/highlight.min.js"></script>
+<script>hljs.highlightAll();</script>
+{% endblock %}
+
+{% block content %}
+<h2 class="text-white fall-element fall-delay-1">Predictor de Champiñones</h2>
+<p class="lead text-white fall-element fall-delay-1">Determina si un champiñón es comestible o venenoso basándose en sus
+    características</p>
+<div class="text-white-50 mb-4 fall-element fall-delay-1">
+    <i class="bi bi-info-circle me-1"></i>
+    <small>Ejercicio de clasificación | Dataset Mushrooms de Kaggle</small>
+</div>
+
+<!-- Botones para modales y descarga -->
+<div class="d-flex flex-wrap gap-2 mb-3 fall-element fall-delay-2">
+    <button type="button" class="btn btn-secondary" data-bs-toggle="modal" data-bs-target="#modeloModal">
+        <i class="bi bi-code-slash"></i> Cómo entrené el modelo
+    </button>
+    <button type="button" class="btn btn-info" data-bs-toggle="modal" data-bs-target="#graficoModal">
+        <i class="bi bi-graph-up"></i> Ver análisis de datos
+    </button>
+    <a href="{{ url_for('predictor_champinones.static', filename='images/mushrooms.csv') }}" class="btn btn-success"
+        download="mushrooms.csv">
+        <i class="bi bi-download"></i> Descargar dataset
+    </a>
+</div>
+
+{% if error %}
+<div class="alert alert-danger alert-dismissible fade show fall-element fall-delay-1" role="alert">
+    <strong>Error:</strong> {{ error }}
+    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+</div>
+{% endif %}
+
+<div class="row">
+    <div class="col-lg-6 col-md-12 mb-4">
+        <form method="POST" action="/predictor-champinones"
+            class="p-4 bg-white rounded shadow-sm text-dark fall-element fall-delay-2">
+
+            <div class="form-group">
+                <label for="odor">Olor:</label>
+                <select class="form-control" id="odor" name="odor" required>
+                    <option value="" {% if not form_data.odor %}selected{% endif %} disabled>Selecciona un olor</option>
+                    {% for key, value in feature_mappings['odor'].items() %}
+                    <option value="{{ key }}" {% if form_data.odor==key %}selected{% endif %}>{{ value }}</option>
+                    {% endfor %}
+                </select>
+                <div class="invalid-feedback">Por favor selecciona un olor.</div>
+            </div>
+
+            <div class="form-group">
+                <label for="spore-print-color">Color de la esporada:</label>
+                <select class="form-control" id="spore-print-color" name="spore-print-color" required>
+                    <option value="" {% if not form_data['spore-print-color'] %}selected{% endif %} disabled>Selecciona
+                        un color</option>
+                    {% for key, value in feature_mappings['spore-print-color'].items() %}
+                    <option value="{{ key }}" {% if form_data['spore-print-color']==key %}selected{% endif %}>{{ value
+                        }}</option>
+                    {% endfor %}
+                </select>
+                <div class="invalid-feedback">Por favor selecciona un color de esporada.</div>
+            </div>
+
+            <div class="form-group">
+                <label for="gill-size">Tamaño de las láminas:</label>
+                <select class="form-control" id="gill-size" name="gill-size" required>
+                    <option value="" {% if not form_data['gill-size'] %}selected{% endif %} disabled>Selecciona un
+                        tamaño</option>
+                    {% for key, value in feature_mappings['gill-size'].items() %}
+                    <option value="{{ key }}" {% if form_data['gill-size']==key %}selected{% endif %}>{{ value }}
+                    </option>
+                    {% endfor %}
+                </select>
+                <div class="invalid-feedback">Por favor selecciona un tamaño de láminas.</div>
+            </div>
+
+            <div class="form-group">
+                <label for="stalk-surface-above-ring">Superficie del tallo sobre el anillo:</label>
+                <select class="form-control" id="stalk-surface-above-ring" name="stalk-surface-above-ring" required>
+                    <option value="" {% if not form_data['stalk-surface-above-ring'] %}selected{% endif %} disabled>
+                        Selecciona una superficie</option>
+                    {% for key, value in feature_mappings['stalk-surface-above-ring'].items() %}
+                    <option value="{{ key }}" {% if form_data['stalk-surface-above-ring']==key %}selected{% endif %}>{{
+                        value }}</option>
+                    {% endfor %}
+                </select>
+                <div class="invalid-feedback">Por favor selecciona una superficie.</div>
+            </div>
+
+            <div class="form-group">
+                <label for="ring-type">Tipo de anillo:</label>
+                <select class="form-control" id="ring-type" name="ring-type" required>
+                    <option value="" {% if not form_data['ring-type'] %}selected{% endif %} disabled>Selecciona un tipo
+                    </option>
+                    {% for key, value in feature_mappings['ring-type'].items() %}
+                    <option value="{{ key }}" {% if form_data['ring-type']==key %}selected{% endif %}>{{ value }}
+                    </option>
+                    {% endfor %}
+                </select>
+                <div class="invalid-feedback">Por favor selecciona un tipo de anillo.</div>
+            </div>
+
+            <div class="form-group">
+                <label for="stalk-surface-below-ring">Superficie del tallo bajo el anillo:</label>
+                <select class="form-control" id="stalk-surface-below-ring" name="stalk-surface-below-ring" required>
+                    <option value="" {% if not form_data['stalk-surface-below-ring'] %}selected{% endif %} disabled>
+                        Selecciona una superficie</option>
+                    {% for key, value in feature_mappings['stalk-surface-below-ring'].items() %}
+                    <option value="{{ key }}" {% if form_data['stalk-surface-below-ring']==key %}selected{% endif %}>{{
+                        value }}</option>
+                    {% endfor %}
+                </select>
+                <div class="invalid-feedback">Por favor selecciona una superficie.</div>
+            </div>
+
+            <div class="form-group">
+                <label for="population">Población:</label>
+                <select class="form-control" id="population" name="population" required>
+                    <option value="" {% if not form_data.population %}selected{% endif %} disabled>Selecciona una
+                        población</option>
+                    {% for key, value in feature_mappings['population'].items() %}
+                    <option value="{{ key }}" {% if form_data.population==key %}selected{% endif %}>{{ value }}</option>
+                    {% endfor %}
+                </select>
+                <div class="invalid-feedback">Por favor selecciona una población.</div>
+            </div>
+
+            <div class="form-group">
+                <label for="stalk-root">Raíz del tallo:</label>
+                <select class="form-control" id="stalk-root" name="stalk-root" required>
+                    <option value="" {% if not form_data['stalk-root'] %}selected{% endif %} disabled>Selecciona tipo de
+                        raíz</option>
+                    {% for key, value in feature_mappings['stalk-root'].items() %}
+                    <option value="{{ key }}" {% if form_data['stalk-root']==key %}selected{% endif %}>{{ value }}
+                    </option>
+                    {% endfor %}
+                </select>
+                <div class="invalid-feedback">Por favor selecciona un tipo de raíz.</div>
+            </div>
+
+            <div class="form-group">
+                <label for="bruises">¿Tiene magulladuras?</label>
+                <select class="form-control" id="bruises" name="bruises" required>
+                    <option value="" {% if not form_data.bruises %}selected{% endif %} disabled>Selecciona una opción
+                    </option>
+                    {% for key, value in feature_mappings['bruises'].items() %}
+                    <option value="{{ key }}" {% if form_data.bruises==key %}selected{% endif %}>{{ value }}</option>
+                    {% endfor %}
+                </select>
+                <div class="invalid-feedback">Por favor selecciona una opción.</div>
+            </div>
+
+            <div class="form-group">
+                <label for="habitat">Hábitat:</label>
+                <select class="form-control" id="habitat" name="habitat" required>
+                    <option value="" {% if not form_data.habitat %}selected{% endif %} disabled>Selecciona un hábitat
+                    </option>
+                    {% for key, value in feature_mappings['habitat'].items() %}
+                    <option value="{{ key }}" {% if form_data.habitat==key %}selected{% endif %}>{{ value }}</option>
+                    {% endfor %}
+                </select>
+                <div class="invalid-feedback">Por favor selecciona un hábitat.</div>
+            </div>
+
+            <button type="submit" class="btn btn-primary">Predecir Clasificación</button>
+            <button type="button" class="btn btn-outline-secondary ms-2" id="resetBtn">
+                <i class="bi bi-arrow-clockwise"></i> Resetear
+            </button>
+        </form>
+    </div>
+
+    <div class="col-lg-6 col-md-12">
+        {% if resultado %}
+        <div id="resultadoSection" class="resultado fall-element fall-delay-3">
+            <h3>Resultado de la Predicción</h3>
+            <div class="alert {% if resultado.es_comestible %}alert-success{% else %}alert-danger{% endif %}">
+                <h4><i
+                        class="bi {% if resultado.es_comestible %}bi-check-circle-fill{% else %}bi-exclamation-triangle-fill{% endif %}"></i>
+                    Champiñón {{ resultado.clasificacion }}</h4>
+                <div class="mt-3">
+                    <p><strong>Probabilidades:</strong></p>
+                    <div class="progress mb-2" style="height: 25px;">
+                        <div class="progress-bar bg-success" role="progressbar"
+                            data-width="{{ resultado.probabilidad_comestible }}" id="progress-comestible">
+                            Comestible: {{ resultado.probabilidad_comestible }}%
+                        </div>
+                        <div class="progress-bar bg-danger" role="progressbar"
+                            data-width="{{ resultado.probabilidad_venenoso }}" id="progress-venenoso">
+                            Venenoso: {{ resultado.probabilidad_venenoso }}%
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <h5>Características analizadas:</h5>
+            <ul class="list-group">
+                <li class="list-group-item d-flex justify-content-between align-items-center">
+                    Olor
+                    <span class="badge bg-primary rounded-pill">{{ resultado.datos.odor }}</span>
+                </li>
+                <li class="list-group-item d-flex justify-content-between align-items-center">
+                    Color de esporada
+                    <span class="badge bg-primary rounded-pill">{{ resultado.datos['spore-print-color'] }}</span>
+                </li>
+                <li class="list-group-item d-flex justify-content-between align-items-center">
+                    Tamaño de láminas
+                    <span class="badge bg-primary rounded-pill">{{ resultado.datos['gill-size'] }}</span>
+                </li>
+                <li class="list-group-item d-flex justify-content-between align-items-center">
+                    Superficie del tallo (arriba)
+                    <span class="badge bg-primary rounded-pill">{{ resultado.datos['stalk-surface-above-ring'] }}</span>
+                </li>
+                <li class="list-group-item d-flex justify-content-between align-items-center">
+                    Tipo de anillo
+                    <span class="badge bg-primary rounded-pill">{{ resultado.datos['ring-type'] }}</span>
+                </li>
+                <li class="list-group-item d-flex justify-content-between align-items-center">
+                    Superficie del tallo (abajo)
+                    <span class="badge bg-primary rounded-pill">{{ resultado.datos['stalk-surface-below-ring'] }}</span>
+                </li>
+                <li class="list-group-item d-flex justify-content-between align-items-center">
+                    Población
+                    <span class="badge bg-primary rounded-pill">{{ resultado.datos.population }}</span>
+                </li>
+                <li class="list-group-item d-flex justify-content-between align-items-center">
+                    Raíz del tallo
+                    <span class="badge bg-primary rounded-pill">{{ resultado.datos['stalk-root'] }}</span>
+                </li>
+                <li class="list-group-item d-flex justify-content-between align-items-center">
+                    Magulladuras
+                    <span class="badge bg-primary rounded-pill">{{ resultado.datos.bruises }}</span>
+                </li>
+                <li class="list-group-item d-flex justify-content-between align-items-center">
+                    Hábitat
+                    <span class="badge bg-primary rounded-pill">{{ resultado.datos.habitat }}</span>
+                </li>
+            </ul>
+        </div>
+        {% endif %}
+    </div>
+</div>
+
+<!-- Modal con el código de entrenamiento -->
+<div class="modal fade" id="modeloModal" tabindex="-1" aria-labelledby="modeloModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg modal-dialog-scrollable modal-fullscreen-sm-down">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="modeloModalLabel">Código de Entrenamiento del Modelo</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <pre><code class="language-python">
+import pandas as pd
+import numpy as np
+from sklearn.model_selection import train_test_split
+from sklearn.ensemble import RandomForestClassifier
+from sklearn.preprocessing import OneHotEncoder
+from sklearn.pipeline import Pipeline
+from sklearn.compose import ColumnTransformer
+from sklearn.metrics import f1_score, classification_report
+
+# Cargar datos
+df_origin = pd.read_csv("mushrooms.csv")
+df = df_origin.copy()
+
+# Preparar los datos
+X, y = df.drop(['class'], axis=1), df['class']
+
+# Aplicar mapeo para 'class'
+mapeo = {'e': 0, 'p': 1}
+y = y.map(mapeo)
+
+# Split de datos
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.4, random_state=42)
+
+# PASO 1: CALCULAR IMPORTANCIAS GLOBALES
+# Crear preprocessor temporal
+temp_preprocessor = ColumnTransformer([
+    ('categorical', OneHotEncoder(drop='first'), X_train.columns.tolist())
+])
+
+# Aplicar one-hot encoding
+X_train_encoded = temp_preprocessor.fit_transform(X_train)
+feature_names = temp_preprocessor.get_feature_names_out()
+
+# Entrenar modelo temporal para obtener importancias
+temp_model = RandomForestClassifier(n_estimators=100, random_state=42)
+temp_model.fit(X_train_encoded, y_train)
+
+# Agregar importancias por característica base
+global_importances = {}
+for feature_name, importance in zip(feature_names, temp_model.feature_importances_):
+    base_feature = feature_name.split('_')[0].replace('categorical__', '')
+    global_importances[base_feature] = global_importances.get(base_feature, 0) + importance
+
+# Seleccionar las 10 características más importantes
+global_importances_series = pd.Series(global_importances).sort_values(ascending=False)
+top_10_features = global_importances_series.head(10).index.tolist()
+
+# PASO 2: CREAR DATAFRAME FILTRADO
+X_train_filtered = X_train[top_10_features].copy()
+X_test_filtered = X_test[top_10_features].copy()
+
+# PASO 3: APLICAR PIPELINE AL DATAFRAME FILTRADO
+# Crear preprocessor para las características filtradas
+preprocessor = ColumnTransformer([
+    ('categorical', OneHotEncoder(drop='first'), X_train_filtered.columns.tolist())
+])
+
+# Pipeline completo
+ml_pipeline = Pipeline([
+    ('preprocessor', preprocessor),
+    ('classifier', RandomForestClassifier(
+        n_estimators=100,
+        max_depth=10,
+        min_samples_leaf=5,
+        random_state=42
+    ))
+])
+
+# Entrenar el pipeline
+ml_pipeline.fit(X_train_filtered, y_train)
+
+# Evaluar
+y_pred = ml_pipeline.predict(X_test_filtered)
+print(f"F1 Score: {f1_score(y_test, y_pred, average='binary'):.4f}")
+
+# Guardar modelo
+import joblib
+model_info = {
+    'pipeline': ml_pipeline,
+    'selected_features': top_10_features,
+    'feature_importances': global_importances_series
+}
+joblib.dump(model_info, 'modelo-mushrooms.joblib')
+</code></pre>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal para el gráfico -->
+<!-- Modal para el gráfico -->
+<div class="modal fade" id="graficoModal" tabindex="-1" aria-labelledby="graficoModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-xl modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="graficoModalLabel">Análisis de Datos del Modelo</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div class="row">
+                    <div class="col-md-6 text-center mb-3">
+                        <img src="{{ url_for('predictor_champinones.static', filename='images/analisis_champinones.png') }}"
+                            class="img-fluid" alt="Análisis del modelo de predicción de champiñones - Gráfico 1"
+                            style="max-height: 65vh; object-fit: contain;">
+                    </div>
+                    <div class="col-md-6 text-center mb-3">
+                        <img src="{{ url_for('predictor_champinones.static', filename='images/analisis_champinones_2.png') }}"
+                            class="img-fluid" alt="Análisis del modelo de predicción de champiñones - Gráfico 2"
+                            style="max-height: 65vh; object-fit: contain;">
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script src="{{ url_for('predictor_champinones.static', filename='js/predictor_champinones.js') }}"></script>
+{% endblock %}

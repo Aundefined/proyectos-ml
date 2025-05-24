@@ -10,6 +10,9 @@ from connect_four import connect_four_bp
 from integrated_analysis import integrated_analysis_bp
 from clustering_clientes import clustering_clientes_bp
 from predictor_seguro import predictor_seguro_bp
+from predictor_champinones import predictor_champinones_bp
+
+
 
 
 # Crear la aplicación Flask
@@ -23,6 +26,7 @@ app.register_blueprint(connect_four_bp)
 app.register_blueprint(integrated_analysis_bp)
 app.register_blueprint(clustering_clientes_bp)
 app.register_blueprint(predictor_seguro_bp)
+app.register_blueprint(predictor_champinones_bp)
 
 app.wsgi_app = ProxyFix(app.wsgi_app, x_proto=1, x_host=1)
 
