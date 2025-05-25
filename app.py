@@ -12,7 +12,7 @@ from clustering_clientes import clustering_clientes_bp
 from predictor_seguro import predictor_seguro_bp
 from predictor_champinones import predictor_champinones_bp
 from clasificador_frutas import clasificador_frutas_bp
-
+from sobre_mi import sobre_mi_bp
 
 # Crear la aplicación Flask
 app = Flask(__name__)
@@ -27,6 +27,7 @@ app.register_blueprint(clustering_clientes_bp)
 app.register_blueprint(predictor_seguro_bp)
 app.register_blueprint(predictor_champinones_bp)
 app.register_blueprint(clasificador_frutas_bp)
+app.register_blueprint(sobre_mi_bp)
 
 app.wsgi_app = ProxyFix(app.wsgi_app, x_proto=1, x_host=1)
 

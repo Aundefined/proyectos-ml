@@ -1,0 +1,263 @@
+{% extends "layout.html" %}
+
+{% block title %}Sobre Mí - Andrai Project{% endblock %}
+
+{% block head_styles %}
+<link rel="stylesheet" href="{{ url_for('sobre_mi.static', filename='css/sobre_mi.css') }}">
+{% endblock %}
+
+{% block content %}
+
+<!-- Sección principal con texto y foto -->
+<div class="row mb-5">
+    <div class="col-lg-8 col-md-7 fall-element fall-delay-1">
+        <div class="about-text-container">
+            <h1 class="display-5 mb-4">¿Quién soy?</h1>
+            <div class="about-text">
+                <div class="about-text">
+                    <div class="about-text">
+                        <p class="lead">
+                            Soy desarrollador FullStack con más de 7 años de experiencia trabajando exclusivamente con
+                            .NET
+                            Core, C# y Angular. A principios de 2025 empecé a aprender Machine Learning y he decidido
+                            crear esta Web
+                            para ir más allá de las prácticas ofrecidas en los cursos y hacer mi formación más sólida.
+                        </p>
+                        <p>
+                            He trabajado en diferentes tipos de empresas - desde consultoras grandes como Capgemini
+                            hasta
+                            empresas más pequeñas. Actualmente trabajo en <a href="https://www.gruposim.net"
+                                target="_blank" class="company-link">Grupo SIM</a> en proyectos de marketing digital.
+                        </p>
+                        <p>
+                            Mi día a día incluye desarrollo de APIs con .NET Core, crear interfaces con Angular,
+                            trabajar
+                            con bases de datos SQL Server. Me gusta resolver problemas y crear soluciones óptimas para
+                            nuestros clientes.
+                        </p>
+                        <p>
+                            Fuera del trabajo, estudio y actualizo esta web con pequeños proyectos de Machine Learning usando
+                            Python
+                            y Flask. Es mi forma de combinar lo que sé de desarrollo web con algoritmos de IA.
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-lg-4 col-md-5 fall-element fall-delay-2">
+        <div class="profile-photo-container">
+            <!-- Cambia esta imagen por tu foto -->
+            <img src="{{ url_for('sobre_mi.static', filename='images/perfil.jpg') }}" alt="Foto de perfil"
+                class="profile-photo">
+            <div class="photo-caption">
+                <p class="mb-0"><strong>FullStack Developer</strong></p>
+                <p class="text-muted small">Especialista en .NET Core & Angular + ML Enthusiast</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Currículum tipo libro -->
+<div class="row">
+    <div class="col-12">
+        <h2 class="text-center mb-5 fall-element fall-delay-3">Mi Trayectoria Profesional</h2>
+
+        <div class="curriculum-book-container fall-element fall-delay-4">
+            <div class="book">
+                <div class="book-spine"></div>
+                <div class="book-pages" id="bookPages">
+
+                    <!-- PÁGINA 1 - Grupo SIM (Más reciente) -->
+                    <div class="page active" data-page="1">
+                        <div class="page-content">
+                            <div class="page-header">
+                                <h3>2021 - Actualidad</h3>
+                                <div class="company-badge">Grupo SIM - Las Rozas / Teletrabajo</div>
+                            </div>
+                            <div class="role-title">Desarrollador FullStack</div>
+                             <div class="page-intro">
+                                <p><em>[Añade aquí tu texto introductorio para esta etapa - unas pocas líneas]</em></p>
+                            </div>
+                            <div class="page-body">
+                                <p><strong>Responsabilidades principales:</strong></p>
+                                <ul>
+                                    <li>Desarrollo de nuevos proyectos y mantenimiento de aplicaciones existentes</li>
+                                    <li>Gestión de incidencias en proyectos orientados al marketing</li>
+                                    <li>Trabajo con diferentes clientes implementando soluciones web personalizadas</li>
+                                    <li>Desarrollo tanto en frontend como backend con tecnologías modernas</li>
+                                </ul>
+                                <div class="achievement-highlight">
+                                    <i class="bi bi-calendar-check-fill"></i>
+                                    <span>Puesto actual - Desde Agosto 2021</span>
+                                </div>
+                                <div class="tech-stack">
+                                    <span class="tech-tag">Web API .NET Core</span>
+                                    <span class="tech-tag">C#</span>
+                                    <span class="tech-tag">Angular 12/17</span>
+                                    <span class="tech-tag">Entity Framework</span>
+                                    <span class="tech-tag">SQL Server</span>
+                                    <span class="tech-tag">DevOps</span>
+                                    <span class="tech-tag">Azure</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="page-number">1</div>
+                    </div>
+
+                    <!-- PÁGINA 2 - Capgemini -->
+                    <div class="page" data-page="2">
+                        <div class="page-content">
+                            <div class="page-header">
+                                <h3>2020 - 2021</h3>
+                                <div class="company-badge">Capgemini - Teletrabajo</div>
+                            </div>
+                            <div class="role-title">Desarrollador FullStack</div>
+                             <div class="page-intro">
+                                <p><em>[Añade aquí tu texto introductorio para esta etapa - unas pocas líneas]</em></p>
+                            </div>
+                            <div class="page-body">
+                                <p><strong>Proyecto destacado:</strong></p>
+                                <ul>
+                                    <li>Desarrollo funcional de proyecto de gestión interna para FCG/Aqualia</li>
+                                    <li>Implementación de APIs Web con .NET Core 3.1</li>
+                                    <li>Desarrollo frontend con Angular 8</li>
+                                    <li>Gestión de base de datos con SQL Server</li>
+                                    <li>Control de versiones y colaboración en equipo</li>
+                                </ul>
+                                <div class="learning-note">
+                                    <i class="bi bi-gear-fill"></i>
+                                    <span>Experiencia en proyectos de gran envergadura empresarial</span>
+                                </div>
+                                <div class="tech-stack">
+                                    <span class="tech-tag">Web API .NET Core 3.1</span>
+                                    <span class="tech-tag">C#</span>
+                                    <span class="tech-tag">SQL Server</span>
+                                    <span class="tech-tag">Angular 8</span>
+                                    <span class="tech-tag">Control de versiones</span>
+                                    <span class="tech-tag">TFS</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="page-number">2</div>
+                    </div>
+
+                    <!-- PÁGINA 3 - Ideal Education Group -->
+                    <div class="page" data-page="3">
+                        <div class="page-content">
+                            <div class="page-header">
+                                <h3>2018 - 2020</h3>
+                                <div class="company-badge">Ideal Education Group - Madrid</div>
+                            </div>
+                            <div class="role-title">Desarrollador FullStack</div>
+                             <div class="page-intro">
+                                <p><em>illum autem possimus commodi reiciendis temporibus? Quia vitae minus repudiandae perferendis, earum delectus.</em></p>
+                            </div>
+                            <div class="page-body">
+                                <p><strong>Proyecto académico:</strong></p>
+                                <ul>
+                                    <li>Desarrollo funcional de proyecto de gestión interna (Gestión Académica)</li>
+                                    <li>Implementación con .NET Core 2.1 y C#</li>
+                                    <li>Desarrollo de interfaces con Entity Framework Core</li>
+                                    <li>Frontend moderno con Angular 5+</li>
+                                    <li>Gestión de bases de datos SQL Server</li>
+                                    <li>Control de versiones con Git</li>
+                                </ul>
+                                <div class="achievement-highlight">
+                                    <i class="bi bi-mortarboard-fill"></i>
+                                    <span>Especialización en sistemas de gestión académica</span>
+                                </div>
+                                <div class="tech-stack">
+                                    <span class="tech-tag">.NET Core 2.1</span>
+                                    <span class="tech-tag">C#</span>
+                                    <span class="tech-tag">Entity Framework Core</span>
+                                    <span class="tech-tag">Angular 5+</span>
+                                    <span class="tech-tag">SQL Server</span>
+                                    <span class="tech-tag">Git</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="page-number">3</div>
+                    </div>
+
+                    <!-- PÁGINA 4 - Everis -->
+                    <div class="page" data-page="4">
+                        <div class="page-content">
+                            <div class="page-header">
+                                <h3>2018</h3>
+                                <div class="company-badge">Everis - Madrid</div>
+                            </div>
+                            <div class="role-title">Desarrollador FullStack</div>
+                             <div class="page-intro">
+                                <p><em>[Añade aquí tu texto introductorio para esta etapa - unas pocas líneas]</em></p>
+                            </div>
+                            <div class="page-body">
+                                <p><strong>Mis inicios profesionales:</strong></p>
+                                <ul>
+                                    <li>Desarrollo funcional de proyecto de gestión interna para Repsol</li>
+                                    <li>Trabajé con ASP .NET Framework en entorno empresarial</li>
+                                    <li>Desarrollo frontend con Entity Framework</li>
+                                    <li>Gestión de bases de datos SQL Server</li>
+                                    <li>Control de versiones y trabajo en equipo con Angular 5</li>
+                                </ul>
+                                <div class="learning-note">
+                                    <i class="bi bi-rocket-takeoff-fill"></i>
+                                    <span>Aquí comenzó mi carrera como desarrollador profesional</span>
+                                </div>
+                                <div class="tech-stack">
+                                    <span class="tech-tag">ASP .NET Framework</span>
+                                    <span class="tech-tag">C#</span>
+                                    <span class="tech-tag">Entity Framework</span>
+                                    <span class="tech-tag">SQL Server</span>
+                                    <span class="tech-tag">Angular 5</span>
+                                    <span class="tech-tag">Git</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="page-number">4</div>
+                    </div>
+
+                </div>
+
+                <!-- Controles de navegación del libro -->
+                <div class="book-controls">
+                    <button class="btn-page-nav" id="prevPage" disabled>
+                        <i class="bi bi-chevron-left"></i>
+                        <span>Anterior</span>
+                    </button>
+                    <div class="page-indicator">
+                        <span id="currentPageNum">1</span> / <span id="totalPages">3</span>
+                    </div>
+                    <button class="btn-page-nav" id="nextPage">
+                        <span>Siguiente</span>
+                        <i class="bi bi-chevron-right"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Sección de contacto simple -->
+<!-- <div class="row mt-5 text-center fall-element fall-delay-5">
+    <div class="col-12">
+        <div class="contact-section">
+            <h3>¿Hablamos?</h3>
+            <p class="lead">Si te interesa mi perfil o quieres colaborar en algún proyecto</p>
+            <div class="contact-links">
+                <a href="mailto:tartulierarnaud@gmail.com" class="btn btn-outline-light btn-lg me-3">
+                    <i class="bi bi-envelope-fill"></i> Email
+                </a>
+                <a href="https://github.com/Aundefined/proyectos-ml" target="_blank" class="btn btn-outline-light btn-lg">
+                    <i class="bi bi-github"></i> GitHub
+                </a>
+            </div>
+        </div>
+    </div>
+</div> -->
+
+{% endblock %}
+
+{% block scripts %}
+<script src="{{ url_for('sobre_mi.static', filename='js/sobre_mi.js') }}"></script>
+{% endblock %}

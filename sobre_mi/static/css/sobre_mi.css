@@ -1,0 +1,496 @@
+/* Sección introductoria */
+.page-intro {
+    margin-bottom: 1.2rem;
+    padding: 0.8rem;
+    background: rgba(26, 87, 176, 0.05);
+    border-left: 3px solid rgba(26, 87, 176, 0.3);
+    border-radius: 0 5px 5px 0;
+    height: 80px;
+    overflow: hidden; /* Sin scroll - oculta el contenido que no cabe */
+    display: flex;
+    align-items: flex-start;
+}
+
+.page-intro p {
+    margin: 0;
+    color: #666;
+    font-style: italic;
+    font-size: 0.9rem;
+    line-height: 1.5;
+    width: 100%;
+}/* ARCHIVO: static/css/sobre_mi.css */
+
+/* Estilos generales para la página sobre mí */
+.about-text-container {
+    background: rgba(255, 255, 255, 0.1);
+    padding: 2rem;
+    border-radius: 15px;
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.about-text {
+    font-size: 1.1rem;
+    line-height: 1.7;
+    color: rgba(255, 255, 255, 0.9);
+}
+
+/* Estilo para el enlace de la empresa */
+.company-link {
+    color: #ffffff;
+    text-decoration: none;
+    font-weight: 600;
+    border-bottom: 2px solid rgba(255, 255, 255, 0.3);
+    transition: all 0.3s ease;
+    padding-bottom: 1px;
+}
+
+.company-link:hover {
+    color: #ffffff;
+    border-bottom-color: rgba(255, 255, 255, 0.8);
+    text-shadow: 0 0 8px rgba(255, 255, 255, 0.5);
+}
+
+/* Estilos para la foto de perfil */
+.profile-photo-container {
+    text-align: center;
+    position: sticky;
+    top: 100px;
+}
+
+.profile-photo {
+    width: 250px;
+    height: 250px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 4px solid rgba(255, 255, 255, 0.3);
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.profile-photo:hover {
+    transform: scale(1.05);
+    box-shadow: 0 15px 40px rgba(0, 0, 0, 0.4);
+}
+
+.photo-caption {
+    margin-top: 1rem;
+    color: white;
+}
+
+/* ESTILOS DEL LIBRO DE CURRÍCULUM */
+.curriculum-book-container {
+    display: flex;
+    justify-content: center;
+    perspective: 1000px;
+    margin: 3rem 0 8rem 0; /* Más margen inferior para los controles */
+}
+
+.book {
+    position: relative;
+    width: 700px;
+    height: 700px; /* Aumentado de 600px a 700px */
+    transform-style: preserve-3d;
+    transition: transform 0.3s ease;
+}
+
+.book:hover {
+    transform: rotateY(-0.5deg) rotateX(0.5deg);
+}
+
+.book-spine {
+    position: absolute;
+    left: -20px;
+    top: 0;
+    width: 20px;
+    height: 100%;
+    background: linear-gradient(to bottom, #8B4513, #A0522D);
+    border-radius: 5px 0 0 5px;
+    box-shadow: -5px 0 15px rgba(0, 0, 0, 0.3);
+}
+
+.book-pages {
+    position: relative;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(135deg, #f8f9fa, #e9ecef);
+    border-radius: 10px;
+    box-shadow: 
+        0 10px 30px rgba(0, 0, 0, 0.2),
+        inset 0 1px 0 rgba(255, 255, 255, 0.8);
+    overflow: hidden;
+}
+
+/* Páginas individuales */
+.page {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    padding: 3rem;
+    background: linear-gradient(135deg, #ffffff, #f8f9fa);
+    border-radius: 10px;
+    opacity: 0;
+    transform: translateX(100px);
+    transition: all 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+    color: #333;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden; /* Sin scroll en las páginas */
+}
+
+.page.active {
+    opacity: 1;
+    transform: translateX(0);
+}
+
+.page.prev {
+    opacity: 0;
+    transform: translateX(-100px);
+}
+
+/* Contenido de las páginas */
+.page-content {
+    flex-grow: 1;
+    display: flex;
+    flex-direction: column;
+}
+
+.page-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1.5rem;
+    padding-bottom: 1rem;
+    border-bottom: 2px solid #e9ecef;
+}
+
+.page-header h3 {
+    color: #4A148C;
+    font-weight: bold;
+    font-size: 1.8rem;
+    margin: 0;
+}
+
+.company-badge {
+    background: linear-gradient(135deg, #7B1FA2, #4A148C);
+    color: white;
+    padding: 0.5rem 1rem;
+    border-radius: 20px;
+    font-size: 0.9rem;
+    font-weight: 500;
+    box-shadow: 0 2px 10px rgba(123, 31, 162, 0.3);
+}
+
+.role-title {
+    font-size: 1.4rem;
+    font-weight: 600;
+    color: #1a57b0;
+    margin-bottom: 1.5rem;
+    position: relative;
+    padding-left: 1rem;
+}
+
+.role-title::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 4px;
+    height: 20px;
+    background: linear-gradient(to bottom, #1a57b0, #7B1FA2);
+    border-radius: 2px;
+}
+
+/* Sección introductoria */
+.page-intro {
+    margin-bottom: 1.2rem;
+    padding: 0.8rem;
+    background: rgba(26, 87, 176, 0.05);
+    border-left: 3px solid rgba(26, 87, 176, 0.3);
+    border-radius: 0 5px 5px 0;
+    height: 80px; /* Altura fija */
+    overflow-y: auto; /* Scroll si el contenido es muy largo */
+    display: flex;
+    align-items: flex-start; /* Alinea el texto arriba */
+}
+
+.page-intro p {
+    margin: 0;
+    color: #666;
+    font-style: italic;
+    font-size: 0.9rem;
+    line-height: 1.5;
+    width: 100%;
+}
+
+.page-body {
+    flex-grow: 1;
+}
+
+.page-body ul {
+    padding-left: 1.2rem;
+}
+
+.page-body li {
+    margin-bottom: 0.5rem;
+    line-height: 1.6;
+}
+
+/* Elementos especiales */
+.achievement-highlight, .learning-note {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    background: rgba(26, 87, 176, 0.1);
+    padding: 0.8rem 1rem;
+    border-radius: 8px;
+    margin: 1rem 0;
+    border-left: 4px solid #1a57b0;
+}
+
+.achievement-highlight i, .learning-note i {
+    color: #1a57b0;
+    font-size: 1.2rem;
+}
+
+/* Stack tecnológico */
+.tech-stack {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.4rem;
+    margin-top: 1.5rem;
+    align-items: flex-start;
+}
+
+.tech-tag {
+    background: linear-gradient(135deg, #e9ecef, #f8f9fa);
+    color: #495057;
+    padding: 0.4rem 0.7rem;
+    border-radius: 12px;
+    font-size: 0.8rem;
+    font-weight: 500;
+    border: 1px solid #dee2e6;
+    transition: all 0.3s ease;
+    white-space: nowrap; /* Evita que el texto se corte */
+    line-height: 1.2;
+    display: inline-flex;
+    align-items: center;
+    flex-shrink: 0; /* No se comprimen */
+}
+
+.tech-tag:hover {
+    background: linear-gradient(135deg, #7B1FA2, #4A148C);
+    color: white;
+    transform: translateY(-1px);
+    box-shadow: 0 2px 8px rgba(123, 31, 162, 0.3);
+}
+
+/* Número de página */
+.page-number {
+    position: absolute;
+    bottom: 1rem;
+    right: 2rem;
+    background: rgba(123, 31, 162, 0.1);
+    color: #7B1FA2;
+    width: 30px;
+    height: 30px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    font-weight: bold;
+    font-size: 0.9rem;
+}
+
+/* Controles del libro */
+.book-controls {
+    position: absolute;
+    bottom: -80px; /* Más separación del libro */
+    left: 50%;
+    transform: translateX(-50%);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 2rem;
+    background: rgba(255, 255, 255, 0.1);
+    padding: 1rem 2rem;
+    border-radius: 30px;
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    white-space: nowrap; /* Evita que el contenido se apile verticalmente */
+    min-width: 300px; /* Ancho mínimo para que no se comprima */
+}
+
+.btn-page-nav {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    background: rgba(123, 31, 162, 0.8);
+    color: white;
+    border: none;
+    padding: 0.7rem 1.2rem;
+    border-radius: 20px;
+    font-size: 0.9rem;
+    transition: all 0.3s ease;
+    cursor: pointer;
+    flex-shrink: 0; /* No se encoge */
+}
+
+.btn-page-nav:hover:not(:disabled) {
+    background: rgba(123, 31, 162, 1);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(123, 31, 162, 0.4);
+}
+
+.btn-page-nav:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+.page-indicator {
+    color: white;
+    font-weight: 500;
+    background: rgba(0, 0, 0, 0.2);
+    padding: 0.7rem 1.2rem;
+    border-radius: 15px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.95rem;
+    flex-shrink: 0; /* No se encoge */
+    min-width: 60px; /* Ancho mínimo */
+}
+
+/* Sección de contacto */
+.contact-section {
+    background: rgba(255, 255, 255, 0.1);
+    padding: 3rem;
+    border-radius: 20px;
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.contact-section h3 {
+    color: white;
+    margin-bottom: 1rem;
+}
+
+.contact-section .lead {
+    color: rgba(255, 255, 255, 0.8);
+    margin-bottom: 2rem;
+}
+
+.contact-links .btn {
+    border: 2px solid rgba(255, 255, 255, 0.3);
+    transition: all 0.3s ease;
+}
+
+.contact-links .btn:hover {
+    background: rgba(255, 255, 255, 0.2);
+    transform: translateY(-2px);
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .book {
+        width: 90vw;
+        height: 550px; /* Aumentado de 480px a 550px */
+    }
+    
+    .page {
+        padding: 1.8rem 1.2rem;
+    }
+    
+    /* Page intro más pequeño en móvil */
+    .page-intro {
+        height: 70px;
+        padding: 0.6rem;
+    }
+    
+    .page-intro p {
+        font-size: 0.8rem;
+    }
+    
+    .page-header {
+        flex-direction: column;
+        gap: 1rem;
+        text-align: center;
+    }
+    
+    .page-header h3 {
+        font-size: 1.5rem;
+    }
+    
+    .role-title {
+        font-size: 1.2rem;
+    }
+    
+    .page-body {
+        font-size: 0.9rem;
+    }
+    
+    .page-body ul {
+        padding-left: 1rem;
+    }
+    
+    .page-body li {
+        font-size: 0.85rem;
+        margin-bottom: 0.4rem;
+    }
+    
+    /* Tech stack más compacto en móvil */
+    .tech-stack {
+        gap: 0.3rem;
+        margin-top: 1rem;
+    }
+    
+    .tech-tag {
+        padding: 0.3rem 0.6rem;
+        font-size: 0.75rem;
+        border-radius: 10px;
+    }
+    
+    .book-controls {
+        bottom: -100px; /* Más separación en móvil */
+        flex-direction: row; /* Mantener horizontal en móvil también */
+        gap: 1rem;
+        padding: 0.8rem 1.5rem;
+        min-width: 280px;
+    }
+    
+    .btn-page-nav {
+        padding: 0.6rem 1rem;
+        font-size: 0.85rem;
+    }
+    
+    .page-indicator {
+        padding: 0.6rem 1rem;
+        font-size: 0.9rem;
+        min-width: 50px;
+    }
+    
+    .profile-photo {
+        width: 200px;
+        height: 200px;
+    }
+    
+    .about-text-container {
+        padding: 1.5rem;
+        margin-bottom: 2rem;
+    }
+    
+    .profile-photo-container {
+        position: static;
+        margin-top: 2rem;
+    }
+    
+    /* Más espacio para la sección del currículum en móvil */
+    .curriculum-book-container {
+        margin: 3rem 0 10rem 0;
+    }
+}
