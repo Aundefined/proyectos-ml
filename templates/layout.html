@@ -24,35 +24,77 @@
                         <li class="nav-item">
                             <a class="nav-link {% if request.path == '/' %}active{% endif %}" href="/">Home</a>
                         </li>
-                        <li class="nav-item">
-                            <a class="nav-link {% if request.path == '/predictor-sueldos' %}active{% endif %}"
-                                href="/predictor-sueldos">Predictor de Sueldos</a>
+                        
+                        <!-- REGRESIONES -->
+                        <li class="nav-item dropdown">
+                            <a class="nav-link dropdown-toggle" href="#" id="regresionesDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                <i class="bi bi-graph-up"></i> Regresiones
+                            </a>
+                            <ul class="dropdown-menu" aria-labelledby="regresionesDropdown">
+                                <li>
+                                    <a class="dropdown-item {% if request.path == '/predictor-sueldos' %}active{% endif %}" 
+                                       href="/predictor-sueldos">
+                                        <i class="bi bi-currency-euro"></i> Predictor de Sueldos
+                                    </a>
+                                </li>
+                                <li>
+                                    <a class="dropdown-item {% if request.path == '/predictor-seguro' %}active{% endif %}" 
+                                       href="/predictor-seguro">
+                                        <i class="bi bi-shield-check"></i> Predictor de Seguro
+                                    </a>
+                                </li>
+                            </ul>
                         </li>
-                        <li class="nav-item">
-                            <a class="nav-link {% if request.path == '/predictor-sueldos' %}active{% endif %}"
-                                href="/predictor-seguro">Predictor de Seguro</a>
+
+                        <!-- CLASIFICACIONES -->
+                        <li class="nav-item dropdown">
+                            <a class="nav-link dropdown-toggle" href="#" id="clasificacionesDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                <i class="bi bi-tag"></i> Clasificaciones
+                            </a>
+                            <ul class="dropdown-menu" aria-labelledby="clasificacionesDropdown">
+                                <li>
+                                    <a class="dropdown-item {% if request.path == '/predictor-champinones' %}active{% endif %}" 
+                                       href="/predictor-champinones">
+                                        <i class="bi bi-tree"></i> Clasificación de Champiñones
+                                    </a>
+                                </li>
+                                <li>
+                                    <a class="dropdown-item {% if request.path == '/clasificador-frutas' %}active{% endif %}" 
+                                       href="/clasificador-frutas">
+                                        <i class="bi bi-flower3"></i> Clasificación de Frutas
+                                    </a>
+                                </li>
+                            </ul>
                         </li>
+
+                        <!-- CLUSTERING -->
                         <li class="nav-item">
-                            <a class="nav-link {% if request.path == '/predictor-champinones' %}active{% endif %}"
-                                href="/predictor-champinones">Clasifición de Champiñones</a>
+                            <a class="nav-link {% if request.path == '/clustering-clientes' %}active{% endif %}" 
+                               href="/clustering-clientes/">
+                                <i class="bi bi-diagram-3"></i> Clustering
+                            </a>
                         </li>
-                        <li class="nav-item">
-                            <a class="nav-link {% if request.path == '/clasificador-frutas' %}active{% endif %}"
-                                href="/clasificador-frutas">Clasifición de Frutas</a>
+
+                        <!-- OTROS -->
+                        <li class="nav-item dropdown">
+                            <a class="nav-link dropdown-toggle" href="#" id="otrosDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                <i class="bi bi-three-dots"></i> Otros
+                            </a>
+                            <ul class="dropdown-menu" aria-labelledby="otrosDropdown">
+                                <li>
+                                    <a class="dropdown-item {% if request.path == '/analisis-integrado' %}active{% endif %}" 
+                                       href="/analisis-integrado">
+                                        <i class="bi bi-bar-chart"></i> Análisis Integrado
+                                    </a>
+                                </li>
+                                <li>
+                                    <a class="dropdown-item {% if request.path == '/connect-four' %}active{% endif %}" 
+                                       href="/connect-four">
+                                        <i class="bi bi-controller"></i> Connect Four
+                                    </a>
+                                </li>
+                            </ul>
                         </li>
-                        <li class="nav-item">
-                            <a class="nav-link {% if request.path == '/predictor-sueldos' %}active{% endif %}"
-                                href="/clustering-clientes/">Clustering Clientes</a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link {% if request.path == '/connect-four' %}active{% endif %}"
-                                href="/connect-four">Connect Four</a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link {% if request.path == '/analisis-integrado' %}active{% endif %}"
-                                href="/analisis-integrado">Análisis Integrado</a>
-                        </li>
-                        <!-- Aquí se pueden añadir más proyectos en el futuro -->
                     </ul>
                 </div>
             </div>
