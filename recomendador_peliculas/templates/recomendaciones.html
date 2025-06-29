@@ -1,0 +1,99 @@
+{% extends "layout.html" %}
+
+{% block title %}Tus Recomendaciones - Recomendador{% endblock %}
+
+{% block head_styles %}
+<link rel="stylesheet" href="{{ url_for('recomendador_peliculas.static', filename='css/recomendador.css') }}">
+{% endblock %}
+
+{% block content %}
+<h2 class="text-white fall-element fall-delay-1">
+    <i class="bi bi-stars text-warning me-2"></i>Tus Recomendaciones Personalizadas
+</h2>
+<p class="lead text-white fall-element fall-delay-1">
+    Basado en {{ peliculas_calificadas }} películas que calificaste, aquí tienes nuestras mejores recomendaciones
+</p>
+
+<!-- Stats -->
+<div class="row mb-4 fall-element fall-delay-2">
+    <div class="col-md-4">
+        <div class="stat-card text-center p-3 bg-primary text-white rounded">
+            <i class="bi bi-brain fs-2"></i>
+            <h6 class="mt-2">IA Entrenada</h6>
+            <small>100,000+ ratings reales</small>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="stat-card text-center p-3 bg-success text-white rounded">
+            <i class="bi bi-check-circle fs-2"></i>
+            <h6 class="mt-2">{{ peliculas_calificadas }} Calificadas</h6>
+            <small>Tu perfil de gustos</small>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="stat-card text-center p-3 bg-warning text-white rounded">
+            <i class="bi bi-star fs-2"></i>
+            <h6 class="mt-2">{{ recomendaciones|length }} Recomendaciones</h6>
+            <small>Personalizadas para ti</small>
+        </div>
+    </div>
+</div>
+
+<!-- Recomendaciones -->
+<div class="row">
+    {% for rec in recomendaciones %}
+    <div class="col-lg-6 col-md-6 mb-4 fall-element fall-delay-{{ loop.index % 4 + 3 }}">
+        <div class="card recommendation-card h-100">
+            <div class="card-body">
+                <div class="d-flex justify-content-between align-items-start mb-3">
+                    <h5 class="card-title mb-0">{{ rec.title }}</h5>
+                    <div class="predicted-rating">
+                        <span class="badge bg-primary fs-6">
+                            <i class="bi bi-star-fill me-1"></i>{{ "%.1f"|format(rec.predicted_rating) }}
+                        </span>
+                    </div>
+                </div>
+                
+                <p class="card-text">
+                    <small class="text-muted">
+                        <i class="bi bi-tags me-1"></i>{{ rec.genres }}
+                    </small>
+                </p>
+                
+                <div class="prediction-explanation">
+                    <small class="text-muted">
+                        <i class="bi bi-cpu me-1"></i>
+                        La IA predice que le darías {{ "%.1f"|format(rec.predicted_rating) }} estrellas a esta película
+                    </small>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% endfor %}
+</div>
+
+<!-- Botones de acción -->
+<div class="text-center mt-4 fall-element fall-delay-4">
+    <a href="{{ url_for('recomendador_peliculas.onboarding') }}" class="btn btn-outline-light btn-lg me-3">
+        <i class="bi bi-arrow-repeat me-2"></i>Volver a Calificar
+    </a>
+    <a href="{{ url_for('recomendador_peliculas.index') }}" class="btn btn-secondary btn-lg">
+        <i class="bi bi-house me-2"></i>Inicio
+    </a>
+</div>
+
+<!-- Explicación técnica -->
+<div class="mt-5 fall-element fall-delay-5">
+    <div class="card bg-dark text-white">
+        <div class="card-body">
+            <h6><i class="bi bi-info-circle me-2"></i>¿Cómo se generaron estas recomendaciones?</h6>
+            <p class="card-text small mb-0">
+                1. Analizamos tus calificaciones y encontramos usuarios similares en nuestro dataset<br>
+                2. Creamos un "perfil de gustos" (embedding) promediando esos usuarios similares<br>
+                3. Nuestro modelo neuronal predijo qué rating le darías a cada película<br>
+                4. Te mostramos las películas con mayor rating predicho que aún no has visto
+            </p>
+        </div>
+    </div>
+</div>
+{% endblock %}

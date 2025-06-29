@@ -1,0 +1,94 @@
+.movie-card {
+    transition: transform 0.2s, box-shadow 0.2s;
+    cursor: pointer;
+    border: 2px solid transparent;
+}
+
+.movie-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 8px 25px rgba(0,0,0,0.15);
+}
+
+.movie-card.rated {
+    border-color: #28a745;
+    background-color: #f8fff9;
+}
+
+.rating-container {
+    margin: 15px 0;
+}
+
+.rating-star {
+    font-size: 1.5rem;
+    color: #ddd;
+    cursor: pointer;
+    transition: color 0.2s, transform 0.1s;
+    margin: 0 2px;
+}
+
+.rating-star:hover {
+    color: #ffc107;
+    transform: scale(1.1);
+}
+
+.rating-star.active {
+    color: #ffc107;
+}
+
+.rating-text {
+    min-height: 20px;
+}
+
+.feature-icon {
+    padding: 20px 10px;
+}
+
+.stat-card {
+    margin-bottom: 15px;
+}
+
+.recommendation-card {
+    transition: transform 0.2s;
+    border-left: 4px solid #007bff;
+}
+
+.recommendation-card:hover {
+    transform: translateY(-3px);
+}
+
+.predicted-rating .badge {
+    font-size: 0.9rem;
+}
+
+.prediction-explanation {
+    margin-top: 10px;
+    padding: 8px;
+    background-color: #f8f9fa;
+    border-radius: 4px;
+}
+
+/* Progress bar personalizada */
+.progress {
+    background-color: rgba(255,255,255,0.2);
+}
+
+.progress-bar {
+    background-color: #28a745;
+    transition: width 0.3s ease;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .rating-star {
+        font-size: 1.3rem;
+        margin: 0 1px;
+    }
+    
+    .feature-icon {
+        padding: 15px 5px;
+    }
+    
+    .stat-card {
+        margin-bottom: 10px;
+    }
+}

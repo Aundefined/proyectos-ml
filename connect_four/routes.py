@@ -31,6 +31,7 @@ class TFLiteModelAdapter:
 try:
     # Cargar el modelo TFLite
     modelo = TFLiteModelAdapter('ml-models/modelo_conecta4.tflite')
+    # modelo = tf.keras.models.load_model('ml-models/modelo_perceptron_multi.h5')
     print("Modelo TFLite cargado correctamente")
 except Exception as e:
     print(f"Error al cargar el modelo TFLite: {e}")

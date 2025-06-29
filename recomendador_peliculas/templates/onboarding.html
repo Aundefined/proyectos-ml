@@ -1,0 +1,79 @@
+{% extends "layout.html" %}
+
+{% block title %}Califica Películas - Recomendador{% endblock %}
+
+{% block head_styles %}
+<link rel="stylesheet" href="{{ url_for('recomendador_peliculas.static', filename='css/recomendador.css') }}">
+{% endblock %}
+
+{% block content %}
+<h2 class="text-white fall-element fall-delay-1">Cuéntanos qué te gusta</h2>
+<p class="lead text-white fall-element fall-delay-1">Califica al menos 5 películas para que podamos recomendarte otras similares</p>
+
+{% if error %}
+<div class="alert alert-danger alert-dismissible fade show fall-element fall-delay-1" role="alert">
+    <strong>Error:</strong> {{ error }}
+    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+</div>
+{% endif %}
+
+<!-- Progress bar -->
+<div class="mb-4 fall-element fall-delay-2">
+    <div class="progress" style="height: 10px;">
+        <div class="progress-bar" role="progressbar" style="width: 0%" id="progressBar"></div>
+    </div>
+    <small class="text-white-50 mt-1 d-block">
+        <span id="progressText">0 de 15 películas calificadas (mínimo 5)</span>
+    </small>
+</div>
+
+<form method="POST" action="{{ url_for('recomendador_peliculas.procesar_onboarding') }}" id="onboardingForm">
+    <div class="row" id="moviesContainer">
+        {% for pelicula in peliculas %}
+        <div class="col-lg-4 col-md-6 mb-4 fall-element fall-delay-{{ loop.index % 3 + 3 }}">
+            <div class="card movie-card h-100">
+                <div class="card-body text-center">
+                    <h6 class="card-title">{{ pelicula.title }}</h6>
+                    <p class="card-text">
+                        <small class="text-muted">{{ pelicula.genres }}</small>
+                    </p>
+                    
+                    <!-- Rating stars -->
+                    <div class="rating-container" data-movie-id="{{ pelicula.movieId }}">
+                        {% for i in range(1, 6) %}
+                        <i class="bi bi-star rating-star" data-rating="{{ i }}"></i>
+                        {% endfor %}
+                        <div class="rating-text mt-2">
+                            <small class="text-muted">Click en las estrellas</small>
+                        </div>
+                    </div>
+                    
+                    <!-- Hidden input -->
+                    <input type="hidden" name="rating_{{ pelicula.movieId }}" class="rating-input" value="">
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+    
+    <div class="text-center mt-4 fall-element fall-delay-4">
+        <button type="submit" class="btn btn-primary btn-lg px-5" id="submitBtn" disabled>
+            <i class="bi bi-magic me-2"></i>Generar Recomendaciones
+        </button>
+        <div class="mt-2">
+            <small class="text-white-50">Necesitas calificar al menos 5 películas</small>
+        </div>
+    </div>
+</form>
+{% endblock %}
+
+{% block scripts %}
+<script src="{{ url_for('recomendador_peliculas.static', filename='js/onboarding.js') }}"></script>
+<script>
+console.log("🔍 Probando JavaScript...");
+document.addEventListener('DOMContentLoaded', function() {
+    console.log("✅ DOM cargado");
+    console.log("🔍 Rating containers:", document.querySelectorAll('.rating-container').length);
+});
+</script>
+{% endblock %}

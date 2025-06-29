@@ -1,0 +1,137 @@
+{% extends "layout.html" %}
+
+{% block title %}Recomendador de Películas con IA{% endblock %}
+
+{% block head_styles %}
+<link rel="stylesheet" href="{{ url_for('recomendador_peliculas.static', filename='css/recomendador.css') }}">
+{% endblock %}
+
+{% block content %}
+<h2 class="text-white fall-element fall-delay-1">Recomendador de Películas con Deep Learning</h2>
+<p class="lead text-white fall-element fall-delay-1">Sistema de recomendación usando redes neuronales y embeddings</p>
+<div class="text-white-50 mb-4 fall-element fall-delay-1">
+    <i class="bi bi-info-circle me-1"></i>
+    <small>Basado en el dataset MovieLens y entrenado con 100,000+ ratings reales</small>
+</div>
+
+<!-- Botones informativos -->
+<div class="d-flex flex-wrap gap-2 mb-4 fall-element fall-delay-2">
+    <button type="button" class="btn btn-secondary" data-bs-toggle="modal" data-bs-target="#modeloModal">
+        <i class="bi bi-code-slash"></i> Cómo funciona la IA
+    </button>
+    <button type="button" class="btn btn-info" data-bs-toggle="modal" data-bs-target="#embeddingsModal">
+        <i class="bi bi-diagram-3"></i> ¿Qué son los embeddings?
+    </button>
+</div>
+
+<!-- Tarjeta principal -->
+<div class="row justify-content-center">
+    <div class="col-lg-8 col-md-10">
+        <div class="card shadow-lg fall-element fall-delay-3">
+            <div class="card-body text-center p-5">
+                <i class="bi bi-film display-1 text-primary mb-4"></i>
+                <h3 class="card-title mb-4">¡Descubre películas perfectas para ti!</h3>
+                <p class="card-text text-muted mb-4">
+                    Nuestro modelo de deep learning ha aprendido de más de 100,000 calificaciones reales para entender qué tipos de películas le gustan a diferentes personas.
+                </p>
+                
+                <div class="row text-center mb-4">
+                    <div class="col-4">
+                        <div class="feature-icon">
+                            <i class="bi bi-brain text-primary fs-1"></i>
+                            <h6 class="mt-2">IA Avanzada</h6>
+                            <small class="text-muted">Embeddings neuronales</small>
+                        </div>
+                    </div>
+                    <div class="col-4">
+                        <div class="feature-icon">
+                            <i class="bi bi-people text-success fs-1"></i>
+                            <h6 class="mt-2">610 Usuarios</h6>
+                            <small class="text-muted">Patrones reales</small>
+                        </div>
+                    </div>
+                    <div class="col-4">
+                        <div class="feature-icon">
+                            <i class="bi bi-film text-warning fs-1"></i>
+                            <h6 class="mt-2">9,724 Películas</h6>
+                            <small class="text-muted">Gran catálogo</small>
+                        </div>
+                    </div>
+                </div>
+
+                <a href="{{ url_for('recomendador_peliculas.onboarding') }}" class="btn btn-primary btn-lg px-5">
+                    <i class="bi bi-play-circle me-2"></i>Empezar Recomendaciones
+                </a>
+                
+                <div class="mt-3">
+                    <small class="text-muted">
+                        <i class="bi bi-clock me-1"></i>Solo toma 2 minutos • Califica 5-15 películas
+                    </small>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal: Cómo funciona -->
+<div class="modal fade" id="modeloModal" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">¿Cómo funciona la IA?</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <h6><i class="bi bi-1-circle text-primary"></i> Embeddings de Usuarios y Películas</h6>
+                <p>El modelo convierte cada usuario y película en vectores de 50 dimensiones que capturan características latentes (géneros, estilos, etc.)</p>
+                
+                <h6><i class="bi bi-2-circle text-primary"></i> Red Neuronal</h6>
+                <p>Una red densa aprende a predecir ratings combinando los embeddings de usuario y película.</p>
+                
+                <h6><i class="bi bi-3-circle text-primary"></i> Para Usuarios Nuevos</h6>
+                <p>Creamos un embedding "sintético" promediando usuarios similares basado en tus calificaciones iniciales.</p>
+                
+                <h6><i class="bi bi-4-circle text-primary"></i> Recomendaciones</h6>
+                <p>El modelo predice qué rating le darías a cada película y recomienda las mejor puntuadas.</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal: Embeddings -->
+<div class="modal fade" id="embeddingsModal" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">¿Qué son los Embeddings?</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <p><strong>Los embeddings son representaciones numéricas que capturan similaridades.</strong></p>
+                
+                <div class="row">
+                    <div class="col-6">
+                        <h6>Usuario A</h6>
+                        <code>[0.2, -0.1, 0.8, 0.3, ...]</code>
+                        <small class="d-block text-muted">Le gustan comedias románticas</small>
+                    </div>
+                    <div class="col-6">
+                        <h6>Usuario B</h6>
+                        <code>[0.1, -0.2, 0.7, 0.4, ...]</code>
+                        <small class="d-block text-muted">También le gustan comedias románticas</small>
+                    </div>
+                </div>
+                
+                <hr>
+                
+                <p><strong>¿Por qué funcionan?</strong></p>
+                <ul>
+                    <li>Usuarios con gustos similares tienen vectores similares</li>
+                    <li>Películas del mismo género quedan "cerca" en el espacio vectorial</li>
+                    <li>El modelo aprende estas representaciones automáticamente</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
