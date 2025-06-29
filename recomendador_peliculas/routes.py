@@ -5,6 +5,7 @@ from scipy.stats import pearsonr
 import pickle
 import tensorflow as tf
 import os
+from sklearn.metrics.pairwise import cosine_similarity  
 
 from . import recomendador_peliculas_bp
 
@@ -220,60 +221,95 @@ def crear_embedding_usuario_nuevo(ratings_onboarding):
         return user_embeddings[0] if user_embeddings is not None else np.zeros(50)
 
 def generar_recomendaciones(embedding_usuario, n_recomendaciones=10):
-    """Genera recomendaciones usando método simple"""
-    try:
-        print(f"🎯 Generando recomendaciones...")
-        print(f"🎯 Movies shape: {movies.shape}")
-        print(f"🎯 Movie_to_index keys: {len(movie_to_index)}")
-        print(f"🎯 Movie_embeddings shape: {movie_embeddings.shape}")
-        
-        # Usar las películas del onboarding como base
-        peliculas_base = obtener_peliculas_onboarding()
-        print(f"🎯 Películas base: {len(peliculas_base)}")
-        
-        predicciones = []
-        
-        for pelicula in peliculas_base:
-            try:
-                movie_id = pelicula['movieId']
-                
-                # Generar rating aleatorio entre 3.5 y 5.0 por ahora
-                predicted_rating = 3.5 + (np.random.random() * 1.5)
-                
-                predicciones.append({
-                    'movieId': movie_id,
-                    'predicted_rating': float(predicted_rating),
-                    'title': pelicula['title'],
-                    'genres': pelicula['genres']
-                })
-                
-                print(f"✅ Agregada: {pelicula['title']} - {predicted_rating:.2f}")
-                
-            except Exception as e:
-                print(f"❌ Error con película {movie_id}: {e}")
-                continue
-        
-        print(f"✅ Total predicciones: {len(predicciones)}")
-        
-        # Ordenar por rating predicho
-        predicciones.sort(key=lambda x: x['predicted_rating'], reverse=True)
-        return predicciones[:n_recomendaciones]
-        
-    except Exception as e:
-        print(f"💥 Error en generar_recomendaciones: {e}")
-        import traceback
-        traceback.print_exc()
-        return []
+   """Genera recomendaciones usando el modelo entrenado con predicciones reales"""
+   try:
+       print(f"🎯 Generando recomendaciones reales...")
+       
+       # Crear el modelo de embeddings directos (una sola vez)
+       modelo_embeddings = crear_modelo_embeddings_directos()
 
-
-
+       
+       predicciones = []
+       peliculas_disponibles = movies.head(200)
+       
+       for _, movie_row in peliculas_disponibles.iterrows():
+           try:
+               movie_id = movie_row['movieId']
+               
+               if movie_id not in movie_to_index:
+                   continue
+                   
+               movie_idx = movie_to_index[movie_id]
+               if movie_idx >= len(movie_embeddings):
+                   continue
+               
+               movie_embedding = movie_embeddings[movie_idx]
+               
+               # Usar el modelo para predecir
+               prediction = modelo_embeddings.predict([
+                   embedding_usuario.reshape(1,-1), 
+                   movie_embedding.reshape(1,-1)
+               ])[0][0]
+               
+               predicted_rating = max(1.0, min(5.0, prediction))
+               
+               predicciones.append({
+                   'movieId': int(movie_id),
+                   'predicted_rating': float(predicted_rating),
+                   'title': movie_row['title'],
+                   'genres': movie_row['genres']
+               })
+               
+           except:
+               continue
+       
+       print(f"✅ Total predicciones calculadas: {len(predicciones)}")
+       
+      
+       
+       # Ordenar por rating predicho
+       predicciones.sort(key=lambda x: x['predicted_rating'], reverse=True)
+       
+       return predicciones[:n_recomendaciones]
+       
+   except Exception as e:
+       print(f"💥 Error en generar_recomendaciones: {e}")
+     
+     
+     
+def crear_modelo_embeddings_directos():
+    """Crea un modelo que acepta embeddings directos"""
+    from tensorflow.keras.layers import Input, Dense, Concatenate, Dropout
+    from tensorflow.keras.models import Model
+    
+    # Inputs directos de embeddings (no índices)
+    user_embedding_input = Input(shape=(50,), name='user_embedding')
+    movie_embedding_input = Input(shape=(50,), name='movie_embedding')
+    
+    # Concatenar (igual que tu modelo original)
+    concat = Concatenate()([user_embedding_input, movie_embedding_input])
+    
+    # Capas densas (copiar tu arquitectura)
+    dense1 = Dense(16, activation='relu')(concat)
+    dropout1 = Dropout(0.5)(dense1)
+    dense2 = Dense(16, activation='relu')(dropout1)
+    dropout2 = Dropout(0.5)(dense2)
+    output = Dense(1, activation='linear')(dropout2)
+    
+    modelo_embeddings = Model(inputs=[user_embedding_input, movie_embedding_input], outputs=output)
+    
+    # Copiar los pesos SOLO de las capas que tienen pesos
+    modelo_embeddings.layers[3].set_weights(modelo.layers[7].get_weights())  # dense1 (índice 3 en nuevo modelo)
+    modelo_embeddings.layers[5].set_weights(modelo.layers[9].get_weights())  # dense2 (índice 5 en nuevo modelo)
+    modelo_embeddings.layers[7].set_weights(modelo.layers[11].get_weights()) # output (índice 7 en nuevo modelo)
+    
+    return modelo_embeddings
 
 
 @recomendador_peliculas_bp.route('/')
 def index():
     """Página principal del recomendador"""
     return render_template('recomendador_peliculas.html')
-
 
 
 @recomendador_peliculas_bp.route('/onboarding')
@@ -290,8 +326,6 @@ def onboarding():
     
     peliculas = obtener_peliculas_onboarding()
     return render_template('onboarding.html', peliculas=peliculas)
-
-
 
 
 @recomendador_peliculas_bp.route('/procesar_onboarding', methods=['POST'])
