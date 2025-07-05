@@ -140,7 +140,7 @@ document.addEventListener('DOMContentLoaded', function() {
             }
         }
 
-        // Form submission with loading state
+        // Form submission con modal de procesamiento
         const form = document.getElementById('onboardingForm');
         if (form) {
             form.addEventListener('submit', function(e) {
@@ -152,14 +152,21 @@ document.addEventListener('DOMContentLoaded', function() {
 
                 console.log("📤 Enviando formulario...");
                 
-                // Show loading state
-                submitBtn.disabled = true;
-                submitBtn.innerHTML = '<i class="spinner-border spinner-border-sm me-2"></i>Generando recomendaciones...';
+                // Prevenir envío múltiple
+                e.preventDefault();
                 
-                // Allow form to submit
+                // Mostrar modal de procesamiento
+                const processingModal = new bootstrap.Modal(document.getElementById('processingModal'));
+                processingModal.show();
+                
+                // Deshabilitar botón
+                submitBtn.disabled = true;
+                
+                // Enviar formulario después de mostrar la modal
                 setTimeout(() => {
-                    submitBtn.innerHTML = '<i class="bi bi-magic me-2"></i>Procesando...';
-                }, 1000);
+                    console.log("🚀 Enviando formulario realmente...");
+                    form.submit();
+                }, 500);
             });
         }
 
