@@ -4,47 +4,6 @@
 
 {% block head_styles %}
 <link rel="stylesheet" href="{{ url_for('recomendador_peliculas.static', filename='css/recomendador.css') }}">
-<style>
-.genre-selector {
-    max-height: 300px;
-    overflow-y: auto;
-    border: 1px solid #ddd;
-    border-radius: 8px;
-    padding: 15px;
-    background-color: #f8f9fa;
-}
-
-.genre-option {
-    margin-bottom: 10px;
-}
-
-.genre-option label {
-    cursor: pointer;
-    padding: 8px 12px;
-    border-radius: 6px;
-    transition: background-color 0.2s;
-    display: block;
-    margin: 0;
-}
-
-.genre-option label:hover {
-    background-color: #e9ecef;
-}
-
-.genre-option input[type="checkbox"]:checked + label {
-    background-color: #007bff;
-    color: white;
-}
-
-.selected-count {
-    background-color: #28a745;
-    color: white;
-    padding: 5px 10px;
-    border-radius: 15px;
-    font-size: 0.9rem;
-    margin-left: 10px;
-}
-</style>
 {% endblock %}
 
 {% block content %}
@@ -79,7 +38,7 @@
                     <!-- Instrucciones -->
                     <p class="text-muted mb-3">
                         <i class="bi bi-info-circle me-1"></i>
-                        Selecciona al menos 3 géneros. Te mostraremos hasta 5 películas aleatorias de cada género elegido.
+                        Selecciona al menos 1 género. Te mostraremos hasta 5 películas aleatorias de cada género elegido.
                     </p>
 
                     <!-- Selector de géneros -->
@@ -119,7 +78,7 @@
                     <div class="mt-3">
                         <small class="text-muted">
                             <i class="bi bi-lightbulb me-1"></i>
-                            <span id="infoText">Selecciona al menos 3 géneros para continuar</span>
+                            <span id="infoText">Selecciona al menos 1 género para continuar</span>
                         </small>
                     </div>
                 </form>

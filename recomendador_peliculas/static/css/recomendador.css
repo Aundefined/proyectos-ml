@@ -92,3 +92,43 @@
         margin-bottom: 10px;
     }
 }
+
+.genre-selector {
+    max-height: 300px;
+    overflow-y: auto;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    padding: 15px;
+    background-color: #f8f9fa;
+}
+
+.genre-option {
+    margin-bottom: 10px;
+}
+
+.genre-option label {
+    cursor: pointer;
+    padding: 8px 12px;
+    border-radius: 6px;
+    transition: background-color 0.2s;
+    display: block;
+    margin: 0;
+}
+
+.genre-option label:hover {
+    background-color: #e9ecef;
+}
+
+.genre-option input[type="checkbox"]:checked + label {
+    background-color: #007bff;
+    color: white;
+}
+
+.selected-count {
+    background-color: #28a745;
+    color: white;
+    padding: 5px 10px;
+    border-radius: 15px;
+    font-size: 0.9rem;
+    margin-left: 10px;
+}

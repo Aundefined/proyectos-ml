@@ -14,16 +14,13 @@ document.addEventListener('DOMContentLoaded', function() {
         selectedCount.textContent = `${count} seleccionado${count !== 1 ? 's' : ''}`;
         
         // Habilitar/deshabilitar botón continuar
-        continueBtn.disabled = count < 3;
+        continueBtn.disabled = count === 0;
         
         // Actualizar texto informativo
         if (count === 0) {
-            infoText.textContent = 'Selecciona al menos 3 géneros para continuar';
-        } else if (count < 3) {
-            const remaining = 3 - count;
-            infoText.textContent = `Selecciona ${remaining} género${remaining > 1 ? 's' : ''} más para continuar`;
-        } else if (count === 3) {
-            infoText.textContent = 'Te mostraremos hasta 15 películas (5 por género)';
+            infoText.textContent = 'Selecciona al menos 1 género para continuar';
+        } else if (count === 1) {
+            infoText.textContent = 'Te mostraremos hasta 5 películas del género seleccionado';
         } else {
             const peliculas = Math.min(count * 5, 75); // máximo razonable
             infoText.textContent = `Te mostraremos hasta ${peliculas} películas (máximo 5 por género)`;
@@ -67,9 +64,9 @@ document.addEventListener('DOMContentLoaded', function() {
     document.getElementById('genreForm').addEventListener('submit', function(e) {
         const selected = document.querySelectorAll('.genre-checkbox:checked');
         
-        if (selected.length < 3) {
+        if (selected.length === 0) {
             e.preventDefault();
-            alert('Por favor, selecciona al menos 3 géneros');
+            alert('Por favor, selecciona al menos un género');
             return;
         }
 

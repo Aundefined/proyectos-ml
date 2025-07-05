@@ -85,21 +85,29 @@ def cargar_modelo_y_datos():
         return False
 
 def obtener_generos_disponibles():
-    """Obtiene todos los géneros únicos disponibles en el dataset"""
+    """Obtiene todos los géneros individuales únicos disponibles en el dataset"""
     try:
         if movies is None:
             raise Exception("Datos de películas no disponibles")
         
-        # Obtener todos los géneros únicos (cada fila es un género completo)
-        generos_unicos = movies['genres'].unique()
+        # Set para almacenar géneros únicos
+        generos_individuales = set()
         
-        # Filtrar géneros vacíos o nulos si los hay
-        generos_unicos = [g for g in generos_unicos if pd.notna(g) and g.strip()]
+        # Procesar cada fila de géneros
+        for genres_string in movies['genres'].dropna():
+            if pd.notna(genres_string) and genres_string.strip():
+                # Dividir por | y agregar cada género individual
+                generos_en_fila = genres_string.split('|')
+                for genero in generos_en_fila:
+                    genero_limpio = genero.strip()
+                    if genero_limpio and genero_limpio != '(no genres listed)':
+                        generos_individuales.add(genero_limpio)
         
-        # Ordenar alfabéticamente
-        generos_unicos.sort()
+        # Convertir a lista y ordenar alfabéticamente
+        generos_unicos = sorted(list(generos_individuales))
         
-        print(f"📊 Géneros únicos encontrados: {len(generos_unicos)}")
+        print(f"📊 Géneros individuales únicos encontrados: {len(generos_unicos)}")
+        print(f"🎬 Géneros: {generos_unicos[:10]}...") # Mostrar los primeros 10
         return generos_unicos
         
     except Exception as e:
@@ -123,8 +131,10 @@ def obtener_peliculas_onboarding(generos_seleccionados):
         for genero in generos_seleccionados:
             print(f"🎬 Procesando género: {genero}")
             
-            # Obtener películas de este género específico
-            peliculas_del_genero = movies[movies['genres'] == genero].copy()
+            # Buscar películas que contengan este género en su string de géneros
+            # Usamos str.contains con regex para buscar el género exacto
+            patron = f'(^|\\|){genero}(\\||$)'
+            peliculas_del_genero = movies[movies['genres'].str.contains(patron, na=False, regex=True)].copy()
             
             print(f"📊 Películas encontradas para {genero}: {len(peliculas_del_genero)}")
             
@@ -365,12 +375,12 @@ def onboarding():
         # Obtener géneros seleccionados del formulario
         generos_seleccionados = request.form.getlist('generos')
         
-        if not generos_seleccionados or len(generos_seleccionados) < 3:
+        if not generos_seleccionados or len(generos_seleccionados) < 1:
             # Redirigir de vuelta a selección de géneros con error
             generos = obtener_generos_disponibles()
             return render_template('seleccionar_generos.html', 
                                  generos=generos,
-                                 error="Por favor, selecciona al menos 3 géneros para garantizar suficientes películas")
+                                 error="Por favor, selecciona al menos un género")
         
         print(f"📝 Géneros seleccionados: {generos_seleccionados}")
         
