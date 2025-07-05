@@ -18,6 +18,7 @@ movie_to_index = None
 user_embeddings = None
 movie_embeddings = None
 
+
 def cargar_modelo_y_datos():
     """Carga el modelo entrenado y los datos necesarios"""
     global modelo, ratings, movies, user_to_index, movie_to_index, user_embeddings, movie_embeddings
@@ -34,12 +35,12 @@ def cargar_modelo_y_datos():
         print("✓ Modelo recompilado")
         
         # Cargar datos
-        ratings = pd.read_csv('ml-models/ratings.csv')
-        movies = pd.read_csv('ml-models/movies.csv')
+        ratings = pd.read_csv('attached-files/ratings.csv')
+        movies = pd.read_csv('attached-files/movies.csv')
         print("✓ CSVs cargados")
         
         # Cargar mapeos
-        with open('ml-models/mapeos_recomendacion.pkl', 'rb') as f:
+        with open('attached-files/mapeos_recomendacion.pkl', 'rb') as f:
             mapeos = pickle.load(f)
             user_to_index = mapeos['user_to_index']
             movie_to_index = mapeos['movie_to_index']
@@ -274,9 +275,7 @@ def generar_recomendaciones(embedding_usuario, n_recomendaciones=10):
        
    except Exception as e:
        print(f"💥 Error en generar_recomendaciones: {e}")
-     
-     
-     
+        
 def crear_modelo_embeddings_directos():
     """Crea un modelo que acepta embeddings directos"""
     from tensorflow.keras.layers import Input, Dense, Concatenate, Dropout
@@ -304,6 +303,8 @@ def crear_modelo_embeddings_directos():
     modelo_embeddings.layers[7].set_weights(modelo.layers[11].get_weights()) # output (índice 7 en nuevo modelo)
     
     return modelo_embeddings
+
+
 
 
 @recomendador_peliculas_bp.route('/')
@@ -385,6 +386,8 @@ def procesar_onboarding():
         return render_template('onboarding.html', 
                              peliculas=obtener_peliculas_onboarding(),
                              error=f"Error al procesar: {str(e)}")
+
+
 
 
 
