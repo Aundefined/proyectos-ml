@@ -165,100 +165,122 @@ def obtener_peliculas_onboarding(generos_seleccionados):
         traceback.print_exc()
         return []
 
-def calcular_correlacion(user_id, ratings_onboarding):
-    """Calcula correlación entre un usuario del dataset y el usuario nuevo"""
-    try:
-        # Obtener ratings del usuario existente
-        user_ratings = ratings[ratings['userId'] == user_id]
-        
-        # Encontrar películas en común
-        peliculas_comunes = set(user_ratings['movieId']).intersection(set(ratings_onboarding.keys()))
-        
-        # Si hay menos de 3 películas en común, retornar 0
-        if len(peliculas_comunes) < 3:
-            return 0.0
-        
-        # Extraer ratings para películas comunes
-        ratings_usuario_existente = []
-        ratings_usuario_nuevo = []
-        
-        for movie_id in peliculas_comunes:
-            # Rating del usuario existente
-            rating_existente = user_ratings[user_ratings['movieId'] == movie_id]['rating'].iloc[0]
-            ratings_usuario_existente.append(rating_existente)
-            
-            # Rating del usuario nuevo
-            ratings_usuario_nuevo.append(ratings_onboarding[movie_id])
-        
-        # Verificar que hay variación en los datos
-        if len(set(ratings_usuario_existente)) <= 1 or len(set(ratings_usuario_nuevo)) <= 1:
-            return 0.0  # No hay variación, correlación no definida
-        
-        # Calcular correlación de Pearson
-        if len(ratings_usuario_existente) < 2:
-            return 0.0
-        
-        correlacion, _ = pearsonr(ratings_usuario_existente, ratings_usuario_nuevo)
-        
-        # Manejar NaN y valores inválidos
-        if np.isnan(correlacion) or np.isinf(correlacion):
-            return 0.0
-        
-        return max(0.0, correlacion)  # Solo correlaciones positivas
-        
-    except Exception as e:
-        print(f"Error en calcular_correlacion para usuario {user_id}: {e}")
-        return 0.0
-
 def crear_embedding_usuario_nuevo(ratings_onboarding):
-    """Crea un embedding para un usuario nuevo basado en usuarios similares"""
+    """Crea un embedding real para un usuario nuevo usando optimización con el modelo entrenado"""
     try:
-        print(f"🔍 user_embeddings shape: {user_embeddings.shape if user_embeddings is not None else 'None'}")
-        print(f"🔍 user_to_index keys: {len(user_to_index) if user_to_index else 0}")
+        import tensorflow as tf
+        from tensorflow.keras.optimizers import Adam
         
-        if user_embeddings is None:
-            raise Exception("user_embeddings es None")
+        print(f"🧠 Creando embedding real para usuario nuevo con {len(ratings_onboarding)} ratings...")
         
-        usuarios_similares = []
-        correlaciones = []
+        if modelo is None or movie_embeddings is None:
+            raise Exception("Modelo o embeddings no disponibles")
         
-        print(f"🔍 Buscando usuarios similares para {len(ratings_onboarding)} ratings...")
+        # Preparar datos de entrenamiento
+        movie_ids = []
+        user_ratings = []
+        movie_embedding_vectors = []
         
-        # Buscar usuarios similares
-        for user_id in range(1, min(100, 611)):  # Probar solo los primeros 100 usuarios
-            correlacion = calcular_correlacion(user_id, ratings_onboarding)
-            if correlacion > 0.2:
-                usuarios_similares.append(user_id)
-                correlaciones.append(correlacion)
+        for movie_id, rating in ratings_onboarding.items():
+            if movie_id in movie_to_index:
+                movie_idx = movie_to_index[movie_id]
+                if movie_idx < len(movie_embeddings):
+                    movie_ids.append(movie_id)
+                    user_ratings.append(rating)
+                    movie_embedding_vectors.append(movie_embeddings[movie_idx])
         
-        print(f"🔍 Usuarios similares encontrados: {len(usuarios_similares)}")
-        
-        if not usuarios_similares:
-            print("⚠️ No se encontraron usuarios similares, usando promedio general")
+        if len(movie_ids) < 3:
+            print("⚠️ Muy pocas películas válidas, usando embedding promedio")
             return np.mean(user_embeddings, axis=0)
         
-        # Crear embedding promediando usuarios similares
-        embeddings_similares = []
-        for user_id in usuarios_similares[:10]:  # Solo los primeros 10
-            if user_id in user_to_index:
-                user_idx = user_to_index[user_id]
-                if user_idx < len(user_embeddings):  # Verificar bounds
-                    embeddings_similares.append(user_embeddings[user_idx])
+        print(f"📊 Optimizando con {len(movie_ids)} películas válidas")
         
-        if not embeddings_similares:
-            print("⚠️ No se pudieron obtener embeddings, usando promedio general")
-            return np.mean(user_embeddings, axis=0)
+        # Convertir a arrays de TensorFlow
+        movie_embeddings_tensor = tf.constant(movie_embedding_vectors, dtype=tf.float32)
+        target_ratings = tf.constant(user_ratings, dtype=tf.float32)
         
-        # Promedio simple
-        embedding_nuevo = np.mean(embeddings_similares, axis=0)
-        print(f"✅ Embedding creado con {len(embeddings_similares)} usuarios")
+        # Crear variable de embedding de usuario a optimizar
+        # Inicializar con promedio de embeddings existentes + ruido pequeño
+        initial_embedding = np.mean(user_embeddings, axis=0) + np.random.normal(0, 0.01, 50)
+        user_embedding_var = tf.Variable(initial_embedding, dtype=tf.float32, trainable=True)
         
-        return embedding_nuevo
+        # Crear modelo de predicción directo
+        def predict_ratings(user_emb, movie_embs):
+            """Predice ratings usando la misma arquitectura que el modelo original"""
+            # Expandir user embedding para hacer broadcast
+            user_emb_expanded = tf.expand_dims(user_emb, 0)  # (1, 50)
+            user_emb_repeated = tf.repeat(user_emb_expanded, tf.shape(movie_embs)[0], axis=0)  # (n_movies, 50)
+            
+            # Concatenar user y movie embeddings
+            concat_features = tf.concat([user_emb_repeated, movie_embs], axis=1)  # (n_movies, 100)
+            
+            # Aplicar capas densas del modelo original (copiamos la arquitectura)
+            # Dense layer 1: 100 -> 16
+            dense1_weights = modelo.layers[7].get_weights()[0]  # (100, 16)
+            dense1_bias = modelo.layers[7].get_weights()[1]     # (16,)
+            x = tf.nn.relu(tf.matmul(concat_features, dense1_weights) + dense1_bias)
+            
+            # Dropout simulation (sin dropout en inferencia)
+            
+            # Dense layer 2: 16 -> 16  
+            dense2_weights = modelo.layers[9].get_weights()[0]  # (16, 16)
+            dense2_bias = modelo.layers[9].get_weights()[1]     # (16,)
+            x = tf.nn.relu(tf.matmul(x, dense2_weights) + dense2_bias)
+            
+            # Output layer: 16 -> 1
+            output_weights = modelo.layers[11].get_weights()[0]  # (16, 1)
+            output_bias = modelo.layers[11].get_weights()[1]     # (1,)
+            predictions = tf.matmul(x, output_weights) + output_bias
+            
+            return tf.squeeze(predictions)  # (n_movies,)
+        
+        # Función de pérdida
+        def loss_function():
+            predictions = predict_ratings(user_embedding_var, movie_embeddings_tensor)
+            mse_loss = tf.reduce_mean(tf.square(predictions - target_ratings))
+            
+            # Regularización L2 para evitar embeddings extremos
+            l2_reg = 0.01 * tf.reduce_sum(tf.square(user_embedding_var))
+            
+            return mse_loss + l2_reg
+        
+        # Optimizador
+        optimizer = Adam(learning_rate=0.01)
+        
+        # Entrenamiento
+        print("🔧 Optimizando embedding...")
+        for epoch in range(200):
+            with tf.GradientTape() as tape:
+                loss = loss_function()
+            
+            # Calcular gradientes y aplicar
+            gradients = tape.gradient(loss, [user_embedding_var])
+            optimizer.apply_gradients(zip(gradients, [user_embedding_var]))
+            
+            # Log progreso cada 50 epochs
+            if epoch % 50 == 0:
+                predictions = predict_ratings(user_embedding_var, movie_embeddings_tensor)
+                mae = tf.reduce_mean(tf.abs(predictions - target_ratings))
+                print(f"  Epoch {epoch}: Loss={loss:.4f}, MAE={mae:.4f}")
+        
+        # Resultado final
+        final_embedding = user_embedding_var.numpy()
+        final_predictions = predict_ratings(user_embedding_var, movie_embeddings_tensor).numpy()
+        final_mae = np.mean(np.abs(final_predictions - user_ratings))
+        
+        print(f"✅ Embedding optimizado completado!")
+        print(f"📊 MAE final: {final_mae:.4f}")
+        print(f"📊 Ratings reales: {user_ratings}")
+        print(f"📊 Predicciones: {final_predictions}")
+        
+        return final_embedding
         
     except Exception as e:
         print(f"💥 Error en crear_embedding_usuario_nuevo: {e}")
-        # Fallback: usar embedding del usuario 0
-        return user_embeddings[0] if user_embeddings is not None else np.zeros(50)
+        import traceback
+        traceback.print_exc()
+        # Fallback: usar embedding promedio
+        return np.mean(user_embeddings, axis=0) if user_embeddings is not None else np.zeros(50)
 
 def generar_recomendaciones(embedding_usuario, n_recomendaciones=10):
    """Genera recomendaciones usando el modelo entrenado con predicciones reales"""

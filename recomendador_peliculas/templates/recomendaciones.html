@@ -74,7 +74,7 @@
 
 <!-- Botones de acción -->
 <div class="text-center mt-4 fall-element fall-delay-4">
-    <a href="{{ url_for('recomendador_peliculas.onboarding') }}" class="btn btn-outline-light btn-lg me-3">
+    <a href="{{ url_for('recomendador_peliculas.seleccionar_generos') }}" class="btn btn-outline-light btn-lg me-3">
         <i class="bi bi-arrow-repeat me-2"></i>Volver a Calificar
     </a>
     <a href="{{ url_for('recomendador_peliculas.index') }}" class="btn btn-secondary btn-lg">
@@ -88,10 +88,11 @@
         <div class="card-body">
             <h6><i class="bi bi-info-circle me-2"></i>¿Cómo se generaron estas recomendaciones?</h6>
             <p class="card-text small mb-0">
-                1. Analizamos tus calificaciones y encontramos usuarios similares en nuestro dataset<br>
-                2. Creamos un "perfil de gustos" (embedding) promediando esos usuarios similares<br>
-                3. Nuestro modelo neuronal predijo qué rating le darías a cada película<br>
-                4. Te mostramos las películas con mayor rating predicho que aún no has visto
+                1. Tomamos tus calificaciones y las películas que puntuaste<br>
+                2. Creamos un embedding personalizado usando optimización con gradient descent<br>
+                3. El embedding se entrena para predecir exactamente los ratings que diste<br>
+                4. Usamos este embedding optimizado para predecir ratings de películas no vistas<br>
+                5. Te mostramos las películas con mayor rating predicho
             </p>
         </div>
     </div>
