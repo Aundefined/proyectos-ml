@@ -59,13 +59,46 @@
                     </div>
                 </div>
 
-                <a href="{{ url_for('recomendador_peliculas.onboarding') }}" class="btn btn-primary btn-lg px-5">
+                <!-- Proceso paso a paso -->
+                <div class="mb-4">
+                    <h5 class="text-primary mb-3">
+                        <i class="bi bi-list-ol me-2"></i>¿Cómo funciona?
+                    </h5>
+                    <div class="row text-start">
+                        <div class="col-md-6 mb-2">
+                            <small class="text-muted">
+                                <i class="bi bi-1-circle text-primary me-2"></i>
+                                <strong>Selecciona géneros</strong> que te interesan
+                            </small>
+                        </div>
+                        <div class="col-md-6 mb-2">
+                            <small class="text-muted">
+                                <i class="bi bi-2-circle text-primary me-2"></i>
+                                <strong>Califica 5+ películas</strong> de esos géneros
+                            </small>
+                        </div>
+                        <div class="col-md-6 mb-2">
+                            <small class="text-muted">
+                                <i class="bi bi-3-circle text-primary me-2"></i>
+                                <strong>La IA analiza</strong> tus gustos
+                            </small>
+                        </div>
+                        <div class="col-md-6 mb-2">
+                            <small class="text-muted">
+                                <i class="bi bi-4-circle text-primary me-2"></i>
+                                <strong>Recibe recomendaciones</strong> personalizadas
+                            </small>
+                        </div>
+                    </div>
+                </div>
+
+                <a href="{{ url_for('recomendador_peliculas.seleccionar_generos') }}" class="btn btn-primary btn-lg px-5">
                     <i class="bi bi-play-circle me-2"></i>Empezar Recomendaciones
                 </a>
                 
                 <div class="mt-3">
                     <small class="text-muted">
-                        <i class="bi bi-clock me-1"></i>Solo toma 2 minutos • Califica 5-15 películas
+                        <i class="bi bi-clock me-1"></i>Solo toma 2 minutos • Elige géneros y califica películas
                     </small>
                 </div>
             </div>

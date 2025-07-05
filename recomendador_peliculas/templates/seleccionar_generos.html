@@ -1,0 +1,141 @@
+{% extends "layout.html" %}
+
+{% block title %}Selecciona Géneros - Recomendador{% endblock %}
+
+{% block head_styles %}
+<link rel="stylesheet" href="{{ url_for('recomendador_peliculas.static', filename='css/recomendador.css') }}">
+<style>
+.genre-selector {
+    max-height: 300px;
+    overflow-y: auto;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    padding: 15px;
+    background-color: #f8f9fa;
+}
+
+.genre-option {
+    margin-bottom: 10px;
+}
+
+.genre-option label {
+    cursor: pointer;
+    padding: 8px 12px;
+    border-radius: 6px;
+    transition: background-color 0.2s;
+    display: block;
+    margin: 0;
+}
+
+.genre-option label:hover {
+    background-color: #e9ecef;
+}
+
+.genre-option input[type="checkbox"]:checked + label {
+    background-color: #007bff;
+    color: white;
+}
+
+.selected-count {
+    background-color: #28a745;
+    color: white;
+    padding: 5px 10px;
+    border-radius: 15px;
+    font-size: 0.9rem;
+    margin-left: 10px;
+}
+</style>
+{% endblock %}
+
+{% block content %}
+<h2 class="text-white fall-element fall-delay-1">
+    <i class="bi bi-collection-play me-2"></i>Selecciona tus Géneros Favoritos
+</h2>
+<p class="lead text-white fall-element fall-delay-1">
+    Elige uno o varios géneros para que podamos mostrarte películas que realmente te interesen
+</p>
+
+{% if error %}
+<div class="alert alert-danger alert-dismissible fade show fall-element fall-delay-1" role="alert">
+    <strong>Error:</strong> {{ error }}
+    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+</div>
+{% endif %}
+
+<div class="row justify-content-center">
+    <div class="col-lg-8 col-md-10">
+        <div class="card shadow-lg fall-element fall-delay-2">
+            <div class="card-body p-4">
+                <form method="POST" action="{{ url_for('recomendador_peliculas.onboarding') }}" id="genreForm">
+                    
+                    <!-- Header con contador -->
+                    <div class="d-flex justify-content-between align-items-center mb-3">
+                        <h5 class="card-title mb-0">
+                            <i class="bi bi-tags me-2"></i>Géneros Disponibles
+                        </h5>
+                        <span class="selected-count" id="selectedCount">0 seleccionados</span>
+                    </div>
+
+                    <!-- Instrucciones -->
+                    <p class="text-muted mb-3">
+                        <i class="bi bi-info-circle me-1"></i>
+                        Selecciona al menos 3 géneros. Te mostraremos hasta 5 películas aleatorias de cada género elegido.
+                    </p>
+
+                    <!-- Selector de géneros -->
+                    <div class="genre-selector mb-4">
+                        {% for genero in generos %}
+                        <div class="genre-option">
+                            <input type="checkbox" 
+                                   name="generos" 
+                                   value="{{ genero }}" 
+                                   id="genre_{{ loop.index }}"
+                                   class="genre-checkbox"
+                                   style="display: none;">
+                            <label for="genre_{{ loop.index }}">
+                                <i class="bi bi-square me-2"></i>{{ genero }}
+                            </label>
+                        </div>
+                        {% endfor %}
+                    </div>
+
+                    <!-- Botones de acción -->
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <button type="button" class="btn btn-outline-secondary me-2" id="selectAllBtn">
+                                <i class="bi bi-check-all me-1"></i>Seleccionar Todo
+                            </button>
+                            <button type="button" class="btn btn-outline-secondary" id="clearAllBtn">
+                                <i class="bi bi-x-circle me-1"></i>Limpiar Todo
+                            </button>
+                        </div>
+                        
+                        <button type="submit" class="btn btn-primary btn-lg px-4" id="continueBtn" disabled>
+                            <i class="bi bi-arrow-right me-2"></i>Continuar
+                        </button>
+                    </div>
+
+                    <!-- Info adicional -->
+                    <div class="mt-3">
+                        <small class="text-muted">
+                            <i class="bi bi-lightbulb me-1"></i>
+                            <span id="infoText">Selecciona al menos 3 géneros para continuar</span>
+                        </small>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Botón para volver -->
+<div class="text-center mt-4 fall-element fall-delay-3">
+    <a href="{{ url_for('recomendador_peliculas.index') }}" class="btn btn-outline-light">
+        <i class="bi bi-arrow-left me-2"></i>Volver al Inicio
+    </a>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script src="{{ url_for('recomendador_peliculas.static', filename='js/seleccionar_generos.js') }}"></script>
+{% endblock %}

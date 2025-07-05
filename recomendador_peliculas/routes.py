@@ -83,41 +83,70 @@ def cargar_modelo_y_datos():
         import traceback
         traceback.print_exc()
         return False
-    
-def obtener_peliculas_onboarding():
-    """Obtiene las películas más populares para el onboarding"""
+
+def obtener_generos_disponibles():
+    """Obtiene todos los géneros únicos disponibles en el dataset"""
+    try:
+        if movies is None:
+            raise Exception("Datos de películas no disponibles")
+        
+        # Obtener todos los géneros únicos (cada fila es un género completo)
+        generos_unicos = movies['genres'].unique()
+        
+        # Filtrar géneros vacíos o nulos si los hay
+        generos_unicos = [g for g in generos_unicos if pd.notna(g) and g.strip()]
+        
+        # Ordenar alfabéticamente
+        generos_unicos.sort()
+        
+        print(f"📊 Géneros únicos encontrados: {len(generos_unicos)}")
+        return generos_unicos
+        
+    except Exception as e:
+        print(f"💥 Error en obtener_generos_disponibles: {e}")
+        return []
+
+def obtener_peliculas_onboarding(generos_seleccionados):
+    """Obtiene películas aleatorias basadas en los géneros seleccionados"""
     try:
         # Verificar que tenemos datos
         if ratings is None or movies is None:
             raise Exception("Datos no disponibles")
         
-        print(f"📊 Ratings shape: {ratings.shape}")
-        print(f"📊 Movies shape: {movies.shape}")
+        if not generos_seleccionados:
+            raise Exception("No se seleccionaron géneros")
         
-        # Películas más populares (con más ratings)
-        popular_movies = (ratings.groupby('movieId')
-                         .size()
-                         .sort_values(ascending=False)
-                         .head(30)
-                         .index.tolist())
+        print(f"📊 Géneros seleccionados: {generos_seleccionados}")
         
-        print(f"📊 Popular movies: {len(popular_movies)}")
-        
-        # Unir con datos de películas para obtener títulos
-        peliculas_onboarding = movies[movies['movieId'].isin(popular_movies)]
-        
-        print(f"📊 Películas encontradas: {len(peliculas_onboarding)}")
-        
-        # Seleccionar las primeras 15 (simplificado)
         peliculas_seleccionadas = []
-        for _, movie in peliculas_onboarding.head(15).iterrows():
-            peliculas_seleccionadas.append({
-                'movieId': int(movie['movieId']),
-                'title': movie['title'],
-                'genres': movie['genres']
-            })
         
-        print(f"📊 Películas seleccionadas: {len(peliculas_seleccionadas)}")
+        for genero in generos_seleccionados:
+            print(f"🎬 Procesando género: {genero}")
+            
+            # Obtener películas de este género específico
+            peliculas_del_genero = movies[movies['genres'] == genero].copy()
+            
+            print(f"📊 Películas encontradas para {genero}: {len(peliculas_del_genero)}")
+            
+            if len(peliculas_del_genero) == 0:
+                print(f"⚠️ No se encontraron películas para el género {genero}")
+                continue
+            
+            # Tomar máximo 5 películas aleatorias (o todas si hay menos de 5)
+            n_peliculas = min(5, len(peliculas_del_genero))
+            peliculas_aleatorias = peliculas_del_genero.sample(n=n_peliculas, random_state=None)
+            
+            # Agregar a la lista de seleccionadas
+            for _, movie in peliculas_aleatorias.iterrows():
+                peliculas_seleccionadas.append({
+                    'movieId': int(movie['movieId']),
+                    'title': movie['title'],
+                    'genres': movie['genres']
+                })
+            
+            print(f"✅ Agregadas {n_peliculas} películas de {genero}")
+        
+        print(f"📊 Total películas seleccionadas: {len(peliculas_seleccionadas)}")
         return peliculas_seleccionadas
         
     except Exception as e:
@@ -305,19 +334,18 @@ def crear_modelo_embeddings_directos():
     return modelo_embeddings
 
 
-
-
 @recomendador_peliculas_bp.route('/')
 def index():
     """Página principal del recomendador"""
     return render_template('recomendador_peliculas.html')
 
 
-@recomendador_peliculas_bp.route('/onboarding')
-def onboarding():
+@recomendador_peliculas_bp.route('/seleccionar-generos')
+def seleccionar_generos():
+    """Página para seleccionar géneros"""
     global modelo, ratings, movies
     
-    # LLAMAR AQUÍ DIRECTAMENTE
+    # Cargar modelo si no está cargado
     if modelo is None:
         print("Modelo es None, cargando...")
         cargar_modelo_y_datos()
@@ -325,8 +353,46 @@ def onboarding():
     if not modelo:
         return "<h1>Error: No se pudo cargar el modelo</h1>"
     
-    peliculas = obtener_peliculas_onboarding()
-    return render_template('onboarding.html', peliculas=peliculas)
+    # Obtener géneros disponibles
+    generos = obtener_generos_disponibles()
+    return render_template('seleccionar_generos.html', generos=generos)
+
+
+@recomendador_peliculas_bp.route('/onboarding', methods=['POST'])
+def onboarding():
+    """Página de onboarding con películas basadas en géneros seleccionados"""
+    try:
+        # Obtener géneros seleccionados del formulario
+        generos_seleccionados = request.form.getlist('generos')
+        
+        if not generos_seleccionados or len(generos_seleccionados) < 3:
+            # Redirigir de vuelta a selección de géneros con error
+            generos = obtener_generos_disponibles()
+            return render_template('seleccionar_generos.html', 
+                                 generos=generos,
+                                 error="Por favor, selecciona al menos 3 géneros para garantizar suficientes películas")
+        
+        print(f"📝 Géneros seleccionados: {generos_seleccionados}")
+        
+        # Obtener películas basadas en géneros
+        peliculas = obtener_peliculas_onboarding(generos_seleccionados)
+        
+        if not peliculas:
+            generos = obtener_generos_disponibles()
+            return render_template('seleccionar_generos.html', 
+                                 generos=generos,
+                                 error="No se encontraron películas para los géneros seleccionados")
+        
+        return render_template('onboarding.html', 
+                             peliculas=peliculas,
+                             generos_seleccionados=generos_seleccionados)
+        
+    except Exception as e:
+        print(f"💥 Error en onboarding: {e}")
+        generos = obtener_generos_disponibles()
+        return render_template('seleccionar_generos.html', 
+                             generos=generos,
+                             error=f"Error al cargar películas: {str(e)}")
 
 
 @recomendador_peliculas_bp.route('/procesar_onboarding', methods=['POST'])
@@ -346,8 +412,16 @@ def procesar_onboarding():
         
         # Validar que se calificaron al menos 5 películas
         if len(ratings_onboarding) < 5:
+            # Obtener géneros seleccionados para poder volver a mostrar las películas
+            generos_seleccionados = request.form.getlist('generos_seleccionados')
+            if generos_seleccionados:
+                peliculas = obtener_peliculas_onboarding(generos_seleccionados)
+            else:
+                peliculas = []
+            
             return render_template('onboarding.html', 
-                                 peliculas=obtener_peliculas_onboarding(),
+                                 peliculas=peliculas,
+                                 generos_seleccionados=generos_seleccionados,
                                  error="Por favor, califica al menos 5 películas")
         
         print("✅ Validación pasada")
@@ -371,8 +445,11 @@ def procesar_onboarding():
         print(f"✅ Recomendaciones filtradas: {len(recomendaciones_filtradas)}")
         
         if not recomendaciones_filtradas:
+            generos_seleccionados = request.form.getlist('generos_seleccionados')
+            peliculas = obtener_peliculas_onboarding(generos_seleccionados)
             return render_template('onboarding.html', 
-                                 peliculas=obtener_peliculas_onboarding(),
+                                 peliculas=peliculas,
+                                 generos_seleccionados=generos_seleccionados,
                                  error="No se pudieron generar recomendaciones. Intenta calificar películas diferentes.")
         
         return render_template('recomendaciones.html', 
@@ -384,11 +461,8 @@ def procesar_onboarding():
         import traceback
         traceback.print_exc()
         return render_template('onboarding.html', 
-                             peliculas=obtener_peliculas_onboarding(),
+                             peliculas=[],
                              error=f"Error al procesar: {str(e)}")
-
-
-
 
 
 # Al final del archivo routes.py
