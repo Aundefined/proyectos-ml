@@ -1,4 +1,4 @@
-from flask import Blueprint, render_template, request, jsonify
+from flask import Blueprint, render_template, request, jsonify, session, redirect, url_for
 import pandas as pd
 import numpy as np
 from scipy.stats import pearsonr
@@ -500,6 +500,90 @@ def procesar_onboarding():
         return render_template('onboarding.html', 
                              peliculas=[],
                              error=f"Error al procesar: {str(e)}")
+
+
+@recomendador_peliculas_bp.route('/refrescar_peliculas', methods=['POST'])
+def refrescar_peliculas():
+    """Trae nuevas películas manteniendo las ya calificadas"""
+    try:
+        # Obtener géneros y películas ya mostradas
+        generos_seleccionados = request.form.getlist('generos_seleccionados')
+        peliculas_mostradas = request.form.getlist('peliculas_mostradas')
+        
+        # Obtener calificaciones existentes
+        ratings_existentes = {}
+        for key, value in request.form.items():
+            if key.startswith('rating_') and value:
+                movie_id = int(key.replace('rating_', ''))
+                ratings_existentes[movie_id] = float(value)
+        
+        print(f"🔄 Refrescando con {len(ratings_existentes)} películas ya calificadas")
+        print(f"🔄 Excluyendo {len(peliculas_mostradas)} películas ya mostradas")
+        
+        # Obtener nuevas películas excluyendo las ya mostradas
+        peliculas_nuevas = obtener_peliculas_onboarding_refresh(
+            generos_seleccionados, 
+            peliculas_mostradas,
+            list(ratings_existentes.keys())
+        )
+        
+        # Renderizar directamente sin usar sesión
+        return render_template('onboarding.html', 
+                             peliculas=peliculas_nuevas,
+                             generos_seleccionados=generos_seleccionados,
+                             ratings_existentes=ratings_existentes)
+        
+    except Exception as e:
+        print(f"💥 Error en refrescar_peliculas: {e}")
+        import traceback
+        traceback.print_exc()
+        return jsonify({'error': str(e)}), 500
+
+
+def obtener_peliculas_onboarding_refresh(generos_seleccionados, peliculas_excluir, peliculas_calificadas):
+    """Obtiene nuevas películas excluyendo las ya mostradas"""
+    try:
+        peliculas_excluir_ids = [int(id) for id in peliculas_excluir if id]
+        peliculas_seleccionadas = []
+        
+        # Primero, agregar películas ya calificadas
+        for movie_id in peliculas_calificadas:
+            pelicula_info = movies[movies['movieId'] == movie_id]
+            if len(pelicula_info) > 0:
+                movie_row = pelicula_info.iloc[0]
+                peliculas_seleccionadas.append({
+                    'movieId': int(movie_row['movieId']),
+                    'title': movie_row['title'],
+                    'genres': movie_row['genres']
+                })
+        
+        # Luego, completar con nuevas películas
+        for genero in generos_seleccionados:
+            patron = f'(^|\\|){genero}(\\||$)'
+            peliculas_del_genero = movies[movies['genres'].str.contains(patron, na=False, regex=True)].copy()
+            
+            # Excluir películas ya mostradas
+            peliculas_del_genero = peliculas_del_genero[~peliculas_del_genero['movieId'].isin(peliculas_excluir_ids)]
+            
+            if len(peliculas_del_genero) > 0:
+                n_peliculas = min(10, len(peliculas_del_genero))
+                peliculas_aleatorias = peliculas_del_genero.sample(n=n_peliculas, random_state=None)
+                
+                for _, movie in peliculas_aleatorias.iterrows():
+                    peliculas_seleccionadas.append({
+                        'movieId': int(movie['movieId']),
+                        'title': movie['title'],
+                        'genres': movie['genres']
+                    })
+        
+        print(f"✅ Nuevas películas obtenidas: {len(peliculas_seleccionadas)}")
+        return peliculas_seleccionadas
+        
+    except Exception as e:
+        print(f"💥 Error en obtener_peliculas_onboarding_refresh: {e}")
+        return []
+
+
 
 
 # Al final del archivo routes.py

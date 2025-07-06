@@ -8,17 +8,16 @@
 
 {% block content %}
 <h2 class="text-white fall-element fall-delay-1">Cuéntanos qué te gusta</h2>
-<p class="lead text-white fall-element fall-delay-1">Califica al menos 5 películas para que podamos recomendarte otras
-    similares</p>
+<p class="lead text-white fall-element fall-delay-1">Califica al menos 5 películas para que podamos recomendarte otras similares</p>
 
 <!-- Mostrar géneros seleccionados -->
 {% if generos_seleccionados %}
 <div class="mb-3 fall-element fall-delay-1">
     <div class="alert alert-info">
         <i class="bi bi-tags me-2"></i>
-        <strong>Géneros seleccionados:</strong>
+        <strong>Géneros seleccionados:</strong> 
         {% for genero in generos_seleccionados %}
-        <span class="badge bg-primary me-1">{{ genero }}</span>
+            <span class="badge bg-primary me-1">{{ genero }}</span>
         {% endfor %}
         <a href="{{ url_for('recomendador_peliculas.seleccionar_generos') }}" class="btn btn-outline-info btn-sm ms-2">
             <i class="bi bi-pencil"></i> Cambiar
@@ -44,13 +43,28 @@
     </small>
 </div>
 
+<!-- Botón de refrescar -->
+<div class="text-center mb-3 fall-element fall-delay-2">
+    <button type="button" class="btn btn-outline-primary" id="refreshBtn">
+        <i class="bi bi-arrow-clockwise me-2"></i>Refrescar Películas
+    </button>
+    <small class="d-block text-white-50 mt-1">
+        Se mantendrán tus calificaciones actuales
+    </small>
+</div>
+
 <form method="POST" action="{{ url_for('recomendador_peliculas.procesar_onboarding') }}" id="onboardingForm">
-
-    <!-- En lugar de múltiples inputs hidden -->
-    {% if generos_seleccionados %}
-    <input type="hidden" name="generos_seleccionados" value="{{ generos_seleccionados|join(',') }}">
-    {% endif %}
-
+    
+    <!-- Campos ocultos para mantener géneros seleccionados -->
+    {% for genero in generos_seleccionados %}
+    <input type="hidden" name="generos_seleccionados" value="{{ genero }}">
+    {% endfor %}
+    
+    <!-- Campos ocultos para tracking de películas mostradas -->
+    {% for pelicula in peliculas %}
+    <input type="hidden" name="peliculas_mostradas" value="{{ pelicula.movieId }}" class="pelicula-mostrada">
+    {% endfor %}
+    
     <div class="row" id="moviesContainer">
         {% for pelicula in peliculas %}
         <div class="col-lg-4 col-md-6 mb-4 fall-element fall-delay-{{ loop.index % 3 + 3 }}">
@@ -60,7 +74,7 @@
                     <p class="card-text">
                         <small class="text-muted">{{ pelicula.genres }}</small>
                     </p>
-
+                    
                     <!-- Rating stars -->
                     <div class="rating-container" data-movie-id="{{ pelicula.movieId }}">
                         {% for i in range(1, 6) %}
@@ -70,9 +84,9 @@
                             <small class="text-muted">Click en las estrellas</small>
                         </div>
                     </div>
-
+                    
                     <!-- Hidden input -->
-                    <input type="hidden" name="rating_{{ pelicula.movieId }}" class="rating-input" value="">
+                    <input type="hidden" name="rating_{{ pelicula.movieId }}" class="rating-input" value="{% if ratings_existentes and pelicula.movieId in ratings_existentes %}{{ ratings_existentes[pelicula.movieId] }}{% endif %}">
                 </div>
             </div>
         </div>
@@ -88,7 +102,7 @@
         </div>
         {% endfor %}
     </div>
-
+    
     <div class="text-center mt-4 fall-element fall-delay-4">
         <button type="submit" class="btn btn-primary btn-lg px-5" id="submitBtn" disabled>
             <i class="bi bi-magic me-2"></i>Generar Recomendaciones
@@ -96,7 +110,7 @@
         <div class="mt-2">
             <small class="text-white-50">Necesitas calificar al menos 5 películas</small>
         </div>
-
+        
         <!-- Botón para volver a seleccionar géneros -->
         <div class="mt-3">
             <a href="{{ url_for('recomendador_peliculas.seleccionar_generos') }}" class="btn btn-outline-light">
@@ -119,11 +133,11 @@
                 <h5 class="mb-3">La IA está trabajando para ti</h5>
                 <p class="text-muted mb-4">
                     <i class="bi bi-cpu me-2"></i>
-                    Creando tu perfil personalizado
+                    Creando tu perfil personalizado con gradient descent...
                 </p>
                 <div class="progress mb-3" style="height: 8px;">
-                    <div class="progress-bar progress-bar-striped progress-bar-animated" role="progressbar"
-                        style="width: 100%"></div>
+                    <div class="progress-bar progress-bar-striped progress-bar-animated" 
+                         role="progressbar" style="width: 100%"></div>
                 </div>
                 <small class="text-muted">
                     Esto puede durar unos segundos. Por favor, no cierres esta ventana.
