@@ -292,81 +292,95 @@ def crear_embedding_usuario_nuevo(ratings_onboarding):
         return np.mean(user_embeddings, axis=0) if user_embeddings is not None else np.zeros(50)
 
 def generar_recomendaciones(embedding_usuario, generos_seleccionados, n_recomendaciones=10):
-   """Genera recomendaciones usando el modelo entrenado con predicciones reales"""
-   try:
-       print(f"🎯 Generando recomendaciones para géneros: {generos_seleccionados}...")
-       
-       
-       predicciones = []
-       peliculas_candidatas = []
-       
-       # Obtener 100 películas aleatorias de cada género seleccionado
-       for genero in generos_seleccionados:
-           print(f"🎬 Buscando películas de género: {genero}")
-           
-           # Buscar películas que contengan este género
-           patron = f'(^|\\|){genero}(\\||$)'
-           peliculas_del_genero = movies[movies['genres'].str.contains(patron, na=False, regex=True)].copy()
-           
-           print(f"📊 Películas encontradas para {genero}: {len(peliculas_del_genero)}")
-           
-           if len(peliculas_del_genero) > 0:
-               # Tomar máximo 100 películas aleatorias
-               n_peliculas = min(100, len(peliculas_del_genero))
-               peliculas_aleatorias = peliculas_del_genero.sample(n=n_peliculas, random_state=None)
-               peliculas_candidatas.append(peliculas_aleatorias)
-       
-       # Combinar todas las películas candidatas y eliminar duplicados
-       if peliculas_candidatas:
-           todas_candidatas = pd.concat(peliculas_candidatas, ignore_index=True)
-           todas_candidatas = todas_candidatas.drop_duplicates(subset=['movieId'], keep='first')
-           print(f"📊 Total películas candidatas (sin duplicados): {len(todas_candidatas)}")
-       else:
-           print("⚠️ No se encontraron películas candidatas")
-           return []
-       
-       # Generar predicciones para las películas candidatas
-       for _, movie_row in todas_candidatas.iterrows():
-           try:
-               movie_id = movie_row['movieId']
-               
-               if movie_id not in movie_to_index:
-                   continue
-                   
-               movie_idx = movie_to_index[movie_id]
-               if movie_idx >= len(movie_embeddings):
-                   continue
-               
-               movie_embedding = movie_embeddings[movie_idx]
-               
-               # Usar el modelo para predecir
-               prediction = modelo_embeddings.predict([
-                   embedding_usuario, 
-                   movie_embedding
-               ])[0][0]
-               
-               predicted_rating = max(1.0, min(5.0, prediction))
-               
-               predicciones.append({
-                   'movieId': int(movie_id),
-                   'predicted_rating': float(predicted_rating),
-                   'title': movie_row['title'],
-                   'genres': movie_row['genres']
-               })
-               
-           except Exception as e:
-               continue
-       
-       print(f"✅ Total predicciones calculadas: {len(predicciones)}")
-       
-       # Ordenar por rating predicho
-       predicciones.sort(key=lambda x: x['predicted_rating'], reverse=True)
-       
-       return predicciones[:n_recomendaciones]
-       
-   except Exception as e:
-       print(f"💥 Error en generar_recomendaciones: {e}")
-       return []
+    """Genera recomendaciones usando el modelo entrenado con predicciones reales"""
+    try:
+        print(f"🎯 Generando recomendaciones para géneros: {generos_seleccionados}...")
+        
+        predicciones = []
+        peliculas_candidatas = []
+        
+        # Obtener 100 películas aleatorias de cada género seleccionado
+        for genero in generos_seleccionados:
+            print(f"🎬 Buscando películas de género: {genero}")
+            
+            # Buscar películas que contengan este género
+            patron = f'(^|\\|){genero}(\\||$)'
+            peliculas_del_genero = movies[movies['genres'].str.contains(patron, na=False, regex=True)].copy()
+            
+            print(f"📊 Películas encontradas para {genero}: {len(peliculas_del_genero)}")
+            
+            if len(peliculas_del_genero) > 0:
+                # Tomar máximo 100 películas aleatorias
+                n_peliculas = min(100, len(peliculas_del_genero))
+                peliculas_aleatorias = peliculas_del_genero.sample(n=n_peliculas, random_state=None)
+                peliculas_candidatas.append(peliculas_aleatorias)
+        
+        # Combinar todas las películas candidatas y eliminar duplicados
+        if peliculas_candidatas:
+            todas_candidatas = pd.concat(peliculas_candidatas, ignore_index=True)
+            todas_candidatas = todas_candidatas.drop_duplicates(subset=['movieId'], keep='first')
+            print(f"📊 Total películas candidatas (sin duplicados): {len(todas_candidatas)}")
+        else:
+            print("⚠️ No se encontraron películas candidatas")
+            return []
+        
+        # Debug: verificar shapes
+        print(f"🔍 embedding_usuario shape: {embedding_usuario.shape}")
+        print(f"🔍 modelo_embeddings disponible: {modelo_embeddings is not None}")
+        
+        # Generar predicciones para las películas candidatas
+        for i, (_, movie_row) in enumerate(todas_candidatas.iterrows()):
+            try:
+                movie_id = movie_row['movieId']
+                
+                if movie_id not in movie_to_index:
+                    continue
+                    
+                movie_idx = movie_to_index[movie_id]
+                if movie_idx >= len(movie_embeddings):
+                    continue
+                
+                movie_embedding = movie_embeddings[movie_idx]
+            
+                
+                # Usar el modelo embeddings cargado para predecir
+                prediction = modelo_embeddings.predict([
+                    embedding_usuario.reshape(1,-1), 
+                    movie_embedding.reshape(1,-1)   
+                ], verbose=0)[0][0]
+                
+                if i < 3:  # Debug para las primeras 3
+                    print(f"🔍 Prediction para movie {i}: {prediction}")
+                
+                predicted_rating = max(1.0, min(5.0, prediction))
+                
+                predicciones.append({
+                    'movieId': int(movie_id),
+                    'predicted_rating': float(predicted_rating),
+                    'title': movie_row['title'],
+                    'genres': movie_row['genres']
+                })
+                
+            except Exception as e:
+                print(f"💥 Error en predicción movie {movie_id}: {e}")
+                continue
+        
+        print(f"✅ Total predicciones calculadas: {len(predicciones)}")
+        
+        # Debug: mostrar variedad de predicciones
+        if predicciones:
+            ratings_unicos = set(p['predicted_rating'] for p in predicciones)
+            print(f"🔍 Ratings únicos generados: {len(ratings_unicos)}")
+            print(f"🔍 Rango de ratings: {min(p['predicted_rating'] for p in predicciones):.3f} - {max(p['predicted_rating'] for p in predicciones):.3f}")
+        
+        # Ordenar por rating predicho
+        predicciones.sort(key=lambda x: x['predicted_rating'], reverse=True)
+        
+        return predicciones[:n_recomendaciones]
+        
+    except Exception as e:
+        print(f"💥 Error en generar_recomendaciones: {e}")
+        return []
     
 
 
