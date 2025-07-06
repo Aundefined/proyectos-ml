@@ -291,15 +291,42 @@ def crear_embedding_usuario_nuevo(ratings_onboarding):
         # Fallback: usar embedding promedio
         return np.mean(user_embeddings, axis=0) if user_embeddings is not None else np.zeros(50)
 
-def generar_recomendaciones(embedding_usuario, n_recomendaciones=10):
+def generar_recomendaciones(embedding_usuario, generos_seleccionados, n_recomendaciones=10):
    """Genera recomendaciones usando el modelo entrenado con predicciones reales"""
    try:
-       print(f"🎯 Generando recomendaciones reales...")
+       print(f"🎯 Generando recomendaciones para géneros: {generos_seleccionados}...")
+       
        
        predicciones = []
-       peliculas_disponibles = movies.head(200)
+       peliculas_candidatas = []
        
-       for _, movie_row in peliculas_disponibles.iterrows():
+       # Obtener 100 películas aleatorias de cada género seleccionado
+       for genero in generos_seleccionados:
+           print(f"🎬 Buscando películas de género: {genero}")
+           
+           # Buscar películas que contengan este género
+           patron = f'(^|\\|){genero}(\\||$)'
+           peliculas_del_genero = movies[movies['genres'].str.contains(patron, na=False, regex=True)].copy()
+           
+           print(f"📊 Películas encontradas para {genero}: {len(peliculas_del_genero)}")
+           
+           if len(peliculas_del_genero) > 0:
+               # Tomar máximo 100 películas aleatorias
+               n_peliculas = min(100, len(peliculas_del_genero))
+               peliculas_aleatorias = peliculas_del_genero.sample(n=n_peliculas, random_state=None)
+               peliculas_candidatas.append(peliculas_aleatorias)
+       
+       # Combinar todas las películas candidatas y eliminar duplicados
+       if peliculas_candidatas:
+           todas_candidatas = pd.concat(peliculas_candidatas, ignore_index=True)
+           todas_candidatas = todas_candidatas.drop_duplicates(subset=['movieId'], keep='first')
+           print(f"📊 Total películas candidatas (sin duplicados): {len(todas_candidatas)}")
+       else:
+           print("⚠️ No se encontraron películas candidatas")
+           return []
+       
+       # Generar predicciones para las películas candidatas
+       for _, movie_row in todas_candidatas.iterrows():
            try:
                movie_id = movie_row['movieId']
                
@@ -328,12 +355,9 @@ def generar_recomendaciones(embedding_usuario, n_recomendaciones=10):
                })
                
            except Exception as e:
-               print(f"💥 Error predicción: {e}")
                continue
        
        print(f"✅ Total predicciones calculadas: {len(predicciones)}")
-       
-      
        
        # Ordenar por rating predicho
        predicciones.sort(key=lambda x: x['predicted_rating'], reverse=True)
@@ -342,6 +366,7 @@ def generar_recomendaciones(embedding_usuario, n_recomendaciones=10):
        
    except Exception as e:
        print(f"💥 Error en generar_recomendaciones: {e}")
+       return []
     
 
 
@@ -414,29 +439,16 @@ def procesar_onboarding():
         
         # Obtener ratings del formulario
         ratings_onboarding = {}
+        generos_str = request.form.get('generos_seleccionados', '')
+        generos_seleccionados = [g.strip() for g in generos_str.split(',') if g.strip()]
+        
         for key, value in request.form.items():
             if key.startswith('rating_') and value:
                 movie_id = int(key.replace('rating_', ''))
                 ratings_onboarding[movie_id] = float(value)
         
         print(f"📝 Ratings recibidos: {ratings_onboarding}")
-        
-        # Validar que se calificaron al menos 5 películas
-        if len(ratings_onboarding) < 5:
-            # Obtener géneros seleccionados para poder volver a mostrar las películas
-            generos_seleccionados = request.form.getlist('generos_seleccionados')
-            if generos_seleccionados:
-                peliculas = obtener_peliculas_onboarding(generos_seleccionados)
-            else:
-                peliculas = []
-            
-            return render_template('onboarding.html', 
-                                 peliculas=peliculas,
-                                 generos_seleccionados=generos_seleccionados,
-                                 error="Por favor, califica al menos 5 películas")
-        
-        print("✅ Validación pasada")
-        
+    
         # Crear embedding para usuario nuevo
         print("🧠 Creando embedding...")
         embedding_usuario = crear_embedding_usuario_nuevo(ratings_onboarding)
@@ -444,7 +456,7 @@ def procesar_onboarding():
         
         # Generar recomendaciones usando el modelo
         print("🎯 Generando recomendaciones...")
-        recomendaciones = generar_recomendaciones(embedding_usuario, 15)
+        recomendaciones = generar_recomendaciones(embedding_usuario,generos_seleccionados, 15)
         print(f"✅ Recomendaciones generadas: {len(recomendaciones)}")
         
         # Filtrar películas que ya calificó
