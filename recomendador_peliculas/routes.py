@@ -152,7 +152,7 @@ def obtener_peliculas_onboarding(generos_seleccionados):
                 continue
             
             # Tomar máximo 5 películas aleatorias (o todas si hay menos de 5)
-            n_peliculas = min(5, len(peliculas_del_genero))
+            n_peliculas = min(10, len(peliculas_del_genero))
             peliculas_aleatorias = peliculas_del_genero.sample(n=n_peliculas, random_state=None)
             
             # Agregar a la lista de seleccionadas
