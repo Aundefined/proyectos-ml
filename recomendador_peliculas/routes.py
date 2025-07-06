@@ -11,6 +11,7 @@ from . import recomendador_peliculas_bp
 
 # Variables globales para el modelo y datos
 modelo = None
+modelo_embeddings = None
 ratings = None
 movies = None
 user_to_index = None
@@ -21,7 +22,7 @@ movie_embeddings = None
 
 def cargar_modelo_y_datos():
     """Carga el modelo entrenado y los datos necesarios"""
-    global modelo, ratings, movies, user_to_index, movie_to_index, user_embeddings, movie_embeddings
+    global modelo, modelo_embeddings, ratings, movies, user_to_index, movie_to_index, user_embeddings, movie_embeddings
     
     try:
         print("🔄 Intentando cargar modelo...")
@@ -33,6 +34,14 @@ def cargar_modelo_y_datos():
         # Recompilar manualmente
         modelo.compile(optimizer='adam', loss='mse', metrics=['mae'])
         print("✓ Modelo recompilado")
+        
+          # Cargar modelo embeddings
+        modelo_embeddings = tf.keras.models.load_model('ml-models/modelo_embeddings.h5', compile=False)
+        print("✓ Modelo embeddings cargado sin compilar")
+        
+        # Recompilar manualmente
+        modelo_embeddings.compile(optimizer='adam', loss='mse', metrics=['mae'])
+        print("✓ Modelo embeddings recompilado")
         
         # Cargar datos
         ratings = pd.read_csv('attached-files/ratings.csv')
@@ -287,10 +296,6 @@ def generar_recomendaciones(embedding_usuario, n_recomendaciones=10):
    try:
        print(f"🎯 Generando recomendaciones reales...")
        
-       # Crear el modelo de embeddings directos (una sola vez)
-       modelo_embeddings = crear_modelo_embeddings_directos()
-
-       
        predicciones = []
        peliculas_disponibles = movies.head(200)
        
@@ -309,8 +314,8 @@ def generar_recomendaciones(embedding_usuario, n_recomendaciones=10):
                
                # Usar el modelo para predecir
                prediction = modelo_embeddings.predict([
-                   embedding_usuario.reshape(1,-1), 
-                   movie_embedding.reshape(1,-1)
+                   embedding_usuario, 
+                   movie_embedding
                ])[0][0]
                
                predicted_rating = max(1.0, min(5.0, prediction))
@@ -322,7 +327,8 @@ def generar_recomendaciones(embedding_usuario, n_recomendaciones=10):
                    'genres': movie_row['genres']
                })
                
-           except:
+           except Exception as e:
+               print(f"💥 Error predicción: {e}")
                continue
        
        print(f"✅ Total predicciones calculadas: {len(predicciones)}")
@@ -336,34 +342,7 @@ def generar_recomendaciones(embedding_usuario, n_recomendaciones=10):
        
    except Exception as e:
        print(f"💥 Error en generar_recomendaciones: {e}")
-        
-def crear_modelo_embeddings_directos():
-    """Crea un modelo que acepta embeddings directos"""
-    from tensorflow.keras.layers import Input, Dense, Concatenate, Dropout
-    from tensorflow.keras.models import Model
     
-    # Inputs directos de embeddings (no índices)
-    user_embedding_input = Input(shape=(50,), name='user_embedding')
-    movie_embedding_input = Input(shape=(50,), name='movie_embedding')
-    
-    # Concatenar (igual que tu modelo original)
-    concat = Concatenate()([user_embedding_input, movie_embedding_input])
-    
-    # Capas densas (copiar tu arquitectura)
-    dense1 = Dense(16, activation='relu')(concat)
-    dropout1 = Dropout(0.5)(dense1)
-    dense2 = Dense(16, activation='relu')(dropout1)
-    dropout2 = Dropout(0.5)(dense2)
-    output = Dense(1, activation='linear')(dropout2)
-    
-    modelo_embeddings = Model(inputs=[user_embedding_input, movie_embedding_input], outputs=output)
-    
-    # Copiar los pesos SOLO de las capas que tienen pesos
-    modelo_embeddings.layers[3].set_weights(modelo.layers[7].get_weights())  # dense1 (índice 3 en nuevo modelo)
-    modelo_embeddings.layers[5].set_weights(modelo.layers[9].get_weights())  # dense2 (índice 5 en nuevo modelo)
-    modelo_embeddings.layers[7].set_weights(modelo.layers[11].get_weights()) # output (índice 7 en nuevo modelo)
-    
-    return modelo_embeddings
 
 
 @recomendador_peliculas_bp.route('/')
