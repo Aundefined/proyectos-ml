@@ -29,6 +29,6 @@ keras
 #chatbot
 OpenAI
 fitz
-faiss
+faiss-cpu
 tiktoken
 python-dotenv
