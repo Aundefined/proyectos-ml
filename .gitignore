@@ -9,3 +9,4 @@ ENV/
 .venv
 env/
 .DS_Store
+.env

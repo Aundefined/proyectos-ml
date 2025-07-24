@@ -8,11 +8,13 @@
 
 {% block content %}
 <h2 class="text-white fall-element fall-delay-1">Chatbot App Pedidos</h2>
-<p class="lead text-white fall-element fall-delay-1">Asistente virtual para consultas sobre el Manual de Usuario del Sistema de gestión de pedidos de Logística Blaniza</p>
+<p class="lead text-white fall-element fall-delay-1">Asistente virtual para consultas sobre el Manual de Usuario del
+    Sistema de gestión de pedidos de Logística Blaniza</p>
 
 <div class="text-white-50 mb-4 fall-element fall-delay-1">
     <i class="bi bi-info-circle me-1"></i>
-    <small>Este chatbot solo puede responder preguntas relacionadas con el manual de usuario del sistema de pedidos</small>
+    <small>Este chatbot solo puede responder preguntas relacionadas con el manual de usuario del sistema de
+        pedidos</small>
 </div>
 
 <!-- Botones de información y descarga -->
@@ -20,8 +22,11 @@
     <button type="button" class="btn btn-secondary" data-bs-toggle="modal" data-bs-target="#infoModal">
         <i class="bi bi-question-circle"></i> ¿Cómo funciona?
     </button>
-    <a href="{{ url_for('chatbot_pedidos.static', filename='pedidos.pdf') }}" class="btn btn-success" 
-       download="manual_pedidos.pdf">
+    <button type="button" class="btn btn-warning" id="clearChatBtn">
+        <i class="bi bi-trash"></i> Limpiar chat
+    </button>
+    <a href="{{ url_for('chatbot_pedidos.static', filename='pedidos.pdf') }}" class="btn btn-success"
+        download="manual_pedidos.pdf">
         <i class="bi bi-download"></i> Descargar PDF
     </a>
 </div>
@@ -38,9 +43,11 @@
                     </div>
                     <div class="message-content">
                         <div class="message-text">
-                            ¡Hola! Soy tu asistente virtual para el Manual de Usuario del Sistema de gestión de pedidos de Logística Blaniza. 
+                            ¡Hola! Soy tu asistente virtual para el Manual de Usuario del Sistema de gestión de pedidos
+                            de Logística Blaniza.
                             <br><br>
-                            Puedes preguntarme sobre cualquier funcionalidad, proceso o procedimiento que aparezca en el manual. 
+                            Puedes preguntarme sobre cualquier funcionalidad, proceso o procedimiento que aparezca en el
+                            manual.
                             Por ejemplo:
                             <ul>
                                 <li>¿Cómo se inicia y se detiene una sesión de descarga de archivos?</li>
@@ -57,11 +64,8 @@
             <!-- Área de escritura -->
             <div class="chat-input-container">
                 <div class="chat-input-wrapper">
-                    <textarea 
-                        id="messageInput" 
-                        class="chat-input" 
-                        placeholder="Escribe tu pregunta sobre el manual de pedidos..."
-                        rows="1"></textarea>
+                    <textarea id="messageInput" class="chat-input"
+                        placeholder="Escribe tu pregunta sobre el manual de pedidos..." rows="1"></textarea>
                     <button id="sendButton" class="send-button" disabled>
                         <i class="bi bi-send-fill"></i>
                     </button>
@@ -94,7 +98,8 @@
                 <h6 class="mt-4"><i class="bi bi-book text-success"></i> Contenido</h6>
                 <p>El chatbot ha sido entrenado específicamente con el manual:</p>
                 <ul>
-                    <li><strong>"Manual de Usuario Aplicaciones del Sistema de gestión de pedidos de Logística Blaniza"</strong></li>
+                    <li><strong>"Manual de Usuario Aplicaciones del Sistema de gestión de pedidos de Logística
+                            Blaniza"</strong></li>
                     <li>Solo puede responder preguntas relacionadas con este documento</li>
                     <li>Las respuestas se basan únicamente en la información contenida en el manual</li>
                 </ul>

@@ -2,6 +2,7 @@ document.addEventListener('DOMContentLoaded', function() {
     const messageInput = document.getElementById('messageInput');
     const sendButton = document.getElementById('sendButton');
     const chatMessages = document.getElementById('chatMessages');
+    const clearChatBtn = document.getElementById('clearChatBtn');
 
     // Auto-resize del textarea
     messageInput.addEventListener('input', function() {
@@ -23,6 +24,13 @@ document.addEventListener('DOMContentLoaded', function() {
 
     // Envío con botón
     sendButton.addEventListener('click', sendMessage);
+
+    // Limpiar chat
+    clearChatBtn.addEventListener('click', function() {
+        if (confirm('¿Estás seguro de que quieres limpiar toda la conversación?')) {
+            clearChat();
+        }
+    });
 
     function sendMessage() {
         const message = messageInput.value.trim();
@@ -149,6 +157,37 @@ document.addEventListener('DOMContentLoaded', function() {
         setTimeout(() => {
             chatMessages.scrollTop = chatMessages.scrollHeight;
         }, 100);
+    }
+
+    function clearChat() {
+        // Llamar al endpoint para limpiar el historial del servidor
+        fetch('/chatbot-pedidos/clear-chat', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            }
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                // Limpiar la interfaz visual
+                const messages = chatMessages.querySelectorAll('.message');
+                messages.forEach((message, index) => {
+                    // Mantener solo el primer mensaje de bienvenida
+                    if (index > 0) {
+                        message.remove();
+                    }
+                });
+                console.log('Chat limpiado exitosamente');
+            } else {
+                console.error('Error limpiando el chat:', data.error);
+                alert('Error al limpiar el chat. Por favor, recarga la página.');
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            alert('Error de conexión al limpiar el chat. Por favor, recarga la página.');
+        });
     }
 
     // Focus inicial en el input

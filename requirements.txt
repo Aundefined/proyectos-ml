@@ -31,3 +31,4 @@ OpenAI
 fitz
 faiss
 tiktoken
+python-dotenv

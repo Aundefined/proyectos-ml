@@ -2,6 +2,14 @@ from flask import Flask, render_template, redirect, request
 import os
 from werkzeug.middleware.proxy_fix import ProxyFix
 
+# ✅ Cargar variables de entorno para desarrollo local
+try:
+    from dotenv import load_dotenv
+    load_dotenv()
+except ImportError:
+    # En Railway no existe python-dotenv, y no importa
+    pass
+
 # Importar los blueprints
 from predictor_sueldos import predictor_sueldos_bp
 from visualizacion_dataset import visualizacion_dataset_bp
@@ -20,6 +28,9 @@ from chatbot_pedidos import chatbot_pedidos_bp
 
 # Crear la aplicación Flask
 app = Flask(__name__)
+
+# ✅ Configurar secret key desde variable de entorno
+app.secret_key = os.getenv('SECRET_KEY', 'desarrollo-local-fallback')
 
 # Registrar los blueprints
 app.register_blueprint(predictor_sueldos_bp)
