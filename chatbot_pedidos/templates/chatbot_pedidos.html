@@ -1,0 +1,120 @@
+{% extends "layout.html" %}
+
+{% block title %}Chatbot App Pedidos{% endblock %}
+
+{% block head_styles %}
+<link rel="stylesheet" href="{{ url_for('chatbot_pedidos.static', filename='css/chatbot_pedidos.css') }}">
+{% endblock %}
+
+{% block content %}
+<h2 class="text-white fall-element fall-delay-1">Chatbot App Pedidos</h2>
+<p class="lead text-white fall-element fall-delay-1">Asistente virtual para consultas sobre el Manual de Usuario del Sistema de gestión de pedidos de Logística Blaniza</p>
+
+<div class="text-white-50 mb-4 fall-element fall-delay-1">
+    <i class="bi bi-info-circle me-1"></i>
+    <small>Este chatbot solo puede responder preguntas relacionadas con el manual de usuario del sistema de pedidos</small>
+</div>
+
+<!-- Botones de información y descarga -->
+<div class="d-flex flex-wrap gap-2 mb-3 fall-element fall-delay-2">
+    <button type="button" class="btn btn-secondary" data-bs-toggle="modal" data-bs-target="#infoModal">
+        <i class="bi bi-question-circle"></i> ¿Cómo funciona?
+    </button>
+    <a href="{{ url_for('chatbot_pedidos.static', filename='pedidos.pdf') }}" class="btn btn-success" 
+       download="manual_pedidos.pdf">
+        <i class="bi bi-download"></i> Descargar PDF
+    </a>
+</div>
+
+<!-- Contenedor principal del chat -->
+<div class="row">
+    <div class="col-12">
+        <div class="chat-container fall-element fall-delay-2">
+            <!-- Área de mensajes -->
+            <div class="chat-messages" id="chatMessages">
+                <div class="message bot-message">
+                    <div class="message-avatar">
+                        <i class="bi bi-robot"></i>
+                    </div>
+                    <div class="message-content">
+                        <div class="message-text">
+                            ¡Hola! Soy tu asistente virtual para el Manual de Usuario del Sistema de gestión de pedidos de Logística Blaniza. 
+                            <br><br>
+                            Puedes preguntarme sobre cualquier funcionalidad, proceso o procedimiento que aparezca en el manual. 
+                            Por ejemplo:
+                            <ul>
+                                <li>¿Cómo se inicia y se detiene una sesión de descarga de archivos?</li>
+                                <li>¿Qué rol cumple la conexión VPN en el funcionamiento de la aplicación?</li>
+                                <li>¿Qué tecnologías se utilizan en el desarrollo de esta aplicación?</li>
+                            </ul>
+                            ¿En qué puedo ayudarte?
+                        </div>
+                        <div class="message-time">Ahora</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Área de escritura -->
+            <div class="chat-input-container">
+                <div class="chat-input-wrapper">
+                    <textarea 
+                        id="messageInput" 
+                        class="chat-input" 
+                        placeholder="Escribe tu pregunta sobre el manual de pedidos..."
+                        rows="1"></textarea>
+                    <button id="sendButton" class="send-button" disabled>
+                        <i class="bi bi-send-fill"></i>
+                    </button>
+                </div>
+                <div class="input-hint">
+                    Presiona Enter para enviar, Shift+Enter para nueva línea
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal informativo -->
+<div class="modal fade" id="infoModal" tabindex="-1" aria-labelledby="infoModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="infoModalLabel">¿Cómo funciona el Chatbot?</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <h6><i class="bi bi-gear-fill text-primary"></i> Tecnología</h6>
+                <p>Este chatbot utiliza tecnología RAG (Retrieval-Augmented Generation) con:</p>
+                <ul>
+                    <li><strong>Embeddings de OpenAI</strong> para entender el significado de tus preguntas</li>
+                    <li><strong>FAISS</strong> para búsqueda semántica rápida en el documento</li>
+                    <li><strong>GPT-4</strong> para generar respuestas naturales y precisas</li>
+                </ul>
+
+                <h6 class="mt-4"><i class="bi bi-book text-success"></i> Contenido</h6>
+                <p>El chatbot ha sido entrenado específicamente con el manual:</p>
+                <ul>
+                    <li><strong>"Manual de Usuario Aplicaciones del Sistema de gestión de pedidos de Logística Blaniza"</strong></li>
+                    <li>Solo puede responder preguntas relacionadas con este documento</li>
+                    <li>Las respuestas se basan únicamente en la información contenida en el manual</li>
+                </ul>
+
+                <h6 class="mt-4"><i class="bi bi-chat-dots text-info"></i> Uso</h6>
+                <ul>
+                    <li>Haz preguntas específicas sobre funcionalidades del sistema</li>
+                    <li>Pregunta por procedimientos paso a paso</li>
+                    <li>Consulta sobre configuraciones o ajustes</li>
+                    <li>Si no encuentra la información, te lo indicará amablemente</li>
+                </ul>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script src="{{ url_for('chatbot_pedidos.static', filename='js/chatbot_pedidos.js') }}"></script>
+{% endblock %}

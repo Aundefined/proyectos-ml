@@ -75,6 +75,21 @@
                             </a>
                         </li>
 
+                        <!-- CHATBOTS -->
+                        <li class="nav-item dropdown">
+                            <a class="nav-link dropdown-toggle" href="#" id="chatbotsDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                <i class="bi bi-chat-dots"></i> Chatbots
+                            </a>
+                            <ul class="dropdown-menu" aria-labelledby="chatbotsDropdown">
+                                <li>
+                                    <a class="dropdown-item {% if request.path == '/chatbot-pedidos' %}active{% endif %}" 
+                                       href="/chatbot-pedidos">
+                                        <i class="bi bi-robot"></i> Chatbot App Pedidos
+                                    </a>
+                                </li>
+                            </ul>
+                        </li>
+
                         <!-- OTROS -->
                         <li class="nav-item dropdown">
                             <a class="nav-link dropdown-toggle" href="#" id="otrosDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">

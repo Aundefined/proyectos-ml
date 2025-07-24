@@ -25,3 +25,9 @@ scipy
 
 tensorflow
 keras
+
+#chatbot
+OpenAI
+fitz
+faiss
+tiktoken
