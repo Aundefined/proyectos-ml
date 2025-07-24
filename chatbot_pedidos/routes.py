@@ -1,7 +1,7 @@
 from flask import Blueprint, render_template, request, jsonify, session
 from openai import OpenAI
 import numpy as np
-import faiss
+from sklearn.metrics.pairwise import cosine_similarity
 import pickle
 import os
 import uuid
@@ -19,24 +19,28 @@ chunks = None
 conversations = {}
 
 def load_chatbot_data():
-    """Carga el índice FAISS y los chunks desde disco"""
-    global index, chunks
+    """Carga chunks y embeddings desde disco"""
+    global chunks, embeddings_matrix
     
     try:
-        index_file = "attached-files/pedidos_index.index"
         chunks_file = "attached-files/pedidos_chunks.pkl"
         
-        if os.path.exists(index_file) and os.path.exists(chunks_file):
-            print("🔁 Cargando índice y fragmentos desde disco...")
-            index = faiss.read_index(index_file)
+        if os.path.exists(chunks_file):
+            print("🔁 Cargando chunks desde disco...")
             with open(chunks_file, "rb") as f:
                 chunks = pickle.load(f)
+            
+            # Generar embeddings en tiempo real (más lento pero funciona)
+            print("🧠 Generando embeddings...")
+            embeddings = get_embeddings(chunks)
+            embeddings_matrix = np.array(embeddings)
+            
             return True
         else:
-            print("❌ No se encontraron los archivos de índice y chunks")
+            print("❌ No se encontraron los archivos")
             return False
     except Exception as e:
-        print(f"❌ Error al cargar datos del chatbot: {e}")
+        print(f"❌ Error al cargar datos: {e}")
         return False
 
 def get_embeddings(texts):
@@ -52,18 +56,26 @@ def get_embeddings(texts):
         return None
 
 def search_similar_chunks(question, k=3):
-    """Busca chunks similares usando FAISS"""
-    global index, chunks
+    """Búsqueda usando cosine similarity en lugar de FAISS"""
+    global chunks, embeddings_matrix
     
-    if index is None or chunks is None:
+    if chunks is None or embeddings_matrix is None:
         return []
     
     try:
+        # Obtener embedding de la pregunta
         question_embedding = get_embeddings([question])[0]
-        distances, indices = index.search(np.array([question_embedding]), k)
-        return [chunks[i] for i in indices[0]]
+        question_embedding = np.array([question_embedding])
+        
+        # Calcular similitud coseno
+        similarities = cosine_similarity(question_embedding, embeddings_matrix)[0]
+        
+        # Obtener los k más similares
+        top_indices = np.argsort(similarities)[-k:][::-1]
+        
+        return [chunks[i] for i in top_indices]
     except Exception as e:
-        print(f"Error en búsqueda semántica: {e}")
+        print(f"Error en búsqueda: {e}")
         return []
 
 def get_system_prompt(context):
