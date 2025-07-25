@@ -9,12 +9,21 @@ from . import predictor_champinones_bp
 # Cargar el modelo entrenado
 try:
     model_info = joblib.load('ml-models/modelo-mushrooms.joblib')
+    print(f"📦 MODELO CARGADO. Keys disponibles: {list(model_info.keys())}")
+    
     pipeline = model_info['pipeline']
-    selected_features = model_info['selected_features']
-    if selected_features is None:
-     selected_features = ['hola','que tal'] 
+    print(f"✅ Pipeline cargado correctamente")
+    
+    selected_features = model_info['selected_features']  
+    print(f"✅ Selected features: {selected_features}")
+    
+except KeyError as e:
+    print(f"❌ Key no encontrada en el modelo: {e}")
+    print(f"📦 Keys disponibles: {list(model_info.keys()) if 'model_info' in locals() else 'model_info no definido'}")
+    pipeline = model_info.get('pipeline') if 'model_info' in locals() else None
+    selected_features = None
 except Exception as e:
-    print(f"Error al cargar el modelo de champiñones: {e}")
+    print(f"❌ Error al cargar el modelo: {e}")
     pipeline = None
     selected_features = None
     
