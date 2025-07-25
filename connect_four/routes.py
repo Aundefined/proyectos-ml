@@ -47,18 +47,28 @@ def predict():
     try:
         board_state = request.json.get('board_state', {})
         difficulty = request.json.get('difficulty', 'normal')
+        is_ai_first_move = request.json.get('is_ai_first_move', False)  # 🆕 Nueva variable
 
         if modelo is None:
             return jsonify({'success': False, 'error': 'Modelo no disponible'}), 500
 
-        # Obtener mejor jugada
-        best_move = get_best_move(board_state, modelo)
-
-        # Aleatoriedad en modo normal
-        if difficulty == 'normal' and np.random.random() < 0.3:
+        # 🆕 LÓGICA PRINCIPAL: Si es el primer movimiento de la IA, SIEMPRE aleatorio
+        if is_ai_first_move:
+            print("🎲 Primer movimiento de la IA - usando movimiento aleatorio")
             available_columns = [c for c in range(7) if is_column_available(board_state, c)]
             if available_columns:
                 best_move = np.random.choice(available_columns)
+            else:
+                best_move = -1  # Tablero lleno (caso extremo)
+        else:
+            # Movimientos posteriores: usar el modelo ML normalmente
+            best_move = get_best_move(board_state, modelo)
+
+            # Aplicar aleatoriedad solo en modo normal Y solo si NO es el primer movimiento
+            if difficulty == 'normal' and np.random.random() < 0.3:
+                available_columns = [c for c in range(7) if is_column_available(board_state, c)]
+                if available_columns:
+                    best_move = np.random.choice(available_columns)
 
         return jsonify({'success': True, 'move': int(best_move)})
     except Exception as e:

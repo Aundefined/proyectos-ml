@@ -13,6 +13,7 @@ document.addEventListener('DOMContentLoaded', function() {
     let gameStartTime = new Date();
     let gameTimer;
     let difficulty = 'normal';
+    let aiMoveCount = 0;  // 🆕 Contador de movimientos de la IA
     
     // Referencias a elementos del DOM
     const gameBoard = document.getElementById('gameBoard');
@@ -54,6 +55,7 @@ document.addEventListener('DOMContentLoaded', function() {
         // Reiniciar variables del juego
         currentPlayer = PLAYER;
         gameOver = false;
+        aiMoveCount = 0;  // 🆕 Reiniciar contador de movimientos de la IA
         winnerMessage.style.display = 'none';
         turnIndicator.className = 'turn-indicator player-turn';
         turnIndicator.textContent = 'Tu turno';
@@ -146,6 +148,11 @@ document.addEventListener('DOMContentLoaded', function() {
             }
         }
         
+        // 🆕 Determinar si es el primer movimiento de la IA
+        const isAiFirstMove = aiMoveCount === 0;
+        
+        console.log(`🤖 IA movimiento #${aiMoveCount + 1}, primer movimiento: ${isAiFirstMove}`);
+        
         // Siempre usar el modelo ML para predecir el movimiento
         // En modo difícil, usamos parámetros más avanzados
         fetch('/connect-four/predict', {
@@ -155,7 +162,8 @@ document.addEventListener('DOMContentLoaded', function() {
             },
             body: JSON.stringify({
                 board_state: boardState,
-                difficulty: difficulty
+                difficulty: difficulty,
+                is_ai_first_move: isAiFirstMove  // 🆕 Enviar si es el primer movimiento
             })
         })
         .then(response => response.json())
@@ -207,6 +215,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 board[r][col] = AI;
                 updateBoardUI();
                 moveCount.textContent = parseInt(moveCount.textContent) + 1;
+                aiMoveCount++;  // 🆕 Incrementar contador de movimientos de la IA
                 
                 // Verificar victoria
                 if (checkWin(r, col, AI)) {

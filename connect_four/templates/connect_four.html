@@ -1,6 +1,6 @@
 {% extends "layout.html" %}
 
-{% block title %}Connect Four - Juega contra IA CNN{% endblock %}
+{% block title %}Connect Four - Juega contra IA{% endblock %}
 
 {% block head_styles %}
 <link rel="stylesheet" href="{{ url_for('connect_four.static', filename='css/connect_four.css') }}">
@@ -14,7 +14,7 @@
 
 {% block content %}
 <h2 class="text-white fall-element fall-delay-1">Connect Four - Juega contra IA CNN</h2>
-<p class="lead text-white fall-element fall-delay-1">¡Intenta conectar 4 fichas en línea antes que la IA con CNN!</p>
+<p class="lead text-white fall-element fall-delay-1">¡Intenta conectar 4 fichas en línea antes que la IA!</p>
 
 <!-- Selector de dificultad -->
 <div class="difficulty-selector fall-element fall-delay-2">
@@ -76,7 +76,7 @@
 <!-- Explicación del modelo -->
 <div class="jumbotron fall-element fall-delay-4">
     <h4>Acerca del Modelo de Machine Learning</h4>
-    <p>Este juego utiliza una Red Neuronal Convolucional (CNN) entrenada con datos de partidas de Connect Four para
+    <p>Este juego utiliza una Red Neuronal Multicapa (MLP) entrenada con datos de partidas de Connect Four para
         predecir el mejor movimiento en cada situación.</p>
 
     <div class="row mt-3">
@@ -91,8 +91,12 @@
         </div>
         <div class="col-md-6">
             <h5>Estadísticas del Modelo</h5>
-            <p>El modelo CNN fue entrenado con un conjunto de datos de <strong>2 millones de ejemplos</strong> y alcanzó una
-                precisión del <strong>66%</strong> en el conjunto de validación.</p>
+            <p>El modelo MLP fue entrenado con un conjunto de datos de <strong>1 millon de partidas</strong> generadas
+                con <strong>Negamax(4)</strong> y mas de <strong>30 millones de jugadas</strong>. </p>
+            <p>
+                Alcanzó una
+                precisión del <strong>85%</strong> en el conjunto de validación.
+            </p>
         </div>
     </div>
 
@@ -106,66 +110,111 @@
 
     <div class="collapse" id="modelCode">
         <pre><code class="language-python">
+from sklearn.model_selection import train_test_split
+import numpy as np
+np.bool = bool
+np.object = object
+np.int = int  
+
 import tensorflow as tf
 import pandas as pd
-from sklearn.model_selection import train_test_split
 
-# Carga de datos balanceados
-df = pd.read_csv("connect_four_dataset_entrenamiento.csv")
+from tensorflow.keras import models
+from tensorflow.keras import layers
+from tensorflow.keras.utils import to_categorical
+from tensorflow.keras.optimizers import Adam
+from tensorflow.keras.callbacks import EarlyStopping, ModelCheckpoint, ReduceLROnPlateau
+from tensorflow.keras.models import Sequential
+from tensorflow.keras.layers import Dense, Dropout, BatchNormalization, Activation
+from tensorflow.keras.regularizers import l2
 
-# Balanceo de clases (aproximadamente 285,714 ejemplos por columna)
-df_balanceado = pd.DataFrame()
-filas_por_clase = 2000000 // 7  
-for valor in range(7):
-    df_clase = df[df["column"] == valor].sample(n=filas_por_clase, random_state=42)
-    df_balanceado = pd.concat([df_balanceado, df_clase])
 
-# Preparación de datos
-df_balanceado.drop(['move_number','outcome','game_id'], axis=1, inplace=True)
-cell_columns = [f'cell_{i}' for i in range(42)]
-df_balanceado[cell_columns] = df_balanceado[cell_columns].replace({'.': 0, 'X': 1, 'O': -1})
+df = pd.read_csv("dataset_codificado.csv", index_col=0)
 
-# Separación de características y variable objetivo
-X = df_balanceado.iloc[:, 0:42]  # Celdas del tablero
-y = df_balanceado['column']
-y_onehot = pd.get_dummies(y, drop_first=False)
+X = df.iloc[:, 0:42]  # Todas las celdas del tablero (cell_0 hasta cell_41)
+y = df['column'] 
 
-# División en conjuntos de entrenamiento y prueba
-X_train, X_test, y_train, y_test = train_test_split(X, y_onehot, test_size=0.4, random_state=42)
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2)
 
-# Arquitectura CNN
-model = tf.keras.Sequential([
-    # Reshape para convertir 42 elementos en un tablero 7x6x1
-    tf.keras.layers.Reshape((6, 7, 1), input_shape=(42,)),
-    tf.keras.layers.Conv2D(32, kernel_size=(3, 3), activation='relu'),
-    tf.keras.layers.Conv2D(64, kernel_size=(3, 3), activation='relu'),
-    tf.keras.layers.Flatten(),
-    tf.keras.layers.Dense(64, activation='relu'),
-    tf.keras.layers.Dense(7, activation='softmax')
+X_test, X_val, y_test, y_val = train_test_split(X_test, y_test, test_size=0.5)
+
+y_train_prep = to_categorical(y_train)
+y_test_prep = to_categorical(y_test)
+y_val_prep = to_categorical(y_val)
+
+network = Sequential([
+    
+    Dense(128, kernel_regularizer=l2(0.001), input_shape=(42,)),
+    BatchNormalization(),
+    Activation('relu'),
+    Dropout(0.25),
+
+    Dense(128, kernel_regularizer=l2(0.001)),
+    BatchNormalization(),
+    Activation('relu'),
+    Dropout(0.25),
+    
+    Dense(64, kernel_regularizer=l2(0.001)),
+    BatchNormalization(),
+    Activation('relu'),
+    Dropout(0.25),
+
+    Dense(7, activation='softmax', kernel_regularizer=l2(0.001))
 ])
 
-# Compilación
-model.compile(
-    optimizer='adam',
+optimizer = Adam(learning_rate=0.0001)
+
+network.compile(
+    optimizer=optimizer,
     loss='categorical_crossentropy',
-    metrics=['accuracy']
+    metrics=['accuracy', 'Precision']
 )
 
-# Entrenamiento
-history = model.fit(
-    X_train,
-    y_train,
-    batch_size=64,
-    epochs=50,
-    validation_data=(X_test, y_test),
-    callbacks=[
-        tf.keras.callbacks.EarlyStopping(patience=5, restore_best_weights=True),
-        tf.keras.callbacks.ReduceLROnPlateau(factor=0.5, patience=3)
-    ]
+early_stop = EarlyStopping(
+    monitor='val_loss',
+    patience=5,
+    restore_best_weights=True
 )
 
-# Guardado del modelo
-model.save('modelo_cnn_connect-four')
+checkpoint_cb = ModelCheckpoint(
+    filepath='mejor_modelo.h5',      
+    monitor='val_loss',              
+    save_best_only=True,             
+    save_weights_only=False,        
+    mode='min',                      
+    verbose=1
+)
+
+reduce_lr = ReduceLROnPlateau(
+    monitor='val_loss',      
+    factor=0.5,              
+    patience=5,              
+    min_lr=1e-6,            
+    verbose=1
+)
+
+history = network.fit(X_train, 
+                      y_train_prep, 
+                      epochs=100,  
+                      batch_size=2048,    
+                      callbacks=[early_stop,checkpoint_cb,reduce_lr],
+                      validation_data=(X_val, y_val_prep))
+
+test_loss, test_acc, test_prec = network.evaluate(X_test, y_test_prep)
+
+import tensorflow as tf
+
+# Cargar tu modelo entrenado
+model = tf.keras.models.load_model('mejor_modelo.h5')
+
+# Convertir a TFLite
+converter = tf.lite.TFLiteConverter.from_keras_model(model)
+tflite_model = converter.convert()
+
+# Guardar el modelo
+with open('modelo_conecta4.tflite', 'wb') as f:
+    f.write(tflite_model)
+
         </code></pre>
     </div>
 </div>
