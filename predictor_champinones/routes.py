@@ -12,7 +12,7 @@ try:
     pipeline = model_info['pipeline']
     selected_features = model_info['selected_features']
     if selected_features is None:
-     selected_features = [] 
+     selected_features = ['hola','que tal'] 
 except Exception as e:
     print(f"Error al cargar el modelo de champiñones: {e}")
     pipeline = None
