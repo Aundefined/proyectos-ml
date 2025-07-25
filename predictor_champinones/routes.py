@@ -1,6 +1,7 @@
 from flask import Blueprint, render_template, request
 import pandas as pd
 import joblib
+import os
 
 # Crear un Blueprint para el predictor de champiñones
 from . import predictor_champinones_bp
@@ -14,6 +15,18 @@ except Exception as e:
     print(f"Error al cargar el modelo de champiñones: {e}")
     pipeline = None
     selected_features = None
+    
+debug_info = {
+    'model_path': 'ml-models/modelo-mushrooms.joblib',
+    'path_exists': os.path.exists('ml-models/modelo-mushrooms.joblib'),
+    'ml_models_dir_exists': os.path.exists('ml-models'),
+    'files_in_ml_models': os.listdir('ml-models') if os.path.exists('ml-models') else [],
+    'pipeline_loaded': pipeline is not None,
+    'selected_features_loaded': selected_features is not None,
+    'selected_features': selected_features
+}
+
+print(f"🔍 DEBUG INFO: {debug_info}")
 
 # Diccionario de mapeo de valores a descripciones en español
 FEATURE_MAPPINGS = {
@@ -163,4 +176,5 @@ def index():
                          resultado=resultado, 
                          error=error, 
                          form_data=form_data,
-                         feature_mappings=FEATURE_MAPPINGS)
+                         feature_mappings=FEATURE_MAPPINGS,
+                         debug_info=debug_info)
