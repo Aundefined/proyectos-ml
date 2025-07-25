@@ -11,40 +11,49 @@ from . import chatbot_pedidos_bp
 # ✅ Configura OpenAI usando variable de entorno
 client = OpenAI(api_key=os.getenv('OPENAI_API_KEY'))
 
-# Variables globales para el índice y chunks
-index = None
+# Variables globales para chunks y embeddings pre-calculados
 chunks = None
+embeddings_matrix = None
 
 # Diccionario para almacenar conversaciones por sesión
 conversations = {}
 
 def load_chatbot_data():
-    """Carga chunks y embeddings desde disco"""
+    """Carga chunks y embeddings PRE-CALCULADOS desde disco"""
     global chunks, embeddings_matrix
     
     try:
         chunks_file = "attached-files/pedidos_chunks.pkl"
+        embeddings_file = "attached-files/pedidos_embeddings.pkl"  # 🆕 Nuevo archivo
         
-        if os.path.exists(chunks_file):
-            print("🔁 Cargando chunks desde disco...")
+        if os.path.exists(chunks_file) and os.path.exists(embeddings_file):
+            print("🔁 Cargando chunks y embeddings pre-calculados desde disco...")
+            
+            # Cargar chunks
             with open(chunks_file, "rb") as f:
                 chunks = pickle.load(f)
             
-            # Generar embeddings en tiempo real (más lento pero funciona)
-            print("🧠 Generando embeddings...")
-            embeddings = get_embeddings(chunks)
+            # 🆕 Cargar embeddings pre-calculados (sin llamar a OpenAI)
+            with open(embeddings_file, "rb") as f:
+                embeddings = pickle.load(f)
+            
+            # Convertir a matriz numpy para cosine similarity
             embeddings_matrix = np.array(embeddings)
             
+            print(f"✅ Cargados {len(chunks)} chunks y {len(embeddings)} embeddings pre-calculados")
             return True
         else:
-            print("❌ No se encontraron los archivos")
+            print(f"❌ No se encontraron los archivos:")
+            print(f"   - Chunks: {os.path.exists(chunks_file)}")
+            print(f"   - Embeddings: {os.path.exists(embeddings_file)}")
             return False
+            
     except Exception as e:
         print(f"❌ Error al cargar datos: {e}")
         return False
 
 def get_embeddings(texts):
-    """Genera embeddings usando OpenAI"""
+    """Genera embeddings usando OpenAI - SOLO para preguntas del usuario"""
     try:
         response = client.embeddings.create(
             input=texts,
@@ -56,18 +65,18 @@ def get_embeddings(texts):
         return None
 
 def search_similar_chunks(question, k=3):
-    """Búsqueda usando cosine similarity en lugar de FAISS"""
+    """Búsqueda usando embeddings pre-calculados + cosine similarity"""
     global chunks, embeddings_matrix
     
     if chunks is None or embeddings_matrix is None:
         return []
     
     try:
-        # Obtener embedding de la pregunta
+        # 🆕 SOLO generar embedding de la pregunta (1 embedding vs 100+ anteriormente)
         question_embedding = get_embeddings([question])[0]
         question_embedding = np.array([question_embedding])
         
-        # Calcular similitud coseno
+        # Calcular similitud coseno contra embeddings pre-calculados
         similarities = cosine_similarity(question_embedding, embeddings_matrix)[0]
         
         # Obtener los k más similares
@@ -103,7 +112,7 @@ def generate_answer(messages):
     """Genera respuesta usando OpenAI GPT con historial completo"""
     try:
         response = client.chat.completions.create(
-            model="gpt-4",
+            model="gpt-4.1-mini",
             messages=messages,
             temperature=0.7,
             max_tokens=500
@@ -130,8 +139,10 @@ def get_conversation_history(session_id):
 def index_route():
     """Página principal del chatbot"""
     # Cargar datos si no están cargados
-    if index is None or chunks is None:
-        load_chatbot_data()
+    if chunks is None or embeddings_matrix is None:
+        if not load_chatbot_data():
+            # Si no se pueden cargar los datos, mostrar error en la página
+            return render_template('chatbot_pedidos.html', error="Error: No se pudieron cargar los datos del chatbot")
     
     return render_template('chatbot_pedidos.html')
 
@@ -146,7 +157,7 @@ def chat():
             return jsonify({'error': 'Mensaje vacío'}), 400
         
         # Asegurar que los datos están cargados
-        if index is None or chunks is None:
+        if chunks is None or embeddings_matrix is None:
             if not load_chatbot_data():
                 return jsonify({'error': 'Error del sistema. Los datos del chatbot no están disponibles.'}), 500
         
@@ -154,7 +165,7 @@ def chat():
         session_id = get_or_create_session_id()
         messages = get_conversation_history(session_id)
         
-        # Buscar chunks relevantes
+        # 🆕 Buscar chunks relevantes (solo 1 embedding generado aquí)
         relevant_chunks = search_similar_chunks(question)
         context = "\n\n".join(relevant_chunks)
         
@@ -163,8 +174,7 @@ def chat():
             system_prompt = get_system_prompt(context)
             messages.append({"role": "system", "content": system_prompt})
         else:
-            # Actualizar el contexto en el system prompt existente (opcional)
-            # Para mantener el contexto siempre fresco con la nueva búsqueda
+            # Actualizar el contexto en el system prompt existente
             messages[0]["content"] = get_system_prompt(context)
         
         # Añadir el mensaje del usuario al historial
