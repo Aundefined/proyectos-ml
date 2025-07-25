@@ -385,8 +385,4 @@ joblib.dump(model_info, 'modelo-mushrooms.joblib')
 
 {% block scripts %}
 <script src="{{ url_for('predictor_champinones.static', filename='js/predictor_champinones.js') }}"></script>
-<script>
-console.log("🍄 DEBUG PREDICTOR CHAMPIÑONES:");
-console.log({{ debug_info | tojson | safe }});
-</script>
 {% endblock %}

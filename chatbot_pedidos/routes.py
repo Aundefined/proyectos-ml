@@ -106,13 +106,15 @@ No menciones contexto, datos disponibles ni restricciones. No expliques por qué
 En definitiva, si la respuesta está en el contexto la das, sino no, pero sin nunca mencionar tus restricciones.
 
 Y varía un poco tus respuestas negativas, no digas siempre lo mismo.
+
+Cuando alguien se despide de ti, deseale siempre un buen día.
 """
 
 def generate_answer(messages):
     """Genera respuesta usando OpenAI GPT con historial completo"""
     try:
         response = client.chat.completions.create(
-            model="gpt-4.1-mini",
+            model="gpt-4.1",
             messages=messages,
             temperature=0.7,
             max_tokens=500
