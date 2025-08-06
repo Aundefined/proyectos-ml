@@ -125,7 +125,7 @@ def generate_answer(messages):
     """Genera respuesta usando OpenAI GPT con historial completo"""
     try:
         response = client.chat.completions.create(
-            model="gpt-4.1-nano",
+            model="gpt-4.1",
             messages=messages,
             temperature=0.7,
             max_tokens=500
