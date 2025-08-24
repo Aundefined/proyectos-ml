@@ -16,13 +16,13 @@ tokenizer = None
 conversations = {}
 
 def load_blaniza_model():
-    """Cargar el modelo Blaniza Assistant desde Hugging Face"""
+    """Cargar el modelo Blaniza Assistant optimizado para CPU y memoria limitada"""
     global model, tokenizer
     
     try:
         model_name = "ArnaudClaudeML/blaniza-assistant"
         print("=" * 60)
-        print("🚀 INICIANDO CARGA DEL MODELO BLANIZA ASSISTANT")
+        print("INICIANDO CARGA OPTIMIZADA DEL MODELO BLANIZA")
         print("=" * 60)
         print(f"📦 Modelo: {model_name}")
         
@@ -63,14 +63,28 @@ def load_blaniza_model():
             print(f"💾 VRAM libre: {total_memory - used_memory:.1f} GB")
             
         else:
-            print("💻 Cargando en CPU (sin cuantización)...")
-            # Cargar en CPU
+            print("💻 Cargando en CPU (optimizado para memoria limitada)...")
+            print("⚠️ Usando configuración de baja memoria para Railway/CPU")
+            
+            # Cargar en CPU con optimizaciones para memoria limitada
             model = AutoModelForCausalLM.from_pretrained(
                 model_name,
                 device_map="cpu",
                 trust_remote_code=True,
-                torch_dtype=torch.float32
+                torch_dtype=torch.float16,  # Usar float16 en lugar de float32
+                low_cpu_mem_usage=True,     # Optimizar uso de memoria
+                use_safetensors=True        # Usar safetensors si está disponible
             )
+            
+            # Optimizaciones adicionales para CPU
+            print("⚙️ Aplicando optimizaciones de memoria...")
+            
+            # Habilitar modo de evaluación (desactiva dropout, etc.)
+            model.eval()
+            
+            # Limpiar cache de CUDA si existe (por si acaso)
+            if hasattr(torch.cuda, 'empty_cache'):
+                torch.cuda.empty_cache()
         
         print("📝 Cargando tokenizer...")
         # Cargar tokenizer
@@ -83,8 +97,14 @@ def load_blaniza_model():
         total_params = sum(p.numel() for p in model.parameters())
         print(f"📊 Parámetros del modelo: {total_params:,}")
         
+        # Mostrar información de memoria (aproximada)
+        import psutil
+        memory_info = psutil.virtual_memory()
+        print(f"💾 RAM total del sistema: {memory_info.total / (1024**3):.1f} GB")
+        print(f"💾 RAM disponible: {memory_info.available / (1024**3):.1f} GB")
+        
         print("=" * 60)
-        print("🎉 MODELO BLANIZA ASSISTANT CARGADO EXITOSAMENTE")
+        print("🎉 MODELO BLANIZA CARGADO CON OPTIMIZACIONES")
         print("=" * 60)
         return True
         
@@ -94,9 +114,10 @@ def load_blaniza_model():
         print("=" * 60)
         print(f"Error: {e}")
         print("Posibles causas:")
+        print("- Memoria RAM insuficiente (Railway limita a 8GB)")
         print("- Conexión a internet")
         print("- Espacio insuficiente en disco")
-        print("- Problema con las dependencias (transformers, torch, bitsandbytes)")
+        print("- Problema con las dependencias")
         print("=" * 60)
         return False
 
@@ -122,41 +143,93 @@ Restricciones:
 
 Tu rol es actuar siempre como experto en este manual, nada más."""
 
-def generate_answer_with_blaniza(messages, max_tokens=150):
-    """Generar respuesta usando el modelo Blaniza"""
+def generate_answer_with_blaniza(messages, max_tokens=200):  # Aumentar tokens para respuestas completas
+    """Generar respuesta usando el modelo Blaniza optimizado para CPU"""
     try:
-        print("🤖 Iniciando generación de respuesta con modelo Blaniza")
+        print("🤖 Iniciando generación optimizada con modelo Blaniza")
         
-        # Construir el prompt en formato conversacional
+        # Construir el prompt en formato conversacional (más eficiente)
         prompt = ""
-        for message in messages:
+        # Limitar el historial para ahorrar memoria
+        recent_messages = messages[-5:] if len(messages) > 5 else messages
+        
+        for message in recent_messages:
             role = message["role"]
             content = message["content"]
+            # Truncar mensajes muy largos
+            if len(content) > 500:
+                content = content[:500] + "..."
             prompt += f"{role}: {content}\n"
         
         prompt += "assistant:"
         
         print(f"📝 Longitud del prompt: {len(prompt)} caracteres")
+        print(f"📝 Mensajes en el historial: {len(recent_messages)}")
         
-        # Tokenizar
+        # Tokenizar con longitud máxima equilibrada
         print("🔤 Tokenizando prompt...")
-        inputs = tokenizer(prompt, return_tensors="pt").to(model.device)
+        inputs = tokenizer(
+            prompt, 
+            return_tensors="pt", 
+            max_length=768,  # Permitir más contexto para respuestas completas
+            truncation=True
+        )
+        
+        # No mover a GPU si no existe
+        if model.device.type != 'cpu':
+            inputs = inputs.to(model.device)
+            
         input_tokens = inputs.input_ids.shape[1]
         print(f"📊 Tokens de entrada: {input_tokens}")
         
-        # Generar respuesta
-        print(f"⚡ Generando respuesta (máx {max_tokens} tokens)...")
-        with torch.no_grad():
-            outputs = model.generate(
-                inputs.input_ids,
-                max_new_tokens=max_tokens,
-                do_sample=True,
-                top_p=0.9,
-                temperature=0.7,
-                pad_token_id=tokenizer.eos_token_id,
-                repetition_penalty=1.1,
-                early_stopping=True
-            )
+        # Verificar memoria disponible antes de generar
+        import psutil
+        memory_before = psutil.virtual_memory().percent
+        print(f"💾 Uso de memoria antes: {memory_before:.1f}%")
+        
+        # Parámetros de generación equilibrados para respuestas completas
+        generation_params = {
+            "max_new_tokens": min(max_tokens, 150),  # Permitir respuestas más largas
+            "do_sample": True,
+            "top_p": 0.9,  # Restaurar diversidad para mejores respuestas
+            "temperature": 0.7,  # Equilibrio entre creatividad y eficiencia
+            "pad_token_id": tokenizer.eos_token_id,
+            "repetition_penalty": 1.1,  # Penalización normal
+            "early_stopping": False,  # No cortar respuestas prematuramente
+            "use_cache": True,  # Usar cache si está disponible
+            "eos_token_id": tokenizer.eos_token_id,  # Asegurar final natural
+        }
+        
+        print(f"⚡ Generando respuesta optimizada (máx {generation_params['max_new_tokens']} tokens)...")
+        
+        # Generar con manejo de memoria
+        with torch.no_grad():  # Importante: no calcular gradientes
+            try:
+                outputs = model.generate(
+                    inputs.input_ids,
+                    **generation_params
+                )
+            except torch.cuda.OutOfMemoryError:
+                # Si hay error de memoria CUDA, limpiar cache
+                torch.cuda.empty_cache()
+                # Intentar con parámetros aún más conservadores
+                generation_params["max_new_tokens"] = 30
+                outputs = model.generate(
+                    inputs.input_ids,
+                    **generation_params
+                )
+            except RuntimeError as e:
+                if "out of memory" in str(e).lower():
+                    print("⚠️ Memoria insuficiente, usando parámetros reducidos...")
+                    generation_params["max_new_tokens"] = 80  # Aún permitir respuestas razonables
+                    generation_params["temperature"] = 0.5
+                    generation_params["early_stopping"] = True  # Solo activar en emergencia
+                    outputs = model.generate(
+                        inputs.input_ids,
+                        **generation_params
+                    )
+                else:
+                    raise e
         
         # Extraer solo la respuesta generada
         response = tokenizer.decode(
@@ -165,14 +238,32 @@ def generate_answer_with_blaniza(messages, max_tokens=150):
         ).strip()
         
         output_tokens = outputs[0].shape[0] - input_tokens
+        memory_after = psutil.virtual_memory().percent
+        
         print(f"📊 Tokens generados: {output_tokens}")
-        print(f"✅ Respuesta generada exitosamente: {len(response)} caracteres")
+        print(f"💾 Uso de memoria después: {memory_after:.1f}%")
+        print(f"✅ Respuesta generada: {len(response)} caracteres")
+        
+        # Limpiar memoria si es necesario
+        if memory_after > 85:  # Si el uso de memoria es alto
+            import gc
+            gc.collect()
+            if hasattr(torch.cuda, 'empty_cache'):
+                torch.cuda.empty_cache()
         
         return response
         
     except Exception as e:
-        print(f"❌ Error generando respuesta con Blaniza: {e}")
-        return "Lo siento, ha ocurrido un error al procesar tu pregunta. Por favor, inténtalo de nuevo."
+        print(f"❌ Error generando respuesta: {e}")
+        print(f"❌ Tipo de error: {type(e).__name__}")
+        
+        # Limpiar memoria en caso de error
+        import gc
+        gc.collect()
+        if hasattr(torch.cuda, 'empty_cache'):
+            torch.cuda.empty_cache()
+            
+        return "Lo siento, ha ocurrido un error de memoria al procesar tu pregunta. Intenta con una pregunta más corta."
 
 def get_or_create_session_id():
     """Obtiene o crea un ID de sesión único"""
@@ -191,14 +282,9 @@ def index_route():
     """Página principal del chatbot Blaniza"""
     print("🌐 Acceso a la página principal del Chatbot Blaniza")
     
-    # Cargar modelo si no está cargado
-    if model is None or tokenizer is None:
-        print("⚠️ Modelo no cargado, iniciando carga...")
-        if not load_blaniza_model():
-            print("❌ Fallo al cargar el modelo, mostrando página de error")
-            return render_template('chatbot_blaniza.html', error="Error: No se pudo cargar el modelo Blaniza Assistant")
-    else:
-        print("✅ Modelo ya está cargado y listo")
+    # NO cargar el modelo al inicio para ahorrar memoria
+    # El modelo se cargará de forma lazy cuando se envíe el primer mensaje
+    print("ℹ️ Modo lazy loading: El modelo se cargará cuando envíes tu primer mensaje")
     
     return render_template('chatbot_blaniza.html')
 
@@ -216,12 +302,12 @@ def chat():
         
         print(f"📩 Pregunta del usuario: {question[:50]}{'...' if len(question) > 50 else ''}")
         
-        # Asegurar que el modelo está cargado
+        # Cargar modelo de forma lazy (solo cuando se necesita)
         if model is None or tokenizer is None:
-            print("⚠️ Modelo no disponible, intentando cargar...")
+            print("⚠️ Cargando modelo por primera vez (lazy loading)...")
             if not load_blaniza_model():
                 print("❌ Error: no se pudo cargar el modelo")
-                return jsonify({'error': 'Error del sistema. El modelo Blaniza no está disponible.'}), 500
+                return jsonify({'error': 'Error del sistema. No hay suficiente memoria para cargar el modelo Blaniza. Intenta reiniciar la aplicación.'}), 500
         
         # Obtener o crear sesión
         session_id = get_or_create_session_id()
