@@ -1,0 +1,127 @@
+{% extends "layout.html" %}
+
+{% block title %}Chatbot Blaniza Assistant{% endblock %}
+
+{% block head_styles %}
+<link rel="stylesheet" href="{{ url_for('chatbot_blaniza.static', filename='css/chatbot_blaniza.css') }}">
+{% endblock %}
+
+{% block content %}
+<h2 class="text-white fall-element fall-delay-1">Chatbot Blaniza Assistant</h2>
+<p class="lead text-white fall-element fall-delay-1">Asistente virtual con modelo personalizado entrenado específicamente para el Manual de Usuario del Sistema de gestión de pedidos de Logística Blaniza</p>
+
+<div class="text-white-50 mb-4 fall-element fall-delay-1">
+    <i class="bi bi-info-circle me-1"></i>
+    <small>Este chatbot utiliza un modelo de IA personalizado entrenado con técnicas LoRA (Low-Rank Adaptation)</small>
+</div>
+
+<!-- Botones de información y descarga -->
+<div class="d-flex flex-wrap gap-2 mb-3 fall-element fall-delay-2">
+    <button type="button" class="btn btn-secondary" data-bs-toggle="modal" data-bs-target="#infoModal">
+        <i class="bi bi-question-circle"></i> ¿Cómo funciona?
+    </button>
+    <button type="button" class="btn btn-warning" id="clearChatBtn">
+        <i class="bi bi-trash"></i> Limpiar chat
+    </button>
+</div>
+
+<!-- Contenedor principal del chat -->
+<div class="row">
+    <div class="col-12">
+        <div class="chat-container fall-element fall-delay-2">
+            <!-- Área de mensajes -->
+            <div class="chat-messages" id="chatMessages">
+                <div class="message bot-message">
+                    <div class="message-avatar">
+                        <i class="bi bi-robot"></i>
+                    </div>
+                    <div class="message-content">
+                        <div class="message-text">
+                            ¡Hola! Soy Blaniza Assistant, tu asistente virtual con modelo personalizado para el Manual de Usuario del Sistema de gestión de pedidos de Logística Blaniza.
+                            <br><br>
+                            He sido entrenado específicamente para ayudarte con cualquier consulta sobre el manual.
+                            Por ejemplo:
+                            <ul>
+                                <li>¿Cómo configurar las variables de entorno?</li>
+                                <li>¿Cómo instalar Node.js y NPM?</li>
+                                <li>¿Qué hacer si hay problemas de conexión con MongoDB?</li>
+                                <li>¿Cómo usar la API del sistema?</li>
+                            </ul>
+                            ¿En qué puedo ayudarte?
+                        </div>
+                        <div class="message-time">Ahora</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Área de escritura -->
+            <div class="chat-input-container">
+                <div class="chat-input-wrapper">
+                    <textarea id="messageInput" class="chat-input"
+                        placeholder="Escribe tu pregunta sobre el sistema Blaniza..." rows="1"></textarea>
+                    <button id="sendButton" class="send-button" disabled>
+                        <i class="bi bi-send-fill"></i>
+                    </button>
+                </div>
+                <div class="input-hint">
+                    Presiona Enter para enviar, Shift+Enter para nueva línea
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal informativo -->
+<div class="modal fade" id="infoModal" tabindex="-1" aria-labelledby="infoModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="infoModalLabel">¿Cómo funciona Blaniza Assistant?</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <h6><i class="bi bi-cpu-fill text-primary"></i> Modelo Personalizado</h6>
+                <p>Este chatbot utiliza un modelo de IA personalizado entrenado con técnicas avanzadas:</p>
+                <ul>
+                    <li><strong>Base:</strong> LenguajeNaturalAI/leniachat-qwen2-1.5B-v0</li>
+                    <li><strong>Técnica:</strong> QLoRA (Quantized Low-Rank Adaptation)</li>
+                    <li><strong>Especialización:</strong> Manual del Sistema Blaniza</li>
+                    <li><strong>Modelo final:</strong> ArnaudClaudeML/blaniza-assistant</li>
+                </ul>
+
+                <h6 class="mt-4"><i class="bi bi-book text-success"></i> Contenido</h6>
+                <p>El modelo ha sido fine-tuneado específicamente con:</p>
+                <ul>
+                    <li><strong>"Manual de Usuario Aplicaciones del Sistema de gestión de pedidos de Logística Blaniza"</strong></li>
+                    <li>Dataset balanceado con preguntas positivas y negativas</li>
+                    <li>Entrenado para rechazar educadamente preguntas fuera de contexto</li>
+                    <li>Respuestas graduales y naturales</li>
+                </ul>
+
+                <h6 class="mt-4"><i class="bi bi-lightning text-warning"></i> Ventajas</h6>
+                <ul>
+                    <li><strong>Especialización:</strong> Modelo dedicado únicamente al manual Blaniza</li>
+                    <li><strong>Eficiencia:</strong> Respuestas más rápidas que modelos generales</li>
+                    <li><strong>Consistencia:</strong> Respuestas más consistentes y precisas</li>
+                    <li><strong>Sin API externa:</strong> Modelo ejecutándose localmente</li>
+                </ul>
+
+                <h6 class="mt-4"><i class="bi bi-chat-dots text-info"></i> Uso</h6>
+                <ul>
+                    <li>Pregunta sobre instalación y configuración</li>
+                    <li>Consulta procedimientos del sistema</li>
+                    <li>Solicita ayuda con troubleshooting</li>
+                    <li>Pregunta sobre la API y funcionalidades</li>
+                </ul>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script src="{{ url_for('chatbot_blaniza.static', filename='js/chatbot_blaniza.js') }}"></script>
+{% endblock %}

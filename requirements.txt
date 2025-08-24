@@ -31,3 +31,8 @@ OpenAI
 fitz
 tiktoken
 python-dotenv
+
+torch
+transformers
+accelerate
+bitsandbytes

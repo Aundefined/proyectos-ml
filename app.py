@@ -23,6 +23,7 @@ from clasificador_frutas import clasificador_frutas_bp
 from sobre_mi import sobre_mi_bp
 from recomendador_peliculas import recomendador_peliculas_bp
 from chatbot_pedidos import chatbot_pedidos_bp
+from chatbot_blaniza import chatbot_blaniza_bp
 
 
 
@@ -45,6 +46,7 @@ app.register_blueprint(clasificador_frutas_bp)
 app.register_blueprint(sobre_mi_bp)
 app.register_blueprint(recomendador_peliculas_bp)
 app.register_blueprint(chatbot_pedidos_bp)
+app.register_blueprint(chatbot_blaniza_bp)
 
 app.wsgi_app = ProxyFix(app.wsgi_app, x_proto=1, x_host=1)
 
