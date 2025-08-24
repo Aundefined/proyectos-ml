@@ -32,10 +32,8 @@ fitz
 tiktoken
 python-dotenv
 
-# Optimizado para Railway - CPU only para builds rápidos
---find-links https://download.pytorch.org/whl/torch_stable.html
-torch==2.1.0+cpu
-transformers==4.36.0
+# Versiones más ligeras para Railway
+torch
+transformers
 accelerate
 psutil
-safetensors
