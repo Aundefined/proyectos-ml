@@ -32,8 +32,7 @@ fitz
 tiktoken
 python-dotenv
 
-torch
-transformers
+torch --index-url https://download.pytorch.org/whl/cpu
+transformers[torch]
 accelerate
-bitsandbytes
 psutil

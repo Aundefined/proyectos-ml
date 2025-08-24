@@ -2,7 +2,7 @@ from flask import Blueprint, render_template, request, jsonify, session
 import torch
 import uuid
 import warnings
-from transformers import AutoTokenizer, AutoModelForCausalLM, BitsAndBytesConfig
+from transformers import AutoTokenizer, AutoModelForCausalLM
 
 from . import chatbot_blaniza_bp
 
@@ -30,61 +30,20 @@ def load_blaniza_model():
         device = "cuda" if torch.cuda.is_available() else "cpu"
         print(f"🎯 Dispositivo detectado: {device}")
         
-        if device == "cuda":
-            gpu_name = torch.cuda.get_device_name()
-            total_memory = torch.cuda.get_device_properties(0).total_memory / (1024**3)
-            print(f"💾 GPU: {gpu_name}")
-            print(f"💾 VRAM total: {total_memory:.1f} GB")
-            
-            print("⚙️ Configurando cuantización 4-bit...")
-            # Configuración de cuantización para ahorrar memoria
-            bnb_config = BitsAndBytesConfig(
-                load_in_4bit=True,
-                bnb_4bit_use_double_quant=True,
-                bnb_4bit_quant_type="nf4",
-                bnb_4bit_compute_dtype=torch.bfloat16
-            )
-            print("✅ Configuración de cuantización lista")
-            
-            print("📥 Descargando y cargando modelo con cuantización 4-bit...")
-            print("   (Esto puede tomar varios minutos en la primera carga)")
-            # Cargar modelo con cuantización
-            model = AutoModelForCausalLM.from_pretrained(
-                model_name,
-                quantization_config=bnb_config,
-                device_map="auto",
-                trust_remote_code=True,
-                revision="main"
-            )
-            
-            # Mostrar uso de memoria después de cargar
-            used_memory = torch.cuda.memory_allocated() / (1024**3)
-            print(f"💾 VRAM utilizada: {used_memory:.2f} GB")
-            print(f"💾 VRAM libre: {total_memory - used_memory:.1f} GB")
-            
-        else:
-            print("💻 Cargando en CPU (optimizado para memoria limitada)...")
-            print("⚠️ Usando configuración de baja memoria para Railway/CPU")
-            
-            # Cargar en CPU con optimizaciones para memoria limitada
-            model = AutoModelForCausalLM.from_pretrained(
-                model_name,
-                device_map="cpu",
-                trust_remote_code=True,
-                torch_dtype=torch.float16,  # Usar float16 en lugar de float32
-                low_cpu_mem_usage=True,     # Optimizar uso de memoria
-                use_safetensors=True        # Usar safetensors si está disponible
-            )
-            
-            # Optimizaciones adicionales para CPU
-            print("⚙️ Aplicando optimizaciones de memoria...")
-            
-            # Habilitar modo de evaluación (desactiva dropout, etc.)
-            model.eval()
-            
-            # Limpiar cache de CUDA si existe (por si acaso)
-            if hasattr(torch.cuda, 'empty_cache'):
-                torch.cuda.empty_cache()
+        # Cargar siempre en CPU para Railway (más rápido y estable)
+        print("💻 Cargando en CPU (optimizado para Railway)...")
+        
+        model = AutoModelForCausalLM.from_pretrained(
+            model_name,
+            device_map="cpu",
+            trust_remote_code=True,
+            torch_dtype=torch.float32,  # Usar float32 para estabilidad
+            low_cpu_mem_usage=True,
+            use_safetensors=True
+        )
+        
+        print("⚙️ Aplicando optimizaciones...")
+        model.eval()
         
         print("📝 Cargando tokenizer...")
         # Cargar tokenizer
@@ -209,15 +168,6 @@ def generate_answer_with_blaniza(messages, max_tokens=200):  # Aumentar tokens p
                     inputs.input_ids,
                     **generation_params
                 )
-            except torch.cuda.OutOfMemoryError:
-                # Si hay error de memoria CUDA, limpiar cache
-                torch.cuda.empty_cache()
-                # Intentar con parámetros aún más conservadores
-                generation_params["max_new_tokens"] = 30
-                outputs = model.generate(
-                    inputs.input_ids,
-                    **generation_params
-                )
             except RuntimeError as e:
                 if "out of memory" in str(e).lower():
                     print("⚠️ Memoria insuficiente, usando parámetros reducidos...")
@@ -245,11 +195,9 @@ def generate_answer_with_blaniza(messages, max_tokens=200):  # Aumentar tokens p
         print(f"✅ Respuesta generada: {len(response)} caracteres")
         
         # Limpiar memoria si es necesario
-        if memory_after > 85:  # Si el uso de memoria es alto
+        if memory_after > 85:
             import gc
             gc.collect()
-            if hasattr(torch.cuda, 'empty_cache'):
-                torch.cuda.empty_cache()
         
         return response
         
@@ -260,8 +208,6 @@ def generate_answer_with_blaniza(messages, max_tokens=200):  # Aumentar tokens p
         # Limpiar memoria en caso de error
         import gc
         gc.collect()
-        if hasattr(torch.cuda, 'empty_cache'):
-            torch.cuda.empty_cache()
             
         return "Lo siento, ha ocurrido un error de memoria al procesar tu pregunta. Intenta con una pregunta más corta."
 
