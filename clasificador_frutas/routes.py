@@ -14,21 +14,46 @@ ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg', 'gif', 'bmp'}
 MAX_FILE_SIZE = 5 * 1024 * 1024  # 5MB
 
 # Cargar el modelo entrenado
+modelo = None
 try:
-    # Cargar modelo sin compilar (evita problemas en Railway)
-    modelo = tf.keras.models.load_model('ml-models/mejor_modelo_frutas_transfer.h5', compile=False)
-    print("✓ Modelo de frutas cargado sin compilar")
+    print("🔄 Iniciando carga del modelo de frutas...")
+    print(f"📂 Directorio actual: {os.getcwd()}")
     
-    # Recompilar manualmente
-    modelo.compile(
-        optimizer=tf.keras.optimizers.Adam(learning_rate=0.001),
-        loss='categorical_crossentropy',
-        metrics=['accuracy']
-    )
-    print("✓ Modelo de frutas recompilado correctamente")
+    # Verificar si existe la carpeta ml-models
+    if os.path.exists('ml-models'):
+        print("✓ Carpeta ml-models existe")
+        archivos = os.listdir('ml-models')
+        print(f"📁 Archivos en ml-models: {archivos}")
+        
+        model_path = 'ml-models/mejor_modelo_frutas_transfer.h5'
+        if os.path.exists(model_path):
+            print(f"✓ Archivo del modelo existe: {model_path}")
+            
+            # Cargar modelo sin compilar (evita problemas en Railway)
+            modelo = tf.keras.models.load_model(model_path, compile=False)
+            print("✓ Modelo de frutas cargado sin compilar")
+            
+            # Recompilar manualmente
+            modelo.compile(
+                optimizer=tf.keras.optimizers.Adam(learning_rate=0.001),
+                loss='categorical_crossentropy',
+                metrics=['accuracy']
+            )
+            print("✓ Modelo de frutas recompilado correctamente")
+        else:
+            print(f"❌ Archivo del modelo NO existe: {model_path}")
+    else:
+        print("❌ Carpeta ml-models NO existe")
+        print(f"📁 Contenido del directorio actual: {os.listdir('.')}")
+        
 except Exception as e:
-    print(f"Error al cargar el modelo de frutas: {e}")
+    print(f"💥 Error al cargar el modelo de frutas: {e}")
+    print(f"💥 Tipo de error: {type(e).__name__}")
+    import traceback
+    traceback.print_exc()
     modelo = None
+
+print(f"🔍 Estado final del modelo: {modelo is not None}")
 
 # Diccionario de mapeo de clases
 CLASE_MAPPING = {
