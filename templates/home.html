@@ -16,8 +16,7 @@
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <div class="modal-body">
-                Hola, esta web es un proyecto personal en proceso de desarrollo y en constante evolución. No está ni
-                mucho menos acabada y puede contener errores, ¡aún me queda mucho por hacer!
+                Hola, esta web es un proyecto personal en proceso de desarrollo y en constante evolución. Puede contener errores, ¡aún me queda mucho por hacer!
             </div>
             <div class="modal-footer">
                 <button type="button" class="btn btn-primary" data-bs-dismiss="modal">Entendido</button>
@@ -32,15 +31,15 @@
                style="border-bottom: 1px dotted rgba(255,255,255,0.7);">
                Arnaud Tartulier
             </a>, desarrollador web FullStack. En el 2025 me he propuesto aprender Machine Learning para combinar mis habilidades de programador web con últimas tecnologías basadas en Inteligencia Artificial.</p>
-            <p class="lead">Los primeros 6 meses me dediqué a aprender las bases del Machine Learning y Deep Learning con 2 cursos en Udemy del gran Santiago Hernández. Después decidí especializarme en LLMs y NLP para aprender a implementar asistentes virtuales y agentes en aplicaciones webs. </p>
-            <p class="lead">En esta web encontrará diferentes ejercicios que he ido haciendo en paralelo a los cursos: Predictores, clasificadores, asistentes virtuales, y hasta un juego de Conecta 4! (es muy malo)</p>
+            <p class="lead">Los primeros 6 meses me dediqué a aprender las bases del Machine Learning y Deep Learning con 2 cursos en Udemy del gran <a href="https://www.udemy.com/user/shramos/" target="_blank" class="text-decoration-none text-white fw-bold" style="border-bottom: 1px dotted rgba(255,255,255,0.7);">Santiago Hernández</a>. Después decidí especializarme en LLMs y NLP para aprender a implementar asistentes virtuales y agentes en aplicaciones webs. </p>
+            <p class="lead">En esta web encontrará diferentes ejercicios que he ido haciendo en paralelo a los cursos: Predictores, clasificadores, clustering, asistentes virtuales... y hasta un juego de Conecta 4! (es muy malo)</p>
     <hr class="my-4">
 </div>
 
 <div class="row mb-3 mt-4">
     <div class="col-12 text-center fall-element fall-delay-2">
         <p class="text-white small"><i class="bi bi-calendar-check me-1"></i>Primera publicación: 05/04/2025 - Última
-            actualización: 25/07/2025</p>
+            actualización: 25/08/2025</p>
     </div>
 </div>
 
@@ -82,14 +81,6 @@
                                 <p class="card-text">Modelo de regresión que predice el coste del seguro basado en
                                     diferentes factores.</p>
                                 <a href="/predictor-seguro" class="btn btn-primary">Ir al predictor</a>
-                            </div>
-                        </div>
-                        <div class="card project-card">
-                            <div class="card-body text-center">
-                                <h5 class="card-title">Recomendador de Películas</h5>
-                                <p class="card-text">Sistema de recomendación con deep learning usando embeddings y
-                                    redes neuronales.</p>
-                                <a href="/recomendador-peliculas" class="btn btn-primary">Ir al recomendador</a>
                             </div>
                         </div>
                     </div>
@@ -168,6 +159,14 @@
                         </div>
                         <div class="card project-card">
                             <div class="card-body text-center">
+                                <h5 class="card-title">Recomendador de Películas</h5>
+                                <p class="card-text">Sistema de recomendación con deep learning usando embeddings y
+                                    redes neuronales.</p>
+                                <a href="/recomendador-peliculas" class="btn btn-primary">Ir al recomendador</a>
+                            </div>
+                        </div>
+                        <div class="card project-card">
+                            <div class="card-body text-center">
                                 <h5 class="card-title">Connect Four con IA</h5>
                                 <p class="card-text">Juega al clásico juego "Connect Four" contra un modelo de ML
                                     entrenado con partidas reales.</p>
@@ -193,10 +192,10 @@
 
 <!-- Logo centrado muy cerca del footer -->
 <div class="row text-center fall-element fall-delay-5 logo-container">
-    <div class="col-12">
+    <!-- <div class="col-12">
         <img src="{{ url_for('static', filename='img/logo.png') }}" alt="Logo" width="210" class="logo-img">
         <p class="tech-text">Andrai Project</p>
-    </div>
+    </div> -->
 </div>
 {% endblock %}
 

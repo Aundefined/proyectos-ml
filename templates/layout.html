@@ -24,6 +24,11 @@
                         <li class="nav-item">
                             <a class="nav-link {% if request.path == '/' %}active{% endif %}" href="/">Home</a>
                         </li>
+                        <li class="nav-item">
+                            <a class="nav-link {% if request.path == '/sobre-mi' %}active{% endif %}" href="/sobre-mi">
+                                <i class="bi bi-person"></i> Sobre Mí
+                            </a>
+                        </li>
                         
                         <!-- REGRESIONES -->
                         <li class="nav-item dropdown">
@@ -109,6 +114,12 @@
                                     </a>
                                 </li>
                                 <li>
+                                    <a class="dropdown-item {% if request.path == '/recomendador-peliculas' %}active{% endif %}" 
+                                       href="/recomendador-peliculas">
+                                        <i class="bi bi-film"></i> Recomendador de Películas
+                                    </a>
+                                </li>
+                                <li>
                                     <a class="dropdown-item {% if request.path == '/connect-four' %}active{% endif %}" 
                                        href="/connect-four">
                                         <i class="bi bi-controller"></i> Connect Four
@@ -131,7 +142,7 @@
         <div class="container">
             <div class="row align-items-center">
                 <div class="col-md-4">
-                    <p class="mb-0 text-white">© 2025 Andrai Project</p>
+                    <!-- <p class="mb-0 text-white">© 2025 Andrai Project</p> -->
                 </div>
                 <div class="col-md-4 text-center">
                     <a href="https://www.python.org/" target="_blank" class="mx-2" title="Python">
@@ -141,10 +152,25 @@
                         <img src="https://scikit-learn.org/stable/_static/scikit-learn-logo-small.png"
                             alt="Scikit-learn" height="24">
                     </a>
+                    <a href="https://www.tensorflow.org/" target="_blank" class="mx-2" title="TensorFlow">
+                        <img src="https://www.tensorflow.org/images/tf_logo_horizontal.png"
+                            alt="TensorFlow" height="20" style="filter: brightness(0) invert(1);">
+                    </a>
+                    <a href="https://pytorch.org/" target="_blank" class="mx-2" title="PyTorch">
+                        <img src="https://pytorch.org/assets/images/pytorch-logo.png"
+                            alt="PyTorch" height="24">
+                    </a>
+                    <a href="https://huggingface.co/" target="_blank" class="mx-2" title="Hugging Face">
+                        <img src="https://huggingface.co/front/assets/huggingface_logo.svg"
+                            alt="Hugging Face" height="24">
+                    </a>
                 </div>
                 <div class="col-md-4 text-end">
                     <a href="mailto:tartulierarnaud@gmail.com" class="text-white me-3">
                         <i class="bi bi-envelope-fill"></i> Contacto
+                    </a>
+                    <a href="https://www.linkedin.com/in/arnaud-tartulier-35bb07162/" target="_blank" class="text-white me-3">
+                        <i class="bi bi-linkedin"></i> LinkedIn
                     </a>
                     <a href="https://github.com/Aundefined/proyectos-ml" target="_blank" class="text-white">
                         <i class="bi bi-github"></i> GitHub
