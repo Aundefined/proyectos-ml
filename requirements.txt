@@ -23,8 +23,8 @@ pillow
 # Dependencias adicionales para análisis no supervisado
 scipy
 
-tensorflow==2.15.0
-keras==2.15.0
+tensorflow
+keras
 
 #chatbot
 OpenAI
