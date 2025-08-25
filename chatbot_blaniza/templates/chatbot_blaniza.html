@@ -30,6 +30,10 @@
         download="dataset_blaniza_entrenamiento.jsonl">
         <i class="bi bi-download"></i> Descargar dataset
     </a>
+    <a href="{{ url_for('chatbot_blaniza.static', filename='doc/pedidos.pdf') }}" class="btn btn-success"
+        download="manual_pedidos.pdf">
+        <i class="bi bi-download"></i> Descargar PDF
+    </a>
     <button type="button" class="btn btn-warning" id="clearChatBtn">
         <i class="bi bi-trash"></i> Limpiar chat
     </button>
@@ -50,13 +54,6 @@
                             ¡Hola! Soy Blaniza Assistant, tu asistente virtual con modelo personalizado para el Manual de Usuario del Sistema de gestión de pedidos de Logística Blaniza.
                             <br><br>
                             He sido entrenado específicamente para ayudarte con cualquier consulta sobre el manual.
-                            Por ejemplo:
-                            <ul>
-                                <li>¿Cómo configurar las variables de entorno?</li>
-                                <li>¿Cómo instalar Node.js y NPM?</li>
-                                <li>¿Qué hacer si hay problemas de conexión con MongoDB?</li>
-                                <li>¿Cómo usar la API del sistema?</li>
-                            </ul>
                             ¿En qué puedo ayudarte?
                         </div>
                         <div class="message-time">Ahora</div>
