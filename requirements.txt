@@ -32,8 +32,6 @@ fitz
 tiktoken
 python-dotenv
 
-# Versiones más ligeras para Railway
-torch
-transformers
-accelerate
-psutil
+# Para conectar con el Space de Blaniza
+requests
+gradio_client
