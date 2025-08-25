@@ -15,8 +15,17 @@ MAX_FILE_SIZE = 5 * 1024 * 1024  # 5MB
 
 # Cargar el modelo entrenado
 try:
-    modelo = tf.keras.models.load_model('ml-models/mejor_modelo_frutas_transfer.h5')
-    print("Modelo de frutas cargado correctamente")
+    # Cargar modelo sin compilar (evita problemas en Railway)
+    modelo = tf.keras.models.load_model('ml-models/mejor_modelo_frutas_transfer.h5', compile=False)
+    print("✓ Modelo de frutas cargado sin compilar")
+    
+    # Recompilar manualmente
+    modelo.compile(
+        optimizer=tf.keras.optimizers.Adam(learning_rate=0.001),
+        loss='categorical_crossentropy',
+        metrics=['accuracy']
+    )
+    print("✓ Modelo de frutas recompilado correctamente")
 except Exception as e:
     print(f"Error al cargar el modelo de frutas: {e}")
     modelo = None
