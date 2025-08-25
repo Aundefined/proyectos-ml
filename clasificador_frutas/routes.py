@@ -44,13 +44,9 @@ try:
             print(f"❌ Archivo del modelo NO existe: {model_path}")
     else:
         print("❌ Carpeta ml-models NO existe")
-        print(f"📁 Contenido del directorio actual: {os.listdir('.')}")
         
 except Exception as e:
     print(f"💥 Error al cargar el modelo de frutas: {e}")
-    print(f"💥 Tipo de error: {type(e).__name__}")
-    import traceback
-    traceback.print_exc()
     modelo = None
 
 print(f"🔍 Estado final del modelo: {modelo is not None}")
