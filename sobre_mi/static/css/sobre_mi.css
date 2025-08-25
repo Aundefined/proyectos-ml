@@ -54,8 +54,10 @@
 /* Estilos para la foto de perfil */
 .profile-photo-container {
     text-align: center;
-    position: sticky;
-    top: 100px;
+    position: static !important;
+    transform: none !important;
+    animation: none !important;
+    transition: none !important;
 }
 
 .profile-photo {
@@ -65,12 +67,14 @@
     object-fit: cover;
     border: 4px solid rgba(255, 255, 255, 0.3);
     box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
-    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    transform: none !important;
+    animation: none !important;
+    position: static !important;
 }
 
 .profile-photo:hover {
-    transform: scale(1.05);
-    box-shadow: 0 15px 40px rgba(0, 0, 0, 0.4);
+    transform: none !important;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
 }
 
 .photo-caption {
