@@ -201,7 +201,26 @@ def chat():
         # Actualizar el historial en la sesión
         conversations[session_id] = messages
         
-        return jsonify({'response': answer})
+        # Preparar información de debug para el frontend
+        debug_info = {
+            'session_id': session_id[:8],  # Solo los primeros 8 caracteres por privacidad
+            'messages_count': len(messages),
+            'messages_sent': len(messages) - 1,  # Sin contar la respuesta recién añadida
+            'conversation_history': [
+                {
+                    'role': msg['role'], 
+                    'content': msg['content'][:100] + '...' if len(msg['content']) > 100 else msg['content']
+                } 
+                for msg in messages[:-1]  # Sin incluir la respuesta recién añadida
+            ],
+            'last_user_message': question,
+            'response_length': len(answer)
+        }
+        
+        return jsonify({
+            'response': answer,
+            'debug_info': debug_info
+        })
         
     except Exception as e:
         print(f"Error en /chat: {e}")

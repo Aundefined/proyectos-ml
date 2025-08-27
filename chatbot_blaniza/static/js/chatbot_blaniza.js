@@ -60,12 +60,24 @@ document.addEventListener('DOMContentLoaded', function() {
             // Ocultar indicador de escritura
             hideTypingIndicator();
             
+            // 🔍 TRAZA: Mostrar información completa de la respuesta
+            console.group('🤖 RESPUESTA COMPLETA DEL CHATBOT');
+            console.log('📦 Datos recibidos:', data);
+            
+            if (data.debug_info) {
+                console.log('🔍 Debug del servidor:', data.debug_info);
+                console.log('📊 Mensajes enviados al modelo:', data.debug_info.messages_sent || 'No disponible');
+                console.log('📝 Historial completo:', data.debug_info.conversation_history || 'No disponible');
+            }
+            
             if (data.error) {
+                console.error('❌ Error del servidor:', data.error);
                 addMessage('Lo siento, ha ocurrido un error. Por favor, inténtalo de nuevo.', 'bot');
-                console.error('Error:', data.error);
             } else {
+                console.log('✅ Respuesta del modelo:', data.response);
                 addMessage(data.response, 'bot');
             }
+            console.groupEnd();
         })
         .catch(error => {
             // Ocultar indicador de escritura
