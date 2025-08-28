@@ -82,46 +82,24 @@ def generate_answer_with_blaniza(messages, max_tokens=1000):
         # except Exception as debug_e:
         #     print(f"No se pudo obtener info del API: {debug_e}")
         
-        # Convertir mensajes a JSON para enviar historial completo
-        messages_json = json.dumps(messages)
-        print(f"📩 Enviando historial completo: {len(messages)} mensajes")
-        print(f"📝 JSON generado: {len(messages_json)} caracteres")
+        # Solo enviar el último mensaje del usuario para la interfaz simple
+        user_message = ""
+        for msg in reversed(messages):
+            if msg.get("role") == "user":
+                user_message = msg.get("content", "")
+                break
         
-        # Usar el endpoint /chat que acepta el historial completo
+        if not user_message:
+            return "No se encontró mensaje del usuario."
+        
+        print(f"📩 Enviando mensaje: {user_message[:50]}...")
+        
         try:
-            result = client.predict(messages_json, max_tokens, api_name="/chat")
+            result = client.predict(user_message, api_name="/simple_chat")
             
-            # Parsear la respuesta JSON del API
-            if isinstance(result, str):
-                response_data = json.loads(result)
-                if 'response' in response_data:
-                    return response_data['response']
-                elif 'error' in response_data:
-                    return f"Error del modelo: {response_data['error']}"
-                else:
-                    return str(result)
-            else:
-                return str(result)
-                
         except Exception as e1:
-            print(f"⚠️ Error con /chat: {e1}")
-            # Fallback al método anterior si /chat no funciona
-            print("🔄 Intentando fallback con /simple_chat...")
-            try:
-                user_message = ""
-                for msg in reversed(messages):
-                    if msg.get("role") == "user":
-                        user_message = msg.get("content", "")
-                        break
-                
-                if user_message:
-                    result = client.predict(user_message, api_name="/simple_chat")
-                    return str(result)
-                else:
-                    return "No se encontró mensaje del usuario."
-            except Exception as e2:
-                print(f"⚠️ Error con fallback: {e2}")
-                return f"Error del modelo en el Space: {str(e2)}"
+            print(f"⚠️ Error con /simple_chat: {e1}")
+            return f"Error del modelo en el Space: {str(e1)}"
         
         elapsed_time = time.time() - start_time
         print(f"⏱️ Tiempo de respuesta: {elapsed_time:.2f}s")
