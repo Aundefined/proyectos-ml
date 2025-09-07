@@ -1,0 +1,99 @@
+{% extends "layout.html" %}
+
+{% block title %}Log de Visitas - Proyectos ML{% endblock %}
+
+{% block head_styles %}
+<!-- DataTables CSS -->
+<link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/1.13.6/css/dataTables.bootstrap5.min.css">
+<link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/responsive/2.5.0/css/responsive.bootstrap5.min.css">
+{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <h4 class="card-title mb-0">
+                    <i class="bi bi-eye"></i> Log de Visitas
+                </h4>
+                <a href="/visitas/logout" class="btn btn-sm btn-outline-secondary">
+                    <i class="bi bi-box-arrow-right"></i> Cerrar Sesión
+                </a>
+            </div>
+            <div class="card-body">
+                <div class="mb-3">
+                    <p class="text-muted mb-2">
+                        <i class="bi bi-info-circle"></i> 
+                        Total de visitas registradas: <span class="badge bg-primary">{{ visits|length }}</span>
+                    </p>
+                </div>
+                
+                <div class="table-responsive">
+                    <table id="visitasTable" class="table table-striped table-hover">
+                        <thead class="table-dark">
+                            <tr>
+                                <th>Fecha y Hora</th>
+                                <th>URL</th>
+                                <th>Dirección IP</th>
+                                <th>País</th>
+                                <th>Región</th>
+                                <th>Ciudad</th>
+                                <th>CP</th>
+                                <th>Ubicación</th>
+                                <th width="100">Acciones</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for visit in visits %}
+                            <tr data-visit-id="{{ visit[0] }}">
+                                <td>{{ visit[1] }}</td>
+                                <td>
+                                    <a href="{{ visit[2] }}" target="_blank" class="text-decoration-none">
+                                        {{ visit[3] }}
+                                        <i class="bi bi-box-arrow-up-right small"></i>
+                                    </a>
+                                </td>
+                                <td>
+                                    <span class="font-monospace">{{ visit[4] }}</span>
+                                </td>
+                                <td>{{ visit[5] or '-' }}</td>
+                                <td>{{ visit[6] or '-' }}</td>
+                                <td>{{ visit[7] or '-' }}</td>
+                                <td>{{ visit[8] or '-' }}</td>
+                                <td>
+                                    {% if visit[9] %}
+                                        <a href="{{ visit[9] }}" target="_blank" class="btn btn-sm btn-outline-primary" title="Ver en Google Maps">
+                                            <i class="bi bi-geo-alt"></i>
+                                        </a>
+                                    {% else %}
+                                        -
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    <button class="btn btn-sm btn-outline-danger delete-visit" 
+                                            data-visit-id="{{ visit[0] }}"
+                                            title="Eliminar registro">
+                                        <i class="bi bi-trash"></i>
+                                    </button>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<!-- DataTables JS -->
+<script type="text/javascript" src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
+<script type="text/javascript" src="https://cdn.datatables.net/1.13.6/js/dataTables.bootstrap5.min.js"></script>
+<script type="text/javascript" src="https://cdn.datatables.net/responsive/2.5.0/js/dataTables.responsive.min.js"></script>
+<script type="text/javascript" src="https://cdn.datatables.net/responsive/2.5.0/js/responsive.bootstrap5.min.js"></script>
+
+<!-- JavaScript específico para visitas -->
+<script src="{{ url_for('visitas_log.static', filename='js/visitas.js') }}"></script>
+{% endblock %}

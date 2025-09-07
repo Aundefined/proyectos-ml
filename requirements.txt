@@ -35,3 +35,5 @@ python-dotenv
 # Para conectar con el Space de Blaniza
 requests
 gradio_client
+
+sqlite3

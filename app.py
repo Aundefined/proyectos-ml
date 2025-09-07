@@ -1,6 +1,7 @@
 from flask import Flask, render_template, redirect, request
 import os
 from werkzeug.middleware.proxy_fix import ProxyFix
+from visitas_log.visit_logger import init_db, log_visit, get_client_ip
 
 # ✅ Cargar variables de entorno para desarrollo local
 try:
@@ -24,6 +25,7 @@ from sobre_mi import sobre_mi_bp
 from recomendador_peliculas import recomendador_peliculas_bp
 from chatbot_pedidos import chatbot_pedidos_bp
 from chatbot_blaniza import chatbot_blaniza_bp
+from visitas_log import visitas_log_bp
 
 
 
@@ -32,6 +34,9 @@ app = Flask(__name__)
 
 # ✅ Configurar secret key desde variable de entorno
 app.secret_key = os.getenv('SECRET_KEY', 'desarrollo-local-fallback')
+
+# Inicializar la base de datos de visitas
+init_db()
 
 # Registrar los blueprints
 app.register_blueprint(predictor_sueldos_bp)
@@ -47,11 +52,23 @@ app.register_blueprint(sobre_mi_bp)
 app.register_blueprint(recomendador_peliculas_bp)
 app.register_blueprint(chatbot_pedidos_bp)
 app.register_blueprint(chatbot_blaniza_bp)
+app.register_blueprint(visitas_log_bp)
 
 app.wsgi_app = ProxyFix(app.wsgi_app, x_proto=1, x_host=1)
 
 @app.before_request
 def before_request():
+    # Registrar la visita antes de procesar la request
+    # Excluir archivos estáticos, la ruta de visitas y archivos de recursos
+    static_extensions = ('.css', '.js', '.png', '.jpg', '.jpeg', '.gif', '.ico', '.svg', '.woff', '.woff2', '.ttf', '.eot')
+    
+    if (request.endpoint and 
+        request.endpoint != 'static' and 
+        not request.path.startswith('/visitas') and
+        not request.path.endswith(static_extensions) and
+        not '/static/' in request.path):
+        log_visit(request.url, get_client_ip())
+    
     if not request.is_secure and not app.debug:
         url = request.url.replace('http://', 'https://', 1)
         return redirect(url, code=301)
