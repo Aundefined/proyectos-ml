@@ -1,8 +1,7 @@
 import sqlite3
 import os
 import requests
-from datetime import datetime
-import pytz
+from datetime import datetime, timedelta
 from flask import request
 
 DATABASE_PATH = 'visits.db'
@@ -77,9 +76,8 @@ def log_visit(url, ip_address):
         conn = sqlite3.connect(DATABASE_PATH)
         cursor = conn.cursor()
         
-        # Usar hora española (Madrid)
-        madrid_tz = pytz.timezone('Europe/Madrid')
-        fecha_hora = datetime.now(madrid_tz)
+        # Añadir 2 horas para hora española
+        fecha_hora = datetime.now() + timedelta(hours=2)
         
         # Obtener datos de geolocalización y tipo de dispositivo
         geo_data = get_geo_data(ip_address)

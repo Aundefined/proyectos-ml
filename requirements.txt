@@ -35,6 +35,3 @@ python-dotenv
 # Para conectar con el Space de Blaniza
 requests
 gradio_client
-
-# Para zona horaria española
-pytz
