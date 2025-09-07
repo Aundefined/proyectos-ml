@@ -62,6 +62,10 @@ def init_db():
 
 def log_visit(url, ip_address):
     """Registrar una visita en la base de datos"""
+    # No registrar visitas desde localhost
+    if ip_address == '127.0.0.1' or ip_address == 'localhost':
+        return
+    
     try:
         conn = sqlite3.connect(DATABASE_PATH)
         cursor = conn.cursor()
