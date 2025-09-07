@@ -22,7 +22,8 @@ def init_db():
             city TEXT,
             zip TEXT,
             lat REAL,
-            lon REAL
+            lon REAL,
+            device_type TEXT
         )
     ''')
     
@@ -57,6 +58,11 @@ def init_db():
     except sqlite3.OperationalError:
         pass
     
+    try:
+        cursor.execute('ALTER TABLE visitas ADD COLUMN device_type TEXT')
+    except sqlite3.OperationalError:
+        pass
+    
     conn.commit()
     conn.close()
 
@@ -72,21 +78,22 @@ def log_visit(url, ip_address):
         
         fecha_hora = datetime.now()
         
-        # Obtener datos de geolocalización
+        # Obtener datos de geolocalización y tipo de dispositivo
         geo_data = get_geo_data(ip_address)
+        device_type = get_device_type()
         
         if geo_data:
             cursor.execute('''
-                INSERT INTO visitas (FECHA_HORA, URL, DIRECCION_IP, country, regionName, city, zip, lat, lon)
-                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+                INSERT INTO visitas (FECHA_HORA, URL, DIRECCION_IP, country, regionName, city, zip, lat, lon, device_type)
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
             ''', (fecha_hora, url, ip_address, 
                   geo_data['country'], geo_data['regionName'], geo_data['city'], 
-                  geo_data['zip'], geo_data['lat'], geo_data['lon']))
+                  geo_data['zip'], geo_data['lat'], geo_data['lon'], device_type))
         else:
             cursor.execute('''
-                INSERT INTO visitas (FECHA_HORA, URL, DIRECCION_IP)
-                VALUES (?, ?, ?)
-            ''', (fecha_hora, url, ip_address))
+                INSERT INTO visitas (FECHA_HORA, URL, DIRECCION_IP, device_type)
+                VALUES (?, ?, ?, ?)
+            ''', (fecha_hora, url, ip_address, device_type))
         
         conn.commit()
         conn.close()
@@ -100,7 +107,7 @@ def get_all_visits():
         cursor = conn.cursor()
         
         cursor.execute('''
-            SELECT id, FECHA_HORA, URL, DIRECCION_IP, country, regionName, city, zip, lat, lon
+            SELECT id, FECHA_HORA, URL, DIRECCION_IP, country, regionName, city, zip, lat, lon, device_type
             FROM visitas
             ORDER BY FECHA_HORA DESC
         ''')
@@ -143,7 +150,8 @@ def get_all_visits():
                 visit[5],          # 6: regionName (de BD)
                 visit[6],          # 7: city (de BD)
                 visit[7],          # 8: zip (de BD)
-                maps_link          # 9: enlace a Google Maps
+                maps_link,         # 9: enlace a Google Maps
+                visit[10]          # 10: device_type (de BD)
             ))
         
         return formatted_visits
@@ -190,6 +198,25 @@ def get_geo_data(ip_address):
         print(f"Error al obtener datos de geolocalización: {e}")
     
     return None
+
+def get_device_type():
+    """Detectar el tipo de dispositivo basado en el User-Agent"""
+    user_agent = request.headers.get('User-Agent', '').lower()
+    
+    # Detectar móviles
+    mobile_keywords = ['mobile', 'android', 'iphone', 'ipad', 'ipod', 'blackberry', 'opera mini', 'windows phone']
+    if any(keyword in user_agent for keyword in mobile_keywords):
+        # Detectar tablets específicamente
+        if 'ipad' in user_agent or 'tablet' in user_agent:
+            return 'Tablet'
+        return 'Móvil'
+    
+    # Detectar tablets (que no fueron detectados como móviles)
+    if 'tablet' in user_agent:
+        return 'Tablet'
+    
+    # Por defecto es escritorio
+    return 'PC'
 
 def get_client_ip():
     """Obtener la dirección IP real del cliente"""

@@ -10,19 +10,19 @@ $(document).ready(function() {
         "columnDefs": [
             {
                 "targets": 0,
-                "width": "12%"
+                "width": "10%"
             },
             {
                 "targets": 1,
-                "width": "20%"
+                "width": "18%"
             },
             {
                 "targets": 2,
-                "width": "12%"
+                "width": "10%"
             },
             {
                 "targets": 3,
-                "width": "10%"
+                "width": "8%"
             },
             {
                 "targets": 4,
@@ -34,15 +34,19 @@ $(document).ready(function() {
             },
             {
                 "targets": 6,
-                "width": "6%"
+                "width": "10%"
             },
             {
                 "targets": 7,
-                "width": "10%",
-                "orderable": false
+                "width": "6%"
             },
             {
                 "targets": 8,
+                "width": "8%",
+                "orderable": false
+            },
+            {
+                "targets": 9,
                 "width": "10%",
                 "orderable": false
             }
