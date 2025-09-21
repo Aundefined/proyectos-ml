@@ -1,7 +1,7 @@
 from flask import render_template, redirect, request, session, flash, jsonify
 import os
 from . import visitas_log_bp
-from .visit_logger import get_all_visits, delete_visit
+from .visit_logger import get_all_visits, delete_visit, delete_visits_by_ip
 
 @visitas_log_bp.route('/visitas', methods=['GET', 'POST'])
 def visitas():
@@ -36,9 +36,29 @@ def delete_visit_route(visit_id):
     # Verificar autenticación
     if not session.get('visitas_authenticated', False):
         return jsonify({'success': False, 'message': 'No autorizado'}), 401
-    
+
     success = delete_visit(visit_id)
     if success:
         return jsonify({'success': True, 'message': 'Visita eliminada correctamente'})
     else:
         return jsonify({'success': False, 'message': 'Error al eliminar la visita'}), 500
+
+@visitas_log_bp.route('/visitas/delete-by-ip', methods=['POST'])
+def delete_visits_by_ip_route():
+    """Eliminar todas las visitas de una IP específica"""
+    # Verificar autenticación
+    if not session.get('visitas_authenticated', False):
+        return jsonify({'success': False, 'message': 'No autorizado'}), 401
+
+    ip_address = request.form.get('ip_address')
+    if not ip_address:
+        return jsonify({'success': False, 'message': 'IP no proporcionada'}), 400
+
+    deleted_count = delete_visits_by_ip(ip_address)
+    if deleted_count is not False:
+        return jsonify({
+            'success': True,
+            'message': f'Se eliminaron {deleted_count} registros de la IP {ip_address}'
+        })
+    else:
+        return jsonify({'success': False, 'message': 'Error al eliminar registros'}), 500

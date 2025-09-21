@@ -5,11 +5,16 @@ from sklearn.metrics.pairwise import cosine_similarity
 import pickle
 import os
 import uuid
+import tempfile
+from gradio_client import Client
 
 from . import chatbot_pedidos_bp
 
-# ✅ Configura OpenAI usando variable de entorno
+# Configura OpenAI usando variable de entorno
 client = OpenAI(api_key=os.getenv('OPENAI_API_KEY'))
+
+# Configuración del endpoint STT
+STT_ENDPOINT_URL = "https://arnaudclaudeml-stt-model-endpoint.hf.space"
 
 # Variables globales para chunks y embeddings pre-calculados
 chunks = None
@@ -148,6 +153,47 @@ def get_conversation_history(session_id):
         conversations[session_id] = []
     return conversations[session_id]
 
+def transcribe_audio_with_stt_service(audio_file):
+    """Transcribe audio usando Space con whisper-large-v3"""
+    try:
+        # Leer el contenido del archivo
+        audio_file.seek(0)
+        audio_content = audio_file.read()
+
+        # Crear archivo temporal como WAV
+        with tempfile.NamedTemporaryFile(suffix='.wav', delete=False) as temp_file:
+            temp_file.write(audio_content)
+            temp_file.flush()
+
+            try:
+                # Conectar al Space usando cliente Gradio
+                client_gradio = Client(STT_ENDPOINT_URL)
+
+                # Usar fn_index=0 con el archivo como handle
+                from gradio_client import handle_file
+                result = client_gradio.predict(handle_file(temp_file.name), fn_index=0)
+
+                if result and isinstance(result, str):
+                    return result
+                else:
+                    return "Error: No se pudo transcribir el audio."
+
+            except Exception as e:
+                print(f"Error con Space STT: {e}")
+                return f"Error en transcripción: {str(e)}"
+
+            finally:
+                # Limpiar archivo temporal
+                try:
+                    os.unlink(temp_file.name)
+                except:
+                    pass
+
+    except Exception as e:
+        print(f"Error general STT: {e}")
+        return f"Error: {str(e)}"
+
+
 @chatbot_pedidos_bp.route('/')
 def index_route():
     """Página principal del chatbot"""
@@ -207,6 +253,68 @@ def chat():
     except Exception as e:
         print(f"Error en /chat: {e}")
         return jsonify({'error': 'Ha ocurrido un error interno. Por favor, inténtalo de nuevo.'}), 500
+
+@chatbot_pedidos_bp.route('/transcribe-audio', methods=['POST'])
+def transcribe_audio():
+    """Endpoint para transcribir audio y enviarlo al chat"""
+    try:
+        # Verificar que se envió un archivo de audio
+        if 'audio' not in request.files:
+            return jsonify({'error': 'No se envió archivo de audio'}), 400
+
+        audio_file = request.files['audio']
+        if audio_file.filename == '':
+            return jsonify({'error': 'Archivo de audio vacío'}), 400
+
+        # Asegurar que los datos están cargados
+        if chunks is None or embeddings_matrix is None:
+            if not load_chatbot_data():
+                return jsonify({'error': 'Error del sistema. Los datos del chatbot no están disponibles.'}), 500
+
+        # Transcribir el audio
+        transcribed_text = transcribe_audio_with_stt_service(audio_file)
+
+        # Verificar si hubo error en la transcripción
+        if transcribed_text.startswith("Error"):
+            return jsonify({'error': transcribed_text}), 500
+
+        # Procesar el texto transcrito como un mensaje normal
+        # Obtener o crear sesión
+        session_id = get_or_create_session_id()
+        messages = get_conversation_history(session_id)
+
+        # Buscar chunks relevantes
+        relevant_chunks = search_similar_chunks(transcribed_text)
+        context = "\n\n".join(relevant_chunks)
+
+        # Si es el primer mensaje de la sesión, añadir system prompt
+        if not messages:
+            system_prompt = get_system_prompt(context)
+            messages.append({"role": "system", "content": system_prompt})
+        else:
+            # Actualizar el contexto en el system prompt existente
+            messages[0]["content"] = get_system_prompt(context)
+
+        # Añadir el mensaje transcrito del usuario al historial
+        messages.append({"role": "user", "content": transcribed_text})
+
+        # Generar respuesta
+        answer = generate_answer(messages)
+
+        # Añadir la respuesta del asistente al historial
+        messages.append({"role": "assistant", "content": answer})
+
+        # Actualizar el historial en la sesión
+        conversations[session_id] = messages
+
+        return jsonify({
+            'transcribed_text': transcribed_text,
+            'response': answer
+        })
+
+    except Exception as e:
+        print(f"Error en /transcribe-audio: {e}")
+        return jsonify({'error': 'Ha ocurrido un error interno procesando el audio.'}), 500
 
 @chatbot_pedidos_bp.route('/clear-chat', methods=['POST'])
 def clear_chat():

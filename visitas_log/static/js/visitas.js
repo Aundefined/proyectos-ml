@@ -53,11 +53,11 @@ $(document).ready(function() {
         ]
     });
     
-    // Manejar eliminación de registros
+    // Manejar eliminación de registros individuales
     $(document).on('click', '.delete-visit', function() {
         var visitId = $(this).data('visit-id');
         var row = $(this).closest('tr');
-        
+
         if (confirm('¿Estás seguro de que quieres eliminar este registro de visita?')) {
             $.ajax({
                 url: '/visitas/delete/' + visitId,
@@ -66,7 +66,7 @@ $(document).ready(function() {
                     if (response.success) {
                         // Eliminar la fila de la tabla
                         $('#visitasTable').DataTable().row(row).remove().draw();
-                        
+
                         // Mostrar mensaje de éxito
                         $('<div class="alert alert-success alert-dismissible fade show" role="alert">' +
                           response.message +
@@ -80,6 +80,51 @@ $(document).ready(function() {
                     alert('Error al comunicarse con el servidor');
                 }
             });
+        }
+    });
+
+    // Manejar eliminación por IP
+    $('#deleteByIpBtn').click(function() {
+        var ipAddress = $('#ipToDelete').val().trim();
+
+        if (!ipAddress) {
+            alert('Por favor, introduce una dirección IP válida');
+            return;
+        }
+
+        // Validar formato básico de IP
+        var ipPattern = /^(\d{1,3}\.){3}\d{1,3}$/;
+        if (!ipPattern.test(ipAddress)) {
+            alert('Por favor, introduce una dirección IP válida (ej: 192.168.1.1)');
+            return;
+        }
+
+        if (confirm('¿Estás seguro de que quieres eliminar TODOS los registros de la IP: ' + ipAddress + '?')) {
+            $.ajax({
+                url: '/visitas/delete-by-ip',
+                type: 'POST',
+                data: {
+                    'ip_address': ipAddress
+                },
+                success: function(response) {
+                    if (response.success) {
+                        // Recargar la página para reflejar los cambios
+                        location.reload();
+                    } else {
+                        alert('Error: ' + response.message);
+                    }
+                },
+                error: function() {
+                    alert('Error al comunicarse con el servidor');
+                }
+            });
+        }
+    });
+
+    // Permitir presionar Enter en el campo de IP
+    $('#ipToDelete').keypress(function(e) {
+        if (e.which == 13) {
+            $('#deleteByIpBtn').click();
         }
     });
 });

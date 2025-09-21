@@ -165,16 +165,40 @@ def delete_visit(visit_id):
     try:
         conn = sqlite3.connect(DATABASE_PATH)
         cursor = conn.cursor()
-        
+
         cursor.execute('''
             DELETE FROM visitas WHERE id = ?
         ''', (visit_id,))
-        
+
         conn.commit()
         conn.close()
         return True
     except Exception as e:
         print(f"Error al eliminar visita: {e}")
+        return False
+
+def delete_visits_by_ip(ip_address):
+    """Eliminar todas las visitas de una IP específica"""
+    try:
+        conn = sqlite3.connect(DATABASE_PATH)
+        cursor = conn.cursor()
+
+        # Contar cuántos registros se van a eliminar
+        cursor.execute('''
+            SELECT COUNT(*) FROM visitas WHERE DIRECCION_IP = ?
+        ''', (ip_address,))
+        count = cursor.fetchone()[0]
+
+        # Eliminar los registros
+        cursor.execute('''
+            DELETE FROM visitas WHERE DIRECCION_IP = ?
+        ''', (ip_address,))
+
+        conn.commit()
+        conn.close()
+        return count
+    except Exception as e:
+        print(f"Error al eliminar visitas por IP: {e}")
         return False
 
 def get_geo_data(ip_address):

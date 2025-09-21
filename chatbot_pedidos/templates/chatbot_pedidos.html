@@ -10,6 +10,10 @@
 <h2 class="text-white fall-element fall-delay-1">Chatbot App Pedidos</h2>
 <p class="lead text-white fall-element fall-delay-1">Asistente virtual para consultas sobre el Manual de Usuario del
     Sistema de gestión de pedidos de Logística Blaniza</p>
+<p class="text-warning fall-element fall-delay-1">
+    <i class="bi bi-mic-fill text-warning me-1"></i>
+    <strong>¡Nuevo!</strong> Ya puedes hacer preguntas por voz - mantén presionado 🎤
+</p>
 
 <div class="text-white-50 mb-4 fall-element fall-delay-1">
     <i class="bi bi-info-circle me-1"></i>
@@ -60,12 +64,27 @@
                 <div class="chat-input-wrapper">
                     <textarea id="messageInput" class="chat-input"
                         placeholder="Escribe tu pregunta sobre el manual de pedidos..." rows="1"></textarea>
+
+                    <!-- Botón de micrófono -->
+                    <button id="voiceButton" class="voice-button" title="Grabar mensaje de voz">
+                        <i class="bi bi-mic-fill"></i>
+                    </button>
+
                     <button id="sendButton" class="send-button" disabled>
                         <i class="bi bi-send-fill"></i>
                     </button>
                 </div>
                 <div class="input-hint">
-                    Presiona Enter para enviar, Shift+Enter para nueva línea
+                    Presiona Enter para enviar, Shift+Enter para nueva línea • <span id="voiceHint">Click en 🎤 para grabar audio (máx. 20s)</span>
+                </div>
+            </div>
+
+            <!-- Componente de grabación de audio (oculto inicialmente) -->
+            <div id="audioRecordingContainer" class="audio-recording-container" style="display: none;">
+                <div class="recording-status">
+                    <i class="bi bi-mic-fill text-danger"></i>
+                    <span>Grabando... (Suelta para enviar)</span>
+                    <div class="recording-timer">0s</div>
                 </div>
             </div>
         </div>
@@ -104,6 +123,15 @@
                     <li>Pregunta por procedimientos paso a paso</li>
                     <li>Consulta sobre configuraciones o ajustes</li>
                     <li>Si no encuentra la información, te lo indicará amablemente</li>
+                </ul>
+
+                <h6 class="mt-4"><i class="bi bi-mic-fill text-success"></i> Funcionalidad por Voz</h6>
+                <ul>
+                    <li><strong>Push-to-talk:</strong> Mantén presionado el botón 🎤 para grabar tu pregunta</li>
+                    <li><strong>Modelo STT:</strong> Utiliza Whisper Large v3 de OpenAI (modelo open source)</li>
+                    <li><strong>Duración máxima:</strong> 20 segundos de grabación por mensaje</li>
+                    <li>La transcripción puede tardar unos segundos en procesarse</li>
+                    <li>Una vez transcrito, el chatbot responderá automáticamente</li>
                 </ul>
             </div>
             <div class="modal-footer">

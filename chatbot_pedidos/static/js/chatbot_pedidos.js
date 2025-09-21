@@ -3,6 +3,17 @@ document.addEventListener('DOMContentLoaded', function() {
     const sendButton = document.getElementById('sendButton');
     const chatMessages = document.getElementById('chatMessages');
     const clearChatBtn = document.getElementById('clearChatBtn');
+    const voiceButton = document.getElementById('voiceButton');
+    const audioRecordingContainer = document.getElementById('audioRecordingContainer');
+    const voiceHint = document.getElementById('voiceHint');
+
+    // Variables para grabación de audio
+    let mediaRecorder = null;
+    let audioChunks = [];
+    let isRecording = false;
+    let recordingTimer = null;
+    let recordingStartTime = null;
+    const MAX_RECORDING_TIME = 20000; // 20 segundos
 
     // Auto-resize del textarea
     messageInput.addEventListener('input', function() {
@@ -153,6 +164,37 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     }
 
+    function showTranscriptionIndicator() {
+        const transcriptionDiv = document.createElement('div');
+        transcriptionDiv.className = 'message bot-message';
+        transcriptionDiv.id = 'transcription-indicator';
+
+        const avatar = document.createElement('div');
+        avatar.className = 'message-avatar';
+        avatar.innerHTML = '<i class="bi bi-robot"></i>';
+
+        const content = document.createElement('div');
+        content.className = 'message-content';
+
+        const indicator = document.createElement('div');
+        indicator.className = 'transcription-indicator';
+        indicator.innerHTML = '<i class="bi bi-mic-fill text-primary me-2"></i>Transcribiendo audio<div class="typing-indicator"><div class="typing-dot"></div><div class="typing-dot"></div><div class="typing-dot"></div></div>';
+
+        content.appendChild(indicator);
+        transcriptionDiv.appendChild(avatar);
+        transcriptionDiv.appendChild(content);
+
+        chatMessages.appendChild(transcriptionDiv);
+        scrollToBottom();
+    }
+
+    function hideTranscriptionIndicator() {
+        const indicator = document.getElementById('transcription-indicator');
+        if (indicator) {
+            indicator.remove();
+        }
+    }
+
     function scrollToBottom() {
         setTimeout(() => {
             chatMessages.scrollTop = chatMessages.scrollHeight;
@@ -188,6 +230,197 @@ document.addEventListener('DOMContentLoaded', function() {
             console.error('Error:', error);
             alert('Error de conexión al limpiar el chat. Por favor, recarga la página.');
         });
+    }
+
+    // ==============================================
+    // FUNCIONALIDAD DE GRABACIÓN DE VOZ (Push to Talk)
+    // ==============================================
+
+    // Configurar eventos para push-to-talk
+    voiceButton.addEventListener('mousedown', handleVoiceButtonDown);
+    voiceButton.addEventListener('mouseup', handleVoiceButtonUp);
+    voiceButton.addEventListener('mouseleave', handleVoiceButtonUp); // Por si se sale del botón
+    voiceButton.addEventListener('touchstart', handleVoiceButtonDown, { passive: false });
+    voiceButton.addEventListener('touchend', handleVoiceButtonUp, { passive: false });
+
+    // También manejar eventos globales para cuando el usuario suelta fuera del botón
+    document.addEventListener('mouseup', handleVoiceButtonUp);
+    document.addEventListener('touchend', handleVoiceButtonUp);
+
+    function handleVoiceButtonDown(e) {
+        e.preventDefault();
+        e.stopPropagation();
+        if (!isRecording) {
+            startRecording();
+        }
+    }
+
+    function handleVoiceButtonUp(e) {
+        if (isRecording) {
+            stopRecording();
+        }
+    }
+
+    async function startRecording() {
+
+        if (isRecording) return;
+
+        try {
+            // Solicitar permisos de micrófono
+            const stream = await navigator.mediaDevices.getUserMedia({
+                audio: {
+                    echoCancellation: true,
+                    noiseSuppression: true,
+                    sampleRate: 16000
+                }
+            });
+
+            // Forzar WAV que es compatible con Whisper
+            mediaRecorder = new MediaRecorder(stream);
+
+            audioChunks = [];
+            isRecording = true;
+            recordingStartTime = Date.now();
+
+            // Cambiar interfaz a modo grabación
+            voiceButton.classList.add('recording');
+            voiceButton.innerHTML = '<i class="bi bi-mic-fill text-danger"></i>';
+            audioRecordingContainer.style.display = 'block';
+            voiceHint.textContent = 'Mantén presionado para grabar...';
+
+            // Iniciar timer visual
+            updateRecordingTimer();
+            recordingTimer = setInterval(updateRecordingTimer, 100);
+
+            // Configurar eventos del MediaRecorder
+            mediaRecorder.ondataavailable = function(event) {
+                if (event.data.size > 0) {
+                    audioChunks.push(event.data);
+                }
+            };
+
+            mediaRecorder.onstop = function() {
+                processRecording();
+            };
+
+            // Iniciar grabación
+            mediaRecorder.start();
+
+            // Auto-stop después del tiempo máximo
+            setTimeout(() => {
+                if (isRecording) {
+                    stopRecording();
+                }
+            }, MAX_RECORDING_TIME);
+
+        } catch (error) {
+            console.error('Error accessing microphone:', error);
+            alert('No se pudo acceder al micrófono. Por favor, verifica los permisos.');
+            resetRecordingState();
+        }
+    }
+
+    function stopRecording() {
+        if (!isRecording || !mediaRecorder) return;
+
+        isRecording = false;
+        clearInterval(recordingTimer);
+
+        // Detener grabación
+        if (mediaRecorder.state === 'recording') {
+            mediaRecorder.stop();
+        }
+
+        // Detener stream
+        const stream = mediaRecorder.stream;
+        if (stream) {
+            stream.getTracks().forEach(track => track.stop());
+        }
+
+        // Cambiar interfaz
+        voiceButton.classList.remove('recording');
+        voiceButton.innerHTML = '<i class="bi bi-mic-fill"></i>';
+        audioRecordingContainer.style.display = 'none';
+        voiceHint.textContent = 'Click en 🎤 para grabar audio (máx. 20s)';
+    }
+
+    function updateRecordingTimer() {
+        if (!isRecording || !recordingStartTime) return;
+
+        const elapsed = Math.floor((Date.now() - recordingStartTime) / 1000);
+        const timerElement = document.querySelector('.recording-timer');
+        if (timerElement) {
+            timerElement.textContent = `${elapsed}s`;
+        }
+    }
+
+    function resetRecordingState() {
+        isRecording = false;
+        clearInterval(recordingTimer);
+        voiceButton.classList.remove('recording');
+        voiceButton.innerHTML = '<i class="bi bi-mic-fill"></i>';
+        audioRecordingContainer.style.display = 'none';
+        voiceHint.textContent = 'Click en 🎤 para grabar audio (máx. 20s)';
+    }
+
+    async function processRecording() {
+        if (audioChunks.length === 0) {
+            resetRecordingState();
+            return;
+        }
+
+        try {
+            // Crear blob de audio
+            const audioBlob = new Blob(audioChunks, { type: 'audio/webm' });
+
+            // Verificar duración mínima (opcional)
+            if (audioBlob.size < 1000) { // Muy pequeño, probablemente no hay audio
+                resetRecordingState();
+                return;
+            }
+
+            // Mostrar indicador de transcripción
+            showTranscriptionIndicator();
+
+            // Enviar audio al servidor
+            const formData = new FormData();
+            formData.append('audio', audioBlob, 'recording.wav');
+
+            const response = await fetch('/chatbot-pedidos/transcribe-audio', {
+                method: 'POST',
+                body: formData
+            });
+
+            const result = await response.json();
+
+            // Ocultar indicador de transcripción
+            hideTranscriptionIndicator();
+
+            if (result.error) {
+                console.error('Error transcribiendo:', result.error);
+                addMessage('Error al procesar el audio. Por favor, inténtalo de nuevo.', 'bot');
+            } else {
+                // Añadir mensaje transcrito del usuario
+                addMessage(result.transcribed_text, 'user');
+                // Añadir respuesta del bot
+                addMessage(result.response, 'bot');
+            }
+
+        } catch (error) {
+            console.error('Error processing recording:', error);
+            // Ocultar indicador de transcripción en caso de error
+            hideTranscriptionIndicator();
+            addMessage('Error al enviar el audio. Por favor, inténtalo de nuevo.', 'bot');
+        } finally {
+            resetRecordingState();
+        }
+    }
+
+    // Verificar soporte de MediaRecorder al cargar
+    if (!navigator.mediaDevices || !MediaRecorder) {
+        voiceButton.disabled = true;
+        voiceButton.title = 'Grabación de voz no soportada en este navegador';
+        voiceHint.textContent = 'Grabación de voz no disponible';
     }
 
     // Focus inicial en el input
