@@ -35,6 +35,19 @@
     </a>
 </div>
 
+<!-- Selector de modelo STT -->
+<div class="mb-3 fall-element fall-delay-2">
+    <div class="d-flex align-items-center justify-content-center">
+        <label for="sttModelSelect" class="form-label text-white me-2 mb-0">
+            <i class="bi bi-cpu"></i> Modelo de transcripción:
+        </label>
+        <select id="sttModelSelect" class="form-select form-select-sm" style="max-width: 250px;">
+            <option value="openai">whisper-1 (OpenAI API)</option>
+            <option value="space">whisper-large-v3 (Open Source)</option>
+        </select>
+    </div>
+</div>
+
 <!-- Contenedor principal del chat -->
 <div class="row">
     <div class="col-12">
@@ -79,14 +92,6 @@
                 </div>
             </div>
 
-            <!-- Componente de grabación de audio (oculto inicialmente) -->
-            <div id="audioRecordingContainer" class="audio-recording-container" style="display: none;">
-                <div class="recording-status">
-                    <i class="bi bi-mic-fill text-danger"></i>
-                    <span>Grabando... (Suelta para enviar)</span>
-                    <div class="recording-timer">0s</div>
-                </div>
-            </div>
         </div>
     </div>
 </div>
@@ -128,9 +133,9 @@
                 <h6 class="mt-4"><i class="bi bi-mic-fill text-success"></i> Funcionalidad por Voz</h6>
                 <ul>
                     <li><strong>Push-to-talk:</strong> Mantén presionado el botón 🎤 para grabar tu pregunta</li>
-                    <li><strong>Modelo STT:</strong> Utiliza Whisper Large v3 de OpenAI (modelo open source)</li>
+                    <li><strong>Selector de modelo:</strong> Elige entre whisper-large-v3 (gratuito, más lento) o whisper-1 (de pago, más rápido)</li>
                     <li><strong>Duración máxima:</strong> 20 segundos de grabación por mensaje</li>
-                    <li>La transcripción puede tardar unos segundos en procesarse</li>
+                    <li>La transcripción puede tardar unos segundos en procesarse (especialmente con el modelo gratuito)</li>
                     <li>Una vez transcrito, el chatbot responderá automáticamente</li>
                 </ul>
             </div>

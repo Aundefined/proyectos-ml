@@ -176,9 +176,13 @@ document.addEventListener('DOMContentLoaded', function() {
         const content = document.createElement('div');
         content.className = 'message-content';
 
+        // Determinar qué modelo se está usando
+        const selectedModel = document.getElementById('sttModelSelect').value;
+        const modelText = selectedModel === 'openai' ? 'whisper-1' : 'whisper-large-v3';
+
         const indicator = document.createElement('div');
         indicator.className = 'transcription-indicator';
-        indicator.innerHTML = '<i class="bi bi-mic-fill text-primary me-2"></i>Transcribiendo audio<div class="typing-indicator"><div class="typing-dot"></div><div class="typing-dot"></div><div class="typing-dot"></div></div>';
+        indicator.innerHTML = `<i class="bi bi-mic-fill text-primary me-2"></i>Transcribiendo con ${modelText}<div class="typing-indicator"><div class="typing-dot"></div><div class="typing-dot"></div><div class="typing-dot"></div></div>`;
 
         content.appendChild(indicator);
         transcriptionDiv.appendChild(avatar);
@@ -192,6 +196,33 @@ document.addEventListener('DOMContentLoaded', function() {
         const indicator = document.getElementById('transcription-indicator');
         if (indicator) {
             indicator.remove();
+        }
+    }
+
+    function showRecordingOverlay() {
+        // Crear overlay de grabación
+        const overlay = document.createElement('div');
+        overlay.id = 'recording-overlay';
+        overlay.className = 'recording-overlay';
+
+        const content = document.createElement('div');
+        content.className = 'recording-overlay-content';
+        content.innerHTML = `
+            <div class="recording-icon">
+                <i class="bi bi-mic-fill"></i>
+            </div>
+            <div class="recording-text">GRABANDO</div>
+            <div class="recording-timer-overlay">0s</div>
+        `;
+
+        overlay.appendChild(content);
+        document.body.appendChild(overlay);
+    }
+
+    function hideRecordingOverlay() {
+        const overlay = document.getElementById('recording-overlay');
+        if (overlay) {
+            overlay.remove();
         }
     }
 
@@ -285,8 +316,10 @@ document.addEventListener('DOMContentLoaded', function() {
             // Cambiar interfaz a modo grabación
             voiceButton.classList.add('recording');
             voiceButton.innerHTML = '<i class="bi bi-mic-fill text-danger"></i>';
-            audioRecordingContainer.style.display = 'block';
             voiceHint.textContent = 'Mantén presionado para grabar...';
+
+            // Mostrar overlay de grabación en el centro
+            showRecordingOverlay();
 
             // Iniciar timer visual
             updateRecordingTimer();
@@ -340,17 +373,27 @@ document.addEventListener('DOMContentLoaded', function() {
         // Cambiar interfaz
         voiceButton.classList.remove('recording');
         voiceButton.innerHTML = '<i class="bi bi-mic-fill"></i>';
-        audioRecordingContainer.style.display = 'none';
         voiceHint.textContent = 'Click en 🎤 para grabar audio (máx. 20s)';
+
+        // Ocultar overlay de grabación
+        hideRecordingOverlay();
     }
 
     function updateRecordingTimer() {
         if (!isRecording || !recordingStartTime) return;
 
         const elapsed = Math.floor((Date.now() - recordingStartTime) / 1000);
+
+        // Actualizar timer en la barra inferior (si existe)
         const timerElement = document.querySelector('.recording-timer');
         if (timerElement) {
             timerElement.textContent = `${elapsed}s`;
+        }
+
+        // Actualizar timer en el overlay
+        const overlayTimer = document.querySelector('.recording-timer-overlay');
+        if (overlayTimer) {
+            overlayTimer.textContent = `${elapsed}s`;
         }
     }
 
@@ -359,8 +402,8 @@ document.addEventListener('DOMContentLoaded', function() {
         clearInterval(recordingTimer);
         voiceButton.classList.remove('recording');
         voiceButton.innerHTML = '<i class="bi bi-mic-fill"></i>';
-        audioRecordingContainer.style.display = 'none';
         voiceHint.textContent = 'Click en 🎤 para grabar audio (máx. 20s)';
+        hideRecordingOverlay();
     }
 
     async function processRecording() {
@@ -382,9 +425,13 @@ document.addEventListener('DOMContentLoaded', function() {
             // Mostrar indicador de transcripción
             showTranscriptionIndicator();
 
+            // Obtener modelo seleccionado
+            const selectedModel = document.getElementById('sttModelSelect').value;
+
             // Enviar audio al servidor
             const formData = new FormData();
             formData.append('audio', audioBlob, 'recording.wav');
+            formData.append('model', selectedModel);
 
             const response = await fetch('/chatbot-pedidos/transcribe-audio', {
                 method: 'POST',

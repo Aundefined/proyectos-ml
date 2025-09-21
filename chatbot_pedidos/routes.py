@@ -193,6 +193,43 @@ def transcribe_audio_with_stt_service(audio_file):
         print(f"Error general STT: {e}")
         return f"Error: {str(e)}"
 
+def transcribe_audio_with_openai(audio_file):
+    """Transcribe audio usando OpenAI Whisper API"""
+    try:
+        # Leer el contenido del archivo
+        audio_file.seek(0)
+        audio_content = audio_file.read()
+
+        # Crear archivo temporal
+        with tempfile.NamedTemporaryFile(suffix='.wav', delete=False) as temp_file:
+            temp_file.write(audio_content)
+            temp_file.flush()
+
+            try:
+                # Transcribir con OpenAI
+                with open(temp_file.name, 'rb') as audio_data:
+                    transcript = client.audio.transcriptions.create(
+                        model="whisper-1",
+                        file=audio_data,
+                        language="es"
+                    )
+                return transcript.text
+
+            except Exception as e:
+                print(f"Error con OpenAI STT: {e}")
+                return f"Error en transcripción: {str(e)}"
+
+            finally:
+                # Limpiar archivo temporal
+                try:
+                    os.unlink(temp_file.name)
+                except:
+                    pass
+
+    except Exception as e:
+        print(f"Error general OpenAI STT: {e}")
+        return f"Error: {str(e)}"
+
 
 @chatbot_pedidos_bp.route('/')
 def index_route():
@@ -271,8 +308,14 @@ def transcribe_audio():
             if not load_chatbot_data():
                 return jsonify({'error': 'Error del sistema. Los datos del chatbot no están disponibles.'}), 500
 
-        # Transcribir el audio
-        transcribed_text = transcribe_audio_with_stt_service(audio_file)
+        # Obtener el modelo seleccionado
+        selected_model = request.form.get('model', 'openai')  # Por defecto usar OpenAI
+
+        # Transcribir el audio según el modelo seleccionado
+        if selected_model == 'openai':
+            transcribed_text = transcribe_audio_with_openai(audio_file)
+        else:
+            transcribed_text = transcribe_audio_with_stt_service(audio_file)
 
         # Verificar si hubo error en la transcripción
         if transcribed_text.startswith("Error"):
