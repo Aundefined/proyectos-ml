@@ -174,6 +174,12 @@ def transcribe_audio_with_stt_service(audio_file):
                 result = client_gradio.predict(handle_file(temp_file.name), fn_index=0)
 
                 if result and isinstance(result, str):
+                    # Filtrar respuestas que indican audio vacío
+                    result_clean = result.strip().lower()
+                    if (result_clean == "subtítulos realizados por la comunidad de amara.org" or
+                        result_clean == "" or
+                        "amara.org" in result_clean):
+                        return "Error: No se detectó voz en la grabación."
                     return result
                 else:
                     return "Error: No se pudo transcribir el audio."
@@ -213,6 +219,14 @@ def transcribe_audio_with_openai(audio_file):
                         file=audio_data,
                         language="es"
                     )
+
+                # Filtrar respuestas que indican audio vacío
+                result_clean = transcript.text.strip().lower()
+                if (result_clean == "" or
+                    len(result_clean) < 3 or
+                    "amara.org" in result_clean):
+                    return "Error: No se detectó voz en la grabación."
+
                 return transcript.text
 
             except Exception as e:

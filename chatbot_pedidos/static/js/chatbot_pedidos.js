@@ -409,6 +409,7 @@ document.addEventListener('DOMContentLoaded', function() {
     async function processRecording() {
         if (audioChunks.length === 0) {
             resetRecordingState();
+            addMessage('No se detectó audio. Inténtalo de nuevo.', 'bot');
             return;
         }
 
@@ -416,9 +417,10 @@ document.addEventListener('DOMContentLoaded', function() {
             // Crear blob de audio
             const audioBlob = new Blob(audioChunks, { type: 'audio/webm' });
 
-            // Verificar duración mínima (opcional)
-            if (audioBlob.size < 1000) { // Muy pequeño, probablemente no hay audio
+            // Verificar si hay contenido de audio real (no solo silencio)
+            if (audioBlob.size < 8000) { // Archivo pequeño = probablemente solo silencio/ruido de fondo
                 resetRecordingState();
+                addMessage('No se detectó voz en la grabación. Asegúrate de hablar cerca del micrófono.', 'bot');
                 return;
             }
 
@@ -445,7 +447,13 @@ document.addEventListener('DOMContentLoaded', function() {
 
             if (result.error) {
                 console.error('Error transcribiendo:', result.error);
-                addMessage('Error al procesar el audio. Por favor, inténtalo de nuevo.', 'bot');
+
+                // Diferenciar entre error de "no hay voz" y error técnico
+                if (result.error.includes('No se detectó voz')) {
+                    addMessage('No se detectó voz en la grabación. Asegúrate de hablar cerca del micrófono.', 'bot');
+                } else {
+                    addMessage('Error al procesar el audio. Por favor, inténtalo de nuevo.', 'bot');
+                }
             } else {
                 // Añadir mensaje transcrito del usuario
                 addMessage(result.transcribed_text, 'user');
