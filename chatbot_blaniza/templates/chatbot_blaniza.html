@@ -90,10 +90,10 @@
                 <h6><i class="bi bi-cpu-fill text-primary"></i> Modelo Personalizado</h6>
                 <p>Este chatbot utiliza un modelo de IA personalizado entrenado con técnicas avanzadas:</p>
                 <ul>
-                    <li><strong>Base:</strong> LenguajeNaturalAI/leniachat-qwen2-1.5B-v0</li>
-                    <li><strong>Técnica:</strong> QLoRA (Quantized Low-Rank Adaptation)</li>
+                    <li><strong>Base:</strong> Qwen/Qwen2.5-7B-Instruct</li>
+                    <li><strong>Técnica:</strong> SFT + LoRA (quantizada y fusionada para producción)</li>
                     <li><strong>Especialización:</strong> Manual del Sistema Blaniza</li>
-                    <li><strong>Modelo final:</strong> ArnaudClaudeML/blaniza-assistant</li>
+                    <li><strong>Modelo final:</strong> ArnaudClaudeML/ASISTENTE-SFTT-Qwen2p5-7B-LoRA-merged</li>
                 </ul>
 
                 <h6 class="mt-4"><i class="bi bi-book text-success"></i> Contenido</h6>
@@ -133,284 +133,123 @@
     <div class="modal-dialog modal-lg modal-dialog-scrollable modal-fullscreen-sm-down">
         <div class="modal-content">
             <div class="modal-header">
-                <h5 class="modal-title" id="modeloModalLabel">Código de Entrenamiento del Modelo (QLoRA Fine-tuning)</h5>
+                <h5 class="modal-title" id="modeloModalLabel">Código de Entrenamiento del Modelo (SFT + LoRA Qwen2.5-7B)</h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <div class="modal-body">
-                <pre><code class="language-python">
+                                <pre><code class="language-python">
+# Entrenamiento SFT + LoRA sobre Qwen2.5-7B-Instruct
 import torch
-import transformers
-import pandas as pd
-import numpy as np
-import json
-from collections import Counter
-import matplotlib.pyplot as plt
-import time
-from datetime import datetime
-import os
+from datasets import load_dataset
+from transformers import (
+    AutoTokenizer,
+    AutoModelForCausalLM,
+    BitsAndBytesConfig,
+    TrainingArguments,
+)
+from trl import SFTTrainer
+from peft import (
+    LoraConfig,
+    get_peft_model,
+    prepare_model_for_kbit_training,
+    PeftModel,
+)
 
-from transformers import AutoTokenizer, AutoModelForCausalLM, BitsAndBytesConfig, TrainingArguments, Trainer, DataCollatorForLanguageModeling
-from peft import LoraConfig, get_peft_model, TaskType, prepare_model_for_kbit_training, PeftModel
-from torch.utils.data import Dataset, DataLoader
-import psutil
+base_model = "Qwen/Qwen2.5-7B-Instruct"
+dataset_path = "/content/drive/Othercomputers/Mi PC/Mis proyectos en code/ASISTENTE-VIRTUAL/dataset_malo_convertido_a_bueno_shuffled_clean.jsonl"
 
-# Configuración del modelo y dataset
-MODEL_NAME = "LenguajeNaturalAI/leniachat-qwen2-1.5B-v0"
-DATASET_PATH = "dataset_mejorado_equilibrado_FIXED.jsonl"
+# 1) Dataset y split 90/10
+ds_raw = load_dataset("json", data_files=dataset_path, split="train")
+ds_split = ds_raw.train_test_split(test_size=0.1, seed=42)
+train_ds, eval_ds = ds_split["train"], ds_split["test"]
 
-# 1. Cargar y analizar el dataset
-def load_and_analyze_dataset(dataset_path):
-    data = []
-    with open(dataset_path, 'r', encoding='utf-8') as f:
-        for line in f:
-            data.append(json.loads(line))
-    
-    system_prompts = [item['messages'][0]['content'] for item in data]
-    user_questions = [item['messages'][1]['content'] for item in data]
-    assistant_responses = [item['messages'][2]['content'] for item in data]
-    
-    tipos_qa = [item.get('qa_type', 'unknown') for item in data]
-    contador_tipos = Counter(tipos_qa)
-    
-    return data, contador_tipos
+# 2) Tokenizer y modelo en 4-bit
+tok = AutoTokenizer.from_pretrained(base_model)
+if tok.pad_token is None:
+    tok.pad_token = tok.eos_token
 
-# 2. Dataset personalizado para entrenamiento conversacional
-class ConversationDataset(Dataset):
-    def __init__(self, data, tokenizer, max_length=None):
-        self.data = data
-        self.tokenizer = tokenizer
-        
-        if max_length is None:
-            self.max_length = self._calculate_optimal_max_length()
-        else:
-            self.max_length = max_length
+bnb_config = BitsAndBytesConfig(
+    load_in_4bit=True,
+    bnb_4bit_use_double_quant=True,
+    bnb_4bit_quant_type="nf4",
+    bnb_4bit_compute_dtype=torch.bfloat16,
+)
 
-    def _calculate_optimal_max_length(self):
-        lengths = []
-        for item in self.data:
-            conversation = item['messages']
-            system_msg = conversation[0]['content']
-            user_msg = conversation[1]['content']
-            assistant_msg = conversation[2]['content']
-            
-            text = f"system: {system_msg}\\nuser: {user_msg}\\nassistant: {assistant_msg}"
-            tokens = self.tokenizer(text, return_tensors='pt')
-            lengths.append(len(tokens['input_ids'][0]))
-        
-        lengths = np.array(lengths)
-        optimal_length = np.max(lengths)
-        return optimal_length
+mdl = AutoModelForCausalLM.from_pretrained(
+    base_model,
+    quantization_config=bnb_config,
+    device_map="auto",
+)
+mdl = prepare_model_for_kbit_training(mdl)
 
-    def __len__(self):
-        return len(self.data)
+# 3) LoRA ligera
+lora_cfg = LoraConfig(
+    r=32,
+    lora_alpha=64,
+    target_modules=["q_proj", "k_proj", "v_proj", "o_proj", "gate_proj", "up_proj", "down_proj"],
+    lora_dropout=0.05,
+    bias="none",
+    task_type="CAUSAL_LM",
+)
+mdl = get_peft_model(mdl, lora_cfg)
 
-    def __getitem__(self, idx):
-        conversation = self.data[idx]['messages']
-        
-        system_msg = conversation[0]['content']
-        user_msg = conversation[1]['content']
-        assistant_msg = conversation[2]['content']
-        
-        text = f"system: {system_msg}\\nuser: {user_msg}\\nassistant: {assistant_msg}"
-        
-        encoding = self.tokenizer(
-            text,
-            truncation=True,
-            max_length=self.max_length,
-            padding='max_length',
-            return_tensors='pt'
-        )
-        
-        return {
-            'input_ids': encoding['input_ids'].flatten(),
-            'attention_mask': encoding['attention_mask'].flatten(),
-            'labels': encoding['input_ids'].flatten()
-        }
-
-# 3. Configurar modelo con cuantización 4-bit y LoRA
-def setup_qlora_model(model_name):
-    # Cargar tokenizer
-    tokenizer = AutoTokenizer.from_pretrained(model_name)
-    if tokenizer.pad_token is None:
-        tokenizer.pad_token = tokenizer.eos_token
-    
-    # Configuración de cuantización 4-bit
-    bnb_config = BitsAndBytesConfig(
-        load_in_4bit=True,
-        bnb_4bit_use_double_quant=True,
-        bnb_4bit_quant_type="nf4",
-        bnb_4bit_compute_dtype=torch.bfloat16
+# 4) Formateo con plantilla de chat oficial de Qwen2.5
+def format_example(example):
+    text = tok.apply_chat_template(
+        example["messages"],
+        tokenize=False,
+        add_generation_prompt=False,
     )
-    
-    # Cargar modelo cuantizado
-    model = AutoModelForCausalLM.from_pretrained(
-        model_name,
-        quantization_config=bnb_config,
-        device_map="auto",
-        trust_remote_code=True,
-        use_cache=False
-    )
-    
-    # Preparar modelo para k-bit training
-    model = prepare_model_for_kbit_training(model)
-    
-    # Configuración LoRA optimizada para conversaciones
-    lora_config = LoraConfig(
-        r=64,                                 # Rank alto para mejor capacidad
-        lora_alpha=32,                        # Alpha = r/2 (ratio recomendado)
-        target_modules=["q_proj", "v_proj", "k_proj", "o_proj",
-                       "gate_proj", "up_proj", "down_proj"],  # Todos los proyectores de atención
-        lora_dropout=0.1,                     # Dropout moderado
-        bias="none",                          # Sin bias adicional
-        task_type=TaskType.CAUSAL_LM,         # Modelado de lenguaje causal
-    )
-    
-    # Aplicar adaptadores LoRA
-    model = get_peft_model(model, lora_config)
-    
-    return model, tokenizer
+    return {"text": text + tok.eos_token}
 
-# 4. Configurar argumentos de entrenamiento QLoRA
-def get_training_arguments():
-    os.environ["WANDB_DISABLED"] = "true"
-    
-    training_args = TrainingArguments(
-        output_dir="./blaniza-assistant-provisional",
-        overwrite_output_dir=True,
-        num_train_epochs=5,                   # Más épocas por ser más eficiente
-        per_device_train_batch_size=8,        # Batch más alto gracias a QLoRA
-        per_device_eval_batch_size=8,         # Batch más alto
-        gradient_accumulation_steps=2,        # Batch efectivo = 16
-        warmup_steps=50,                      # Warmup más largo
-        weight_decay=0.01,
-        logging_dir="./logs",
-        logging_steps=5,
-        eval_strategy="steps",
-        eval_steps=15,                        # Evaluación más frecuente
-        save_steps=30,                        # Guardado más frecuente
-        save_total_limit=3,                   # Más checkpoints
-        dataloader_pin_memory=False,
-        remove_unused_columns=False,
-        load_best_model_at_end=True,
-        metric_for_best_model="eval_loss",
-        greater_is_better=False,
-        report_to=None,
-        fp16=False,
-        bf16=True,                            # BF16 compatible con QLoRA
-        gradient_checkpointing=False,         # No necesario con QLoRA
-        logging_nan_inf_filter=False,
-        max_grad_norm=0.3,                    # Gradient clipping más agresivo para LoRA
-        learning_rate=2e-4,                   # LR más alto típico para LoRA
-        lr_scheduler_type="cosine",           # Cosine scheduling
-        warmup_ratio=0.05,
-        dataloader_num_workers=0,
-        optim="paged_adamw_8bit",             # Optimizador 8-bit para QLoRA
-    )
-    
-    return training_args
+train_ds_fmt = train_ds.map(format_example, remove_columns=train_ds.column_names)
+eval_ds_fmt = eval_ds.map(format_example, remove_columns=eval_ds.column_names)
 
-# 5. Entrenar modelo con QLoRA
-def train_qlora_model(model, tokenizer, train_dataset, val_dataset, training_args):
-    data_collator = DataCollatorForLanguageModeling(
-        tokenizer=tokenizer,
-        mlm=False,
-        return_tensors="pt"
-    )
-    
-    trainer = Trainer(
-        model=model,
-        args=training_args,
-        train_dataset=train_dataset,
-        eval_dataset=val_dataset,
-        data_collator=data_collator,
-        tokenizer=tokenizer,
-    )
-    
-    if torch.cuda.is_available():
-        torch.cuda.empty_cache()
-    
-    start_time = time.time()
-    train_result = trainer.train()
-    end_time = time.time()
-    
-    training_time = end_time - start_time
-    
-    # Guardar adaptadores LoRA
-    model.save_pretrained("./blaniza-assistant")
-    tokenizer.save_pretrained("./blaniza-assistant")
-    
-    return train_result, training_time
+# 5) SFTTrainer
+output_dir = "/content/drive/MyDrive/ASISTENTE-SFTT-Qwen2p5-7B-LoRA"
 
-# 6. Fusionar adaptadores LoRA con modelo base para producción
-def merge_lora_adapters(base_model_name, adapter_path, output_path):
-    # Cargar modelo base sin cuantización
-    base_model = AutoModelForCausalLM.from_pretrained(
-        base_model_name,
-        device_map="auto",
-        trust_remote_code=True,
-        torch_dtype=torch.bfloat16
-    )
-    
-    # Cargar adaptadores LoRA
-    model_with_lora = PeftModel.from_pretrained(base_model, adapter_path)
-    
-    # Fusionar adaptadores
-    merged_model = model_with_lora.merge_and_unload()
-    
-    # Cargar tokenizer
-    tokenizer = AutoTokenizer.from_pretrained(base_model_name)
-    if tokenizer.pad_token is None:
-        tokenizer.pad_token = tokenizer.eos_token
-    
-    # Guardar modelo fusionado
-    os.makedirs(output_path, exist_ok=True)
-    merged_model.save_pretrained(output_path, save_function=torch.save, max_shard_size="2GB")
-    tokenizer.save_pretrained(output_path)
-    
-    return merged_model
+args = TrainingArguments(
+    output_dir=output_dir,
+    num_train_epochs=2,
+    per_device_train_batch_size=4,
+    per_device_eval_batch_size=4,
+    gradient_accumulation_steps=4,
+    learning_rate=2e-4,
+    logging_steps=10,
+    eval_strategy="steps",
+    eval_steps=100,
+    save_steps=100,
+    save_total_limit=2,
+    do_eval=True,
+    bf16=True,
+    report_to="wandb",
+    run_name="sftt-qwen2p5",
+)
 
-# 7. Función principal de entrenamiento
-def main():
-    # Cargar dataset
-    data, contador_tipos = load_and_analyze_dataset(DATASET_PATH)
-    
-    # Dividir dataset (80% entrenamiento, 20% validación)
-    train_size = int(0.8 * len(data))
-    train_data = data[:train_size]
-    val_data = data[train_size:]
-    
-    # Configurar modelo QLoRA
-    model, tokenizer = setup_qlora_model(MODEL_NAME)
-    
-    # Crear datasets
-    train_dataset = ConversationDataset(train_data, tokenizer)
-    val_dataset = ConversationDataset(val_data, tokenizer)
-    
-    # Configurar entrenamiento
-    training_args = get_training_arguments()
-    
-    # Entrenar modelo
-    train_result, training_time = train_qlora_model(
-        model, tokenizer, train_dataset, val_dataset, training_args
-    )
-    
-    # Fusionar adaptadores para producción
-    merged_model = merge_lora_adapters(
-        MODEL_NAME, 
-        "./blaniza-assistant", 
-        "./blaniza-assistant-merged"
-    )
-    
-    return {
-        "training_loss": train_result.training_loss,
-        "training_time": training_time,
-        "global_steps": train_result.global_step,
-        "model_path": "./blaniza-assistant-merged"
-    }
+trainer = SFTTrainer(
+    model=mdl,
+    args=args,
+    train_dataset=train_ds_fmt,
+    eval_dataset=eval_ds_fmt,
+)
 
-if __name__ == "__main__":
-    results = main()
-                </code></pre>
+trainer.train()
+trainer.save_model(output_dir)
+
+# 6) Fusión de adaptadores a modelo base (bf16, sin cuantizar)
+base_merge = AutoModelForCausalLM.from_pretrained(
+    base_model,
+    device_map="auto",
+    torch_dtype=torch.bfloat16,
+)
+
+model_with_lora = PeftModel.from_pretrained(base_merge, output_dir)
+merged_dir = "/content/drive/MyDrive/ASISTENTE-SFTT-Qwen2p5-7B-LoRA-merged"
+merged_model = model_with_lora.merge_and_unload()
+
+merged_model.save_pretrained(merged_dir, max_shard_size="2GB")
+tok.save_pretrained(merged_dir)
+</code></pre>
             </div>
             <div class="modal-footer">
                 <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>

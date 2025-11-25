@@ -59,7 +59,7 @@ Restricciones:
 
 Tu rol es actuar siempre como experto en este manual, nada más."""
 
-def generate_answer_with_blaniza(messages, max_tokens=1000):
+def generate_answer_with_blaniza(messages, max_tokens=200):
     """Generar respuesta usando la API de Gradio del Space Blaniza"""
     try:
         print(f"🤖 Enviando petición al Space: {BLANIZA_SPACE_URL}")
@@ -82,29 +82,39 @@ def generate_answer_with_blaniza(messages, max_tokens=1000):
         # except Exception as debug_e:
         #     print(f"No se pudo obtener info del API: {debug_e}")
         
-        # Solo enviar el último mensaje del usuario para la interfaz simple
-        user_message = ""
-        for msg in reversed(messages):
-            if msg.get("role") == "user":
-                user_message = msg.get("content", "")
-                break
-        
-        if not user_message:
-            return "No se encontró mensaje del usuario."
-        
-        print(f"📩 Enviando mensaje: {user_message[:50]}...")
-        
+        print(f"📩 Enviando {len(messages)} mensajes...")
         try:
-            result = client.predict(user_message, api_name="/simple_chat")
+            print("🗒️ Historial completo que se envía:")
+            for idx, m in enumerate(messages, 1):
+                print(f"  {idx}. {m.get('role')} -> {m.get('content')[:200] if m.get('content') else ''}")
+        except Exception as log_err:
+            print(f"⚠️ No se pudo imprimir historial: {log_err}")
+
+        try:
+            # /chat_endpoint espera un string JSON con los mensajes
+            payload = json.dumps(messages, ensure_ascii=False)
+            result = client.predict(payload, api_name="/chat_endpoint")
             
         except Exception as e1:
-            print(f"⚠️ Error con /simple_chat: {e1}")
+            print(f"⚠️ Error con /chat_endpoint: {e1}")
             return f"Error del modelo en el Space: {str(e1)}"
         
         elapsed_time = time.time() - start_time
         print(f"⏱️ Tiempo de respuesta: {elapsed_time:.2f}s")
         print(f"✅ Respuesta recibida: {len(str(result))} caracteres")
-        
+
+        # Normalizar salida del Space (puede ser dict o string JSON)
+        if isinstance(result, dict) and "response" in result:
+            return str(result["response"])
+        if isinstance(result, str):
+            try:
+                parsed = json.loads(result)
+                if isinstance(parsed, dict) and "response" in parsed:
+                    return str(parsed["response"])
+            except Exception:
+                pass
+            return result
+
         return str(result)
             
     except ImportError:
