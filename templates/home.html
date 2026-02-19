@@ -1,9 +1,7 @@
-<!-- prueba git -->
 {% extends "layout.html" %}
 
 {% block title %}Proyectos de Machine Learning{% endblock %}
 
-<link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
 {% block head_styles %}{% endblock %}
 
 {% block content %}
@@ -12,12 +10,12 @@
     <div class="modal-dialog" role="document">
         <div class="modal-content">
             <div class="modal-header">
-                <h5 class="modal-title" id="welcomeModalLabel">¡Bienvenid@!</h5>
+                <h5 class="modal-title" id="welcomeModalLabel">Bienvenid@!</h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <div class="modal-body">
                 Hola, esta web es un proyecto personal en proceso de desarrollo y en constante evolución. Puede contener
-                errores, ¡aún me queda mucho por hacer!
+                errores, aun me queda mucho por hacer!
             </div>
             <div class="modal-footer">
                 <button type="button" class="btn btn-primary" data-bs-dismiss="modal">Entendido</button>
@@ -26,271 +24,313 @@
     </div>
 </div>
 
-<div class="jumbotron fall-element fall-delay-1 text-white p-4 rounded-3" style="background: rgba(255, 255, 255, 0.05); backdrop-filter: blur(10px); border: 1px solid rgba(255,255,255,0.1);">
-    <!-- Intro Header -->
-    <div class="text-center mb-5">
-        <h1 class="display-4 fw-bold mb-3">Portfolio de Machine Learning</h1>
-        <p class="lead mb-0">
-            Hola, soy <a href="/sobre-mi" class="text-white fw-bold text-decoration-none" style="border-bottom: 2px solid #0d6efd;">Arnaud Tartulier</a>.
-        </p>
-        <p class="lead text-white-80">
-            De <strong>FullStack Developer</strong> a <strong>AI Engineer</strong>: Transformando código en inteligencia.
-        </p>
-    </div>
-
-    <!-- Learning Path Cards -->
-    <div class="row g-4 mb-5">
-        <!-- 2025: Foundations -->
-        <div class="col-md-4">
-            <div class="card h-100 bg-transparent border-secondary text-white shadow-sm" style="border: 1px solid rgba(255,255,255,0.2);">
-                <div class="card-header bg-transparent border-bottom border-secondary text-center fw-bold py-3">
-                    <i class="bi bi-bricks fs-4 d-block mb-2 text-info"></i>
-                    2025: Los Cimientos
-                </div>
-                <div class="card-body text-center">
-                    <p class="card-text small text-white-80 mb-3">Bases sólidas en ML y Deep Learning.</p>
-                    <ul class="list-unstyled small mb-0 d-inline-block text-start">
-                        <li class="mb-2 d-flex align-items-start">
-                            <i class="bi bi-check-circle-fill text-success me-2 mt-1"></i>
-                            <a href="https://www.udemy.com/certificate/UC-18f62563-773d-4216-a278-2cb1fbc68687/" target="_blank" class="text-white text-decoration-none hover-link">ML & Data Science (Udemy)</a>
-                        </li>
-                        <li class="mb-2 d-flex align-items-start">
-                            <i class="bi bi-check-circle-fill text-success me-2 mt-1"></i>
-                            <a href="https://www.udemy.com/certificate/UC-edfa4ba5-b913-4ec4-9720-5d13a2f38242/" target="_blank" class="text-white text-decoration-none hover-link">DL desde cero (Udemy)</a>
-                        </li>
-                        <li class="d-flex align-items-start">
-                            <i class="bi bi-check-circle-fill text-success me-2 mt-1"></i>
-                            <a href="https://drive.google.com/file/d/1Gx-kyFc-KiIk5UYQ6MPLMeUTh5Hk49ed/view?usp=drive_link" target="_blank" class="text-white text-decoration-none hover-link">ML Aplicado (Gobierno)</a>
-                        </li>
-                    </ul>
-                </div>
-            </div>
-        </div>
-
-        <!-- Jan 2026: LLMs -->
-        <div class="col-md-4">
-            <div class="card h-100 bg-transparent border-success text-white shadow-sm" style="border: 1px solid rgba(25, 135, 84, 0.5);">
-                <div class="card-header bg-transparent border-bottom border-success text-center fw-bold py-3">
-                    <i class="bi bi-cpu fs-4 d-block mb-2 text-success"></i>
-                    Ene 2026: LLMs & Agentes
-                </div>
-                <div class="card-body text-center d-flex flex-column justify-content-center">
-                    <p class="card-text small text-white-80">Especialización en Modelos de Lenguaje y Arquitecturas de Agentes.</p>
-                    <div class="mt-2">
-                        <a href="https://www.udemy.com/certificate/UC-e5e2cd80-9fb1-4e66-9fcc-086d988c497b/" target="_blank" class="btn btn-outline-success btn-sm w-100 text-truncate">
-                            <i class="bi bi-award me-1"></i> Ver Certificado LLM
-                        </a>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <!-- Current: MLOps -->
-        <div class="col-md-4">
-            <div class="card h-100 bg-transparent border-warning text-white shadow-sm" style="border: 1px solid rgba(255, 193, 7, 0.5);">
-                <div class="card-header bg-transparent border-bottom border-warning text-center fw-bold py-3">
-                    <i class="bi bi-gear-wide-connected fs-4 d-block mb-2 text-warning"></i>
-                    Actualidad: MLOps
-                </div>
-                <div class="card-body text-center d-flex flex-column justify-content-center">
-                    <p class="card-text small text-white-80">Despliegue de IA Generativa y Agentes a escala en producción.</p>
-                    <div class="mt-2">
-                        <a href="https://www.udemy.com/course/generative-and-agentic-ai-in-production/" target="_blank" class="btn btn-outline-warning btn-sm w-100 text-truncate">
-                            <i class="bi bi-play-circle me-1"></i> Ver Curso MLOps
-                        </a>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- Featured Project & Intro to Projects -->
-    <div class="row align-items-center bg-dark bg-opacity-50 p-3 rounded mx-1 border border-secondary">
-        <div class="col-md-7 mb-3 mb-md-0">
-            <div class="d-flex align-items-center">
-                <div class="me-3">
-                    <i class="bi bi-rocket-takeoff fs-2 text-primary"></i>
-                </div>
-                <div>
-                    <h5 class="mb-1 text-white">Proyecto Autónomo en Producción</h5>
-                    <p class="mb-0 small text-white-80">He desarrollado <strong>Aidoo</strong>, una plataforma que busca, resume y publica noticias cada hora de forma totalmente autónoma.</p>
-                </div>
-            </div>
-        </div>
-        <div class="col-md-5 text-md-end text-center">
-            <a href="https://aidoo.news" target="_blank" class="btn btn-primary btn-sm me-2"><i class="bi bi-globe me-1"></i> Web</a>
-            <a href="https://play.google.com/store/apps/details?id=com.aidoo.news" target="_blank" class="btn btn-outline-light btn-sm"><i class="bi bi-android2 me-1"></i> App</a>
-        </div>
-    </div>
-
-    <p class="lead text-center mt-5 mb-0 fs-6 text-white-80">
-        A continuación encontrarás ejercicios prácticos realizados en paralelo a mi formación: Predictores, clasificadores, Chatbots y más.
+<!-- ===== HERO SECTION ===== -->
+<section class="hero-section fall-element fall-delay-1">
+    <div class="hero-badge">Portfolio AI/ML</div>
+    <h1 class="hero-title">Arnaud Tartulier</h1>
+    <p class="hero-subtitle">
+        De <span class="hero-highlight">FullStack Developer</span> a <span class="hero-highlight">AI Engineer</span>
     </p>
-    <hr class="my-4 border-secondary">
-</div>
+    <a href="/sobre-mi" class="btn-hero">
+        <i class="bi bi-person-circle me-2"></i>Sobre Mí
+    </a>
+</section>
 
-<div class="row mb-3 mt-4">
-    <div class="col-12 text-center fall-element fall-delay-2">
-        <p class="text-white small"><i class="bi bi-calendar-check me-1"></i>Primera publicación: 05/04/2025 - Última
-            actualización: 20/01/2026</p>
+<!-- ===== LEARNING JOURNEY (TIMELINE) ===== -->
+<section class="fall-element fall-delay-2">
+    <div class="section-header">
+        <i class="bi bi-mortarboard-fill"></i>
+        <h2>Mi Aprendizaje</h2>
+        <p class="section-subtitle">Formación continua y certificaciones obtenidas</p>
     </div>
-</div>
 
-<div class="row mt-2">
-    <!-- Carrusel de proyectos -->
-    <div class="col-12 mb-5 fall-element fall-delay-2">
-        <div id="projectsCarousel" class="carousel slide" data-bs-ride="carousel">
-            <!-- Indicadores (5 en total) -->
-            <div class="carousel-indicators">
-                <button type="button" data-bs-target="#projectsCarousel" data-bs-slide-to="0" class="active"
-                    aria-current="true" aria-label="Regresiones"></button>
-                <button type="button" data-bs-target="#projectsCarousel" data-bs-slide-to="1"
-                    aria-label="Clasificaciones"></button>
-                <button type="button" data-bs-target="#projectsCarousel" data-bs-slide-to="2"
-                    aria-label="Clustering"></button>
-                <button type="button" data-bs-target="#projectsCarousel" data-bs-slide-to="3"
-                    aria-label="Chatbots"></button>
-                <button type="button" data-bs-target="#projectsCarousel" data-bs-slide-to="4"
-                    aria-label="Otros"></button>
+    <div class="timeline">
+        <!-- Linea conectora -->
+        <div class="timeline-line"></div>
+
+        <!-- Etapa 1: ML/DL -->
+        <div class="timeline-item">
+            <div class="timeline-dot dot-info">
+                <i class="bi bi-bricks"></i>
             </div>
-
-            <!-- Contenido del carrusel -->
-            <div class="carousel-inner">
-                <!-- Grupo 1: Regresiones -->
-                <div class="carousel-item active">
-                    <h3 class="text-center mb-4">Regresiones</h3>
-                    <div class="card-container">
-                        <div class="card project-card">
-                            <div class="card-body text-center">
-                                <h5 class="card-title">Predictor de Sueldos</h5>
-                                <p class="card-text">Modelo de regresión que predice el sueldo anual basado en
-                                    diferentes factores.</p>
-                                <a href="/predictor-sueldos" class="btn btn-primary">Ir al predictor</a>
-                            </div>
-                        </div>
-                        <div class="card project-card">
-                            <div class="card-body text-center">
-                                <h5 class="card-title">Predictor de Seguro</h5>
-                                <p class="card-text">Modelo de regresión que predice el coste del seguro basado en
-                                    diferentes factores.</p>
-                                <a href="/predictor-seguro" class="btn btn-primary">Ir al predictor</a>
-                            </div>
-                        </div>
-                    </div>
+            <div class="timeline-card">
+                <div class="timeline-card-header">
+                    <span class="timeline-badge badge-info">2025</span>
+                    <h3>Los Cimientos: ML & Deep Learning</h3>
                 </div>
-
-                <!-- Grupo 2: Clasificaciones -->
-                <div class="carousel-item">
-                    <h3 class="text-center mb-4">Clasificaciones</h3>
-                    <div class="card-container">
-                        <div class="card project-card">
-                            <div class="card-body text-center">
-                                <h5 class="card-title">Clasificación de Champiñones</h5>
-                                <p class="card-text">Clasifica si un champiñón es comestible o venenoso basándose en sus
-                                    características.</p>
-                                <a href="/predictor-champinones" class="btn btn-primary">Ir al predictor</a>
-                            </div>
-                        </div>
-                        <div class="card project-card">
-                            <div class="card-body text-center">
-                                <h5 class="card-title">Clasificación de Frutas</h5>
-                                <p class="card-text">Identifica el estado de frutas (frescas o podridas) usando IA con
-                                    transfer learning.</p>
-                                <a href="/clasificador-frutas" class="btn btn-primary">Ir al clasificador</a>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Grupo 3: Clustering -->
-                <div class="carousel-item">
-                    <h3 class="text-center mb-4">Clustering</h3>
-                    <div class="card-container">
-                        <div class="card project-card">
-                            <div class="card-body text-center">
-                                <h5 class="card-title">Clustering de Clientes</h5>
-                                <p class="card-text">Segmentación de clientes basada en datos reales para identificar
-                                    patrones de comportamiento.</p>
-                                <a href="/clustering-clientes" class="btn btn-primary">Ir al clustering</a>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Grupo 4: Chatbots -->
-                <div class="carousel-item">
-                    <h3 class="text-center mb-4">Chatbots</h3>
-                    <div class="card-container">
-                        <div class="card project-card">
-                            <div class="card-body text-center">
-                                <h5 class="card-title">Chatbot RAG</h5>
-                                <p class="card-text">Asistente virtual especializado en el manual de usuario del sistema
-                                    de gestión de pedidos de Logística Blaniza.</p>
-                                <a href="/chatbot-pedidos" class="btn btn-primary">Ir al chatbot</a>
-                            </div>
-                        </div>
-                        <div class="card project-card">
-                            <div class="card-body text-center">
-                                <h5 class="card-title">Chatbot Fine Tuning</h5>
-                                <p class="card-text">Modelo personalizado entrenado con LoRA específicamente para el
-                                    sistema Blaniza. Más eficiente y especializado.</p>
-                                <a href="/chatbot-blaniza" class="btn btn-primary">Ir al assistant</a>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Grupo 5: Otros -->
-                <div class="carousel-item">
-                    <h3 class="text-center mb-4">Otros</h3>
-                    <div class="card-container">
-                        <div class="card project-card">
-                            <div class="card-body text-center">
-                                <h5 class="card-title">Análisis Integrado</h5>
-                                <p class="card-text">Combina visualización de datasets y análisis no supervisado en una
-                                    sola interfaz integrada.</p>
-                                <a href="/analisis-integrado" class="btn btn-primary">Ir al análisis</a>
-                            </div>
-                        </div>
-                        <div class="card project-card">
-                            <div class="card-body text-center">
-                                <h5 class="card-title">Recomendador de Películas</h5>
-                                <p class="card-text">Sistema de recomendación con deep learning usando embeddings y
-                                    redes neuronales.</p>
-                                <a href="/recomendador-peliculas" class="btn btn-primary">Ir al recomendador</a>
-                            </div>
-                        </div>
-                        <div class="card project-card">
-                            <div class="card-body text-center">
-                                <h5 class="card-title">Connect Four con IA</h5>
-                                <p class="card-text">Juega al clásico juego "Connect Four" contra un modelo de ML
-                                    entrenado con partidas reales.</p>
-                                <a href="/connect-four" class="btn btn-primary">Jugar ahora</a>
-                            </div>
-                        </div>
-                    </div>
+                <p class="timeline-desc">Bases solidas en Machine Learning clásico, Data Science y Deep Learning desde cero.</p>
+                <div class="cert-list">
+                    <a href="https://www.udemy.com/certificate/UC-18f62563-773d-4216-a278-2cb1fbc68687/" target="_blank" class="cert-item">
+                        <i class="bi bi-patch-check-fill text-success"></i>
+                        <span>ML & Data Science</span>
+                        <span class="cert-source">Udemy</span>
+                    </a>
+                    <a href="https://www.udemy.com/certificate/UC-edfa4ba5-b913-4ec4-9720-5d13a2f38242/" target="_blank" class="cert-item">
+                        <i class="bi bi-patch-check-fill text-success"></i>
+                        <span>Deep Learning desde cero</span>
+                        <span class="cert-source">Udemy</span>
+                    </a>
+                    <a href="https://drive.google.com/file/d/1Gx-kyFc-KiIk5UYQ6MPLMeUTh5Hk49ed/view?usp=drive_link" target="_blank" class="cert-item">
+                        <i class="bi bi-patch-check-fill text-success"></i>
+                        <span>ML Aplicado</span>
+                        <span class="cert-source">Ministerio de Trabajo</span>
+                    </a>
                 </div>
             </div>
+        </div>
 
-            <!-- Controles del carrusel -->
-            <button class="carousel-control-prev" type="button" data-bs-target="#projectsCarousel" data-bs-slide="prev">
-                <span class="carousel-control-prev-icon" aria-hidden="true"></span>
-                <span class="visually-hidden">Anterior</span>
-            </button>
-            <button class="carousel-control-next" type="button" data-bs-target="#projectsCarousel" data-bs-slide="next">
-                <span class="carousel-control-next-icon" aria-hidden="true"></span>
-                <span class="visually-hidden">Siguiente</span>
-            </button>
+        <!-- Etapa 2: LLMs -->
+        <div class="timeline-item">
+            <div class="timeline-dot dot-success">
+                <i class="bi bi-cpu"></i>
+            </div>
+            <div class="timeline-card">
+                <div class="timeline-card-header">
+                    <span class="timeline-badge badge-success">Ene 2026</span>
+                    <h3>LLMs & Agentes IA</h3>
+                </div>
+                <p class="timeline-desc">Especialización en Large Language Models, RAG, Fine-Tuning y arquitecturas de agentes autónomos.</p>
+                <div class="cert-list">
+                    <a href="https://www.udemy.com/certificate/UC-e5e2cd80-9fb1-4e66-9fcc-086d988c497b/" target="_blank" class="cert-item">
+                        <i class="bi bi-patch-check-fill text-success"></i>
+                        <span>LLMs & Agentes</span>
+                        <span class="cert-source">Udemy</span>
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Etapa 3: MLOps -->
+        <div class="timeline-item">
+            <div class="timeline-dot dot-warning">
+                <i class="bi bi-gear-wide-connected"></i>
+            </div>
+            <div class="timeline-card">
+                <div class="timeline-card-header">
+                    <span class="timeline-badge badge-warning">Actualidad</span>
+                    <h3>MLOps & Producción</h3>
+                </div>
+                <p class="timeline-desc">Despliegue de IA Generativa y agentes a escala en entornos de producción.</p>
+                <div class="cert-list">
+                    <a href="https://www.udemy.com/course/generative-and-agentic-ai-in-production/" target="_blank" class="cert-item cert-in-progress">
+                        <i class="bi bi-hourglass-split text-warning"></i>
+                        <span>Generative & Agentic AI in Production</span>
+                        <span class="cert-source">En curso</span>
+                    </a>
+                </div>
+            </div>
         </div>
     </div>
-</div>
+</section>
 
-<!-- Logo centrado muy cerca del footer -->
-<div class="row text-center fall-element fall-delay-5 logo-container">
-    <!-- <div class="col-12">
-        <img src="{{ url_for('static', filename='img/logo.png') }}" alt="Logo" width="210" class="logo-img">
-        <p class="tech-text">Andrai Project</p>
-    </div> -->
+<!-- ===== AIDOO - PROYECTO DESTACADO ===== -->
+<section class="fall-element fall-delay-3">
+    <div class="section-header">
+        <i class="bi bi-rocket-takeoff-fill"></i>
+        <h2>Proyecto en Producción</h2>
+    </div>
+
+    <div class="aidoo-showcase">
+        <div class="aidoo-glow"></div>
+        <div class="aidoo-content">
+            <div class="aidoo-info">
+                <div class="aidoo-label">
+                    <span class="live-dot"></span> En producción
+                </div>
+                <h3 class="aidoo-title">Aidoo</h3>
+                <p class="aidoo-desc">
+                    Plataforma autónoma que busca, resume y publica noticias de actualidad cada hora utilizando agentes de IA.
+                    Sin intervención humana, 24/7.
+                </p>
+                <div class="aidoo-features">
+                    <div class="aidoo-feature">
+                        <i class="bi bi-robot"></i>
+                        <span>Agentes autónomos</span>
+                    </div>
+                    <div class="aidoo-feature">
+                        <i class="bi bi-clock-history"></i>
+                        <span>Actualización cada hora</span>
+                    </div>
+                    <div class="aidoo-feature">
+                        <i class="bi bi-newspaper"></i>
+                        <span>Noticias resumidas con IA</span>
+                    </div>
+                </div>
+            </div>
+            <div class="aidoo-actions">
+                <a href="https://aidoo.news" target="_blank" class="aidoo-btn aidoo-btn-web">
+                    <i class="bi bi-globe2"></i>
+                    <div>
+                        <span class="aidoo-btn-label">Acceder via</span>
+                        <span class="aidoo-btn-title">Web</span>
+                    </div>
+                </a>
+                <a href="https://play.google.com/store/apps/details?id=com.aidoo.news" target="_blank" class="aidoo-btn aidoo-btn-app">
+                    <i class="bi bi-google-play"></i>
+                    <div>
+                        <span class="aidoo-btn-label">Descargar en</span>
+                        <span class="aidoo-btn-title">Google Play</span>
+                    </div>
+                </a>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- ===== PROYECTOS DEL PORTFOLIO ===== -->
+<section class="fall-element fall-delay-4">
+    <div class="section-header">
+        <i class="bi bi-code-slash"></i>
+        <h2>Ejercicios Prácticos</h2>
+        <p class="section-subtitle">Proyectos realizados en paralelo a mi formación</p>
+    </div>
+
+    <div id="projectsCarousel" class="carousel slide" data-bs-ride="carousel">
+        <!-- Indicadores -->
+        <div class="carousel-indicators">
+            <button type="button" data-bs-target="#projectsCarousel" data-bs-slide-to="0" class="active"
+                aria-current="true" aria-label="Regresiones"></button>
+            <button type="button" data-bs-target="#projectsCarousel" data-bs-slide-to="1"
+                aria-label="Clasificaciones"></button>
+            <button type="button" data-bs-target="#projectsCarousel" data-bs-slide-to="2"
+                aria-label="Clustering"></button>
+            <button type="button" data-bs-target="#projectsCarousel" data-bs-slide-to="3"
+                aria-label="Chatbots"></button>
+            <button type="button" data-bs-target="#projectsCarousel" data-bs-slide-to="4"
+                aria-label="Otros"></button>
+        </div>
+
+        <div class="carousel-inner">
+            <!-- Grupo 1: Regresiones -->
+            <div class="carousel-item active">
+                <h3 class="text-center mb-4"><i class="bi bi-graph-up me-2"></i>Regresiones</h3>
+                <div class="card-container">
+                    <div class="card project-card">
+                        <div class="card-body text-center">
+                            <div class="project-icon"><i class="bi bi-currency-euro"></i></div>
+                            <h5 class="card-title">Predictor de Sueldos</h5>
+                            <p class="card-text">Modelo de regresión que predice el sueldo anual basado en diferentes factores.</p>
+                            <a href="/predictor-sueldos" class="btn btn-primary">Ir al predictor</a>
+                        </div>
+                    </div>
+                    <div class="card project-card">
+                        <div class="card-body text-center">
+                            <div class="project-icon"><i class="bi bi-shield-check"></i></div>
+                            <h5 class="card-title">Predictor de Seguro</h5>
+                            <p class="card-text">Modelo de regresión que predice el coste del seguro basado en diferentes factores.</p>
+                            <a href="/predictor-seguro" class="btn btn-primary">Ir al predictor</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Grupo 2: Clasificaciones -->
+            <div class="carousel-item">
+                <h3 class="text-center mb-4"><i class="bi bi-tag me-2"></i>Clasificaciones</h3>
+                <div class="card-container">
+                    <div class="card project-card">
+                        <div class="card-body text-center">
+                            <div class="project-icon"><i class="bi bi-tree"></i></div>
+                            <h5 class="card-title">Clasificación de Champiñones</h5>
+                            <p class="card-text">Clasifica si un champiñón es comestible o venenoso basandose en sus características.</p>
+                            <a href="/predictor-champinones" class="btn btn-primary">Ir al predictor</a>
+                        </div>
+                    </div>
+                    <div class="card project-card">
+                        <div class="card-body text-center">
+                            <div class="project-icon"><i class="bi bi-flower3"></i></div>
+                            <h5 class="card-title">Clasificación de Frutas</h5>
+                            <p class="card-text">Identifica el estado de frutas (frescas o podridas) usando IA con transfer learning.</p>
+                            <a href="/clasificador-frutas" class="btn btn-primary">Ir al clasificador</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Grupo 3: Clustering -->
+            <div class="carousel-item">
+                <h3 class="text-center mb-4"><i class="bi bi-diagram-3 me-2"></i>Clustering</h3>
+                <div class="card-container">
+                    <div class="card project-card">
+                        <div class="card-body text-center">
+                            <div class="project-icon"><i class="bi bi-people"></i></div>
+                            <h5 class="card-title">Clustering de Clientes</h5>
+                            <p class="card-text">Segmentación de clientes basada en datos reales para identificar patrones de comportamiento.</p>
+                            <a href="/clustering-clientes" class="btn btn-primary">Ir al clustering</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Grupo 4: Chatbots -->
+            <div class="carousel-item">
+                <h3 class="text-center mb-4"><i class="bi bi-chat-dots me-2"></i>Chatbots</h3>
+                <div class="card-container">
+                    <div class="card project-card">
+                        <div class="card-body text-center">
+                            <div class="project-icon"><i class="bi bi-robot"></i></div>
+                            <h5 class="card-title">Chatbot RAG</h5>
+                            <p class="card-text">Asistente virtual especializado en el manual de usuario del sistema de gestión de pedidos.</p>
+                            <a href="/chatbot-pedidos" class="btn btn-primary">Ir al chatbot</a>
+                        </div>
+                    </div>
+                    <div class="card project-card">
+                        <div class="card-body text-center">
+                            <div class="project-icon"><i class="bi bi-cpu"></i></div>
+                            <h5 class="card-title">Chatbot Fine Tuning</h5>
+                            <p class="card-text">Modelo personalizado entrenado con LoRA. Mas eficiente y especializado.</p>
+                            <a href="/chatbot-blaniza" class="btn btn-primary">Ir al assistant</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Grupo 5: Otros -->
+            <div class="carousel-item">
+                <h3 class="text-center mb-4"><i class="bi bi-stars me-2"></i>Otros</h3>
+                <div class="card-container">
+                    <div class="card project-card">
+                        <div class="card-body text-center">
+                            <div class="project-icon"><i class="bi bi-bar-chart"></i></div>
+                            <h5 class="card-title">Analisis Integrado</h5>
+                            <p class="card-text">Combina visualización de datasets y análisis no supervisado en una sola interfaz.</p>
+                            <a href="/analisis-integrado" class="btn btn-primary">Ir al analisis</a>
+                        </div>
+                    </div>
+                    <div class="card project-card">
+                        <div class="card-body text-center">
+                            <div class="project-icon"><i class="bi bi-film"></i></div>
+                            <h5 class="card-title">Recomendador de Peliculas</h5>
+                            <p class="card-text">Sistema de recomendación con deep learning usando embeddings y redes neuronales.</p>
+                            <a href="/recomendador-peliculas" class="btn btn-primary">Ir al recomendador</a>
+                        </div>
+                    </div>
+                    <div class="card project-card">
+                        <div class="card-body text-center">
+                            <div class="project-icon"><i class="bi bi-controller"></i></div>
+                            <h5 class="card-title">Connect Four con IA</h5>
+                            <p class="card-text">Juega al clásico "Connect Four" contra un modelo de ML entrenado con partidas reales.</p>
+                            <a href="/connect-four" class="btn btn-primary">Jugar ahora</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Controles del carrusel -->
+        <button class="carousel-control-prev" type="button" data-bs-target="#projectsCarousel" data-bs-slide="prev">
+            <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+            <span class="visually-hidden">Anterior</span>
+        </button>
+        <button class="carousel-control-next" type="button" data-bs-target="#projectsCarousel" data-bs-slide="next">
+            <span class="carousel-control-next-icon" aria-hidden="true"></span>
+            <span class="visually-hidden">Siguiente</span>
+        </button>
+    </div>
+</section>
+
+<div class="text-center mt-4 mb-5 fall-element fall-delay-5">
+    <p class="text-white-60 small"><i class="bi bi-calendar-check me-1"></i>Primera publicación: 05/04/2025 - Ultima actualización: 19/02/2026</p>
 </div>
 {% endblock %}
 
