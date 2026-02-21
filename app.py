@@ -1,4 +1,4 @@
-from flask import Flask, render_template, redirect, request
+from flask import Flask, render_template, redirect, request, send_from_directory
 import os
 from werkzeug.middleware.proxy_fix import ProxyFix
 from visitas_log.visit_logger import init_db, log_visit, get_client_ip
@@ -77,6 +77,10 @@ def before_request():
 def home():
     """Página principal con navegación a los diferentes proyectos"""
     return render_template('home.html')
+
+@app.route('/app-ads.txt')
+def serve_app_ads():
+    return send_from_directory(app.root_path, 'app-ads.txt')
 
 if __name__ == '__main__':
     port = int(os.environ.get('PORT', 5000))
