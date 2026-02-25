@@ -87,13 +87,20 @@
                             </a>
                             <ul class="dropdown-menu" aria-labelledby="chatbotsDropdown">
                                 <li>
-                                    <a class="dropdown-item {% if request.path == '/chatbot-pedidos' %}active{% endif %}" 
+                                    <a class="dropdown-item {% if request.path == '/chatbot-gemelo' %}active{% endif %}"
+                                       href="/chatbot-gemelo">
+                                        <i class="bi bi-person-bounding-box"></i> Gemelo Digital
+                                    </a>
+                                </li>
+                                <li><hr class="dropdown-divider"></li>
+                                <li>
+                                    <a class="dropdown-item {% if request.path == '/chatbot-pedidos' %}active{% endif %}"
                                        href="/chatbot-pedidos">
                                         <i class="bi bi-robot"></i> Chatbot RAG
                                     </a>
                                 </li>
                                 <li>
-                                    <a class="dropdown-item {% if request.path == '/chatbot-blaniza' %}active{% endif %}" 
+                                    <a class="dropdown-item {% if request.path == '/chatbot-blaniza' %}active{% endif %}"
                                        href="/chatbot-blaniza">
                                         <i class="bi bi-cpu"></i> Chatbot Fine Tuning
                                     </a>

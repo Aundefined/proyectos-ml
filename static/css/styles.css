@@ -51,7 +51,7 @@ body {
 /* ===== HERO SECTION ===== */
 .hero-section {
     text-align: center;
-    padding: 60px 20px 50px;
+    padding: 60px 20px 30px;
     position: relative;
 }
 
@@ -83,7 +83,7 @@ body {
 .hero-subtitle {
     font-size: 1.3rem;
     color: rgba(255, 255, 255, 0.8);
-    margin-bottom: 8px;
+    margin-bottom: 20px;
 }
 
 .hero-highlight {
@@ -114,6 +114,54 @@ body {
     background: rgba(255, 255, 255, 0.15);
     color: white;
     transform: translateY(-2px);
+}
+
+/* Hero actions stack */
+.hero-actions {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 16px;
+}
+
+/* Gemelo digital CTA en hero */
+.btn-hero-twin {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    background: rgba(13, 110, 253, 0.1);
+    border: 1px solid rgba(13, 202, 240, 0.25);
+    color: rgba(255, 255, 255, 0.8);
+    padding: 9px 24px;
+    border-radius: 50px;
+    text-decoration: none;
+    font-size: 0.9rem;
+    transition: all 0.3s ease;
+}
+
+.btn-hero-twin:hover {
+    background: rgba(13, 110, 253, 0.22);
+    border-color: rgba(13, 202, 240, 0.5);
+    color: white;
+    transform: translateY(-2px);
+}
+
+.btn-hero-twin strong {
+    color: #7dd3fc;
+}
+
+.twin-dot {
+    width: 8px;
+    height: 8px;
+    background: #38bdf8;
+    border-radius: 50%;
+    flex-shrink: 0;
+    animation: pulse-twin 2s infinite;
+}
+
+@keyframes pulse-twin {
+    0%, 100% { opacity: 1; box-shadow: 0 0 0 0 rgba(56, 189, 248, 0.4); }
+    50% { opacity: 0.8; box-shadow: 0 0 0 8px rgba(56, 189, 248, 0); }
 }
 
 /* ===== SECTION HEADERS ===== */

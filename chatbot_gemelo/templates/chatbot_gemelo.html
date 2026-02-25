@@ -1,0 +1,117 @@
+{% extends "layout.html" %}
+
+{% block title %}Gemelo Digital - Arnaud Tartulier{% endblock %}
+
+{% block head_styles %}
+<link rel="stylesheet" href="{{ url_for('chatbot_gemelo.static', filename='css/chatbot_gemelo.css') }}">
+{% endblock %}
+
+{% block content %}
+<h2 class="text-white fall-element fall-delay-1">Gemelo Digital</h2>
+<p class="lead text-white fall-element fall-delay-1">
+    Una IA que me representa. Puedes preguntarle sobre mi experiencia, proyectos, habilidades o cualquier cosa que quieras saber sobre mí.
+</p>
+
+<div class="text-white-50 mb-4 fall-element fall-delay-1">
+    <i class="bi bi-info-circle me-1"></i>
+    <small>Desplegado en <strong class="text-white-50">AWS Lambda</strong> con <strong class="text-white-50">Amazon Bedrock</strong> (Nova) · Memoria persistente por sesión</small>
+</div>
+
+<!-- Botones de acción -->
+<div class="d-flex flex-wrap gap-2 mb-3 fall-element fall-delay-2">
+    <button type="button" class="btn btn-secondary" data-bs-toggle="modal" data-bs-target="#infoModal">
+        <i class="bi bi-question-circle"></i> ¿Cómo funciona?
+    </button>
+    <button type="button" class="btn btn-warning" id="clearChatBtn">
+        <i class="bi bi-trash"></i> Nueva conversación
+    </button>
+</div>
+
+<!-- Contenedor principal del chat -->
+<div class="row">
+    <div class="col-12">
+        <div class="chat-container fall-element fall-delay-2">
+            <!-- Área de mensajes -->
+            <div class="chat-messages" id="chatMessages">
+                <div class="message bot-message">
+                    <div class="message-avatar">
+                        <img src="{{ url_for('chatbot_gemelo.static', filename='images/perfil.jpg') }}" alt="Arnaud">
+                    </div>
+                    <div class="message-content">
+                        <div class="message-text">
+                            ¡Hola! Soy el gemelo digital de Arnaud. Puedes preguntarme sobre su experiencia profesional, proyectos, habilidades técnicas o formación.
+                            <br><br>
+                            ¿En qué puedo ayudarte?
+                        </div>
+                        <div class="message-time">Ahora</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Área de escritura -->
+            <div class="chat-input-container">
+                <div class="chat-input-wrapper">
+                    <textarea id="messageInput" class="chat-input"
+                        placeholder="Pregúntame sobre Arnaud..." rows="1"></textarea>
+                    <button id="sendButton" class="send-button" disabled>
+                        <i class="bi bi-send-fill"></i>
+                    </button>
+                </div>
+                <div class="input-hint">
+                    Presiona Enter para enviar, Shift+Enter para nueva línea
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal informativo -->
+<div class="modal fade" id="infoModal" tabindex="-1" aria-labelledby="infoModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="infoModalLabel">¿Cómo funciona el Gemelo Digital?</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <h6><i class="bi bi-cloud-fill text-primary"></i> Infraestructura AWS</h6>
+                <p>Este chatbot se apoya en una arquitectura serverless completamente desplegada en AWS:</p>
+                <ul>
+                    <li><strong>Compute:</strong> AWS Lambda (Python 3.12) con FastAPI + Mangum</li>
+                    <li><strong>API:</strong> Amazon API Gateway (HTTP API)</li>
+                    <li><strong>Modelo IA:</strong> Amazon Bedrock — <em>Amazon Nova Lite</em></li>
+                    <li><strong>Memoria:</strong> Amazon S3 (historial de conversación por sesión)</li>
+                    <li><strong>IaC:</strong> Terraform + GitHub Actions CI/CD</li>
+                </ul>
+
+                <h6 class="mt-4"><i class="bi bi-person-fill text-success"></i> El Gemelo Digital</h6>
+                <p>La IA ha sido configurada con información real sobre Arnaud:</p>
+                <ul>
+                    <li>Perfil de LinkedIn (extraído de PDF)</li>
+                    <li>Resumen profesional y estilo de comunicación</li>
+                    <li>Datos y hechos verificados</li>
+                </ul>
+                <p>Solo responde con información que tiene documentada. No inventa ni especula.</p>
+
+                <h6 class="mt-4"><i class="bi bi-chat-dots text-info"></i> Qué puedes preguntar</h6>
+                <ul>
+                    <li>Experiencia laboral y proyectos realizados</li>
+                    <li>Habilidades técnicas (ML, AI, desarrollo web...)</li>
+                    <li>Formación y certificaciones</li>
+                    <li>Motivaciones y objetivos profesionales</li>
+                </ul>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    const GEMELO_AVATAR_URL = "{{ url_for('chatbot_gemelo.static', filename='images/perfil.jpg') }}";
+</script>
+<script src="{{ url_for('chatbot_gemelo.static', filename='js/chatbot_gemelo.js') }}"></script>
+{% endblock %}
