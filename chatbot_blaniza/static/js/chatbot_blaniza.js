@@ -3,6 +3,7 @@ document.addEventListener('DOMContentLoaded', function() {
     const sendButton = document.getElementById('sendButton');
     const chatMessages = document.getElementById('chatMessages');
     const clearChatBtn = document.getElementById('clearChatBtn');
+    const healthBtn = document.getElementById('healthBtn');
 
     // Auto-resize del textarea
     messageInput.addEventListener('input', function() {
@@ -201,6 +202,32 @@ document.addEventListener('DOMContentLoaded', function() {
             alert('Error de conexión al limpiar el chat. Por favor, recarga la página.');
         });
     }
+
+    // Health check manual
+    healthBtn.addEventListener('click', function() {
+        healthBtn.disabled = true;
+        healthBtn.className = 'btn btn-secondary';
+        healthBtn.innerHTML = '<span class="spinner-border spinner-border-sm me-1" role="status"></span> Comprobando...';
+
+        fetch('/chatbot-blaniza/health')
+            .then(response => response.json())
+            .then(data => {
+                if (data.available) {
+                    healthBtn.className = 'btn btn-success';
+                    healthBtn.innerHTML = '<i class="bi bi-circle-fill me-1"></i> Servicio disponible';
+                } else {
+                    healthBtn.className = 'btn btn-danger';
+                    healthBtn.innerHTML = '<i class="bi bi-circle-fill me-1"></i> Servicio no disponible';
+                }
+            })
+            .catch(() => {
+                healthBtn.className = 'btn btn-danger';
+                healthBtn.innerHTML = '<i class="bi bi-circle-fill me-1"></i> Servicio no disponible';
+            })
+            .finally(() => {
+                healthBtn.disabled = false;
+            });
+    });
 
     // Focus inicial en el input
     messageInput.focus();

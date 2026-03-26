@@ -118,11 +118,6 @@ def get_conversation_history(session_id):
 def index_route():
     """Página principal del chatbot Blaniza"""
     print("🌐 Acceso a la página principal del Chatbot Blaniza")
-    
-    # Verificar si el servicio está disponible
-    service_status = check_blaniza_service()
-    print(f"ℹ️ Estado del servicio Blaniza: {'✅ Disponible' if service_status else '❌ No disponible'}")
-    
     return render_template('chatbot_blaniza.html')
 
 @chatbot_blaniza_bp.route('/chat', methods=['POST'])
@@ -191,6 +186,13 @@ def chat():
     except Exception as e:
         print(f"Error en /chat: {e}")
         return jsonify({'error': 'Ha ocurrido un error interno. Por favor, inténtalo de nuevo.'}), 500
+
+@chatbot_blaniza_bp.route('/health', methods=['GET'])
+def health():
+    """Endpoint para comprobar el estado del servicio Modal"""
+    available = check_blaniza_service()
+    return jsonify({'available': available})
+
 
 @chatbot_blaniza_bp.route('/clear-chat', methods=['POST'])
 def clear_chat():
