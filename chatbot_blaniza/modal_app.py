@@ -42,6 +42,12 @@ image_with_model = image.run_function(
 )
 
 
+@app.function(image=image)
+@modal.fastapi_endpoint(method="GET")
+def health():
+    return {"status": "healthy", "model": MODEL_NAME}
+
+
 @app.cls(
     image=image_with_model,
     gpu="T4",
@@ -144,6 +150,3 @@ class BlanizaAssistant:
             print(f"Error generando respuesta: {e}")
             return {"error": str(e)}
 
-    @modal.fastapi_endpoint(method="GET")
-    def health(self):
-        return {"status": "healthy", "model": MODEL_NAME}
