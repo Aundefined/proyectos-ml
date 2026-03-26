@@ -5,36 +5,36 @@ import json
 
 from . import chatbot_blaniza_bp
 
-# URL del Space de Hugging Face (usaremos la API de Gradio)
-BLANIZA_SPACE_URL = "https://arnaudclaudeml-blaniza-assistant.hf.space"
+# URLs del endpoint de Modal
+MODAL_ENDPOINT_URL = "https://tartulierarnaud--blaniza-assistant-blanizaassistant-chat.modal.run"
+MODAL_HEALTH_URL = "https://tartulierarnaud--blaniza-assistant-blanizaassistant-health.modal.run"
 
 # Diccionario para almacenar conversaciones por sesión
 conversations = {}
 
 def check_blaniza_service():
-    """Verificar si el servicio Blaniza está disponible"""
+    """Verificar si el servicio Modal está disponible"""
     try:
-        # Verificar que el Space responda
-        print(f"🔍 Verificando Space en: {BLANIZA_SPACE_URL}")
-        
-        response = requests.get(BLANIZA_SPACE_URL, timeout=10)
-        print(f"📡 Respuesta del Space: {response.status_code}")
-        
+        print(f"🔍 Verificando endpoint Modal en: {MODAL_HEALTH_URL}")
+
+        response = requests.get(MODAL_HEALTH_URL, timeout=10)
+        print(f"📡 Respuesta del endpoint: {response.status_code}")
+
         if response.status_code == 200:
-            print("✅ Space está activo")
+            print("✅ Endpoint Modal está activo")
             return True
         else:
-            print(f"⚠️ Space no disponible: {response.status_code}")
+            print(f"⚠️ Endpoint no disponible: {response.status_code}")
             return False
-            
+
     except requests.exceptions.Timeout:
-        print(f"⏰ Timeout conectando al Space ({BLANIZA_SPACE_URL})")
+        print(f"⏰ Timeout conectando al endpoint Modal ({MODAL_HEALTH_URL})")
         return False
     except requests.exceptions.ConnectionError:
-        print(f"🌐 Error de conexión al Space ({BLANIZA_SPACE_URL})")
+        print(f"🌐 Error de conexión al endpoint Modal ({MODAL_HEALTH_URL})")
         return False
     except Exception as e:
-        print(f"❌ Error inesperado verificando Space: {type(e).__name__}: {e}")
+        print(f"❌ Error inesperado verificando endpoint: {type(e).__name__}: {e}")
         return False
 
 def get_system_prompt():
@@ -60,29 +60,13 @@ Restricciones:
 Tu rol es actuar siempre como experto en este manual, nada más."""
 
 def generate_answer_with_blaniza(messages, max_tokens=200):
-    """Generar respuesta usando la API de Gradio del Space Blaniza"""
+    """Generar respuesta usando el endpoint Modal"""
+    import time
+
     try:
-        print(f"🤖 Enviando petición al Space: {BLANIZA_SPACE_URL}")
+        print(f"🤖 Enviando petición al endpoint Modal: {MODAL_ENDPOINT_URL}")
         print(f"📦 Payload: {len(messages)} mensajes, max_tokens={max_tokens}")
-        
-        # Gradio Client para conectar con el Space
-        from gradio_client import Client
-        
-        import time
-        start_time = time.time()
-        
-        # Conectar con el Space (con timeout reducido)
-        client = Client(BLANIZA_SPACE_URL)
-        
-        # Mostrar información de debug del Space (solo si hay problemas)
-        # print("📋 Información del Space:")
-        # try:
-        #     api_info = client.view_api()
-        #     print(api_info)
-        # except Exception as debug_e:
-        #     print(f"No se pudo obtener info del API: {debug_e}")
-        
-        print(f"📩 Enviando {len(messages)} mensajes...")
+
         try:
             print("🗒️ Historial completo que se envía:")
             for idx, m in enumerate(messages, 1):
@@ -90,38 +74,32 @@ def generate_answer_with_blaniza(messages, max_tokens=200):
         except Exception as log_err:
             print(f"⚠️ No se pudo imprimir historial: {log_err}")
 
-        try:
-            # /chat_endpoint espera un string JSON con los mensajes
-            payload = json.dumps(messages, ensure_ascii=False)
-            result = client.predict(payload, api_name="/chat_endpoint")
-            
-        except Exception as e1:
-            print(f"⚠️ Error con /chat_endpoint: {e1}")
-            return f"Error del modelo en el Space: {str(e1)}"
-        
+        start_time = time.time()
+        print(messages)
+        response = requests.post(
+            MODAL_ENDPOINT_URL,
+            json={"messages": messages, "max_tokens": max_tokens},
+            timeout=120,
+        )
+        response.raise_for_status()
+        result = response.json()
+
         elapsed_time = time.time() - start_time
         print(f"⏱️ Tiempo de respuesta: {elapsed_time:.2f}s")
-        print(f"✅ Respuesta recibida: {len(str(result))} caracteres")
 
-        # Normalizar salida del Space (puede ser dict o string JSON)
-        if isinstance(result, dict) and "response" in result:
-            return str(result["response"])
-        if isinstance(result, str):
-            try:
-                parsed = json.loads(result)
-                if isinstance(parsed, dict) and "response" in parsed:
-                    return str(parsed["response"])
-            except Exception:
-                pass
-            return result
+        if "error" in result:
+            print(f"❌ Error del modelo: {result['error']}")
+            return f"Lo siento, ha ocurrido un error: {result['error']}"
 
-        return str(result)
-            
-    except ImportError:
-        print("❌ Error: gradio_client no está instalado")
-        return "Error: Dependencia faltante. Instala gradio_client."
+        answer = result.get("response", "")
+        print(f"✅ Respuesta recibida: {len(answer)} caracteres")
+        return answer
+
+    except requests.exceptions.Timeout:
+        print("⏰ Timeout conectando al endpoint Modal")
+        return "Lo siento, el servicio ha tardado demasiado en responder. Por favor, inténtalo de nuevo."
     except Exception as e:
-        print(f"❌ Error conectando con Space: {type(e).__name__}: {e}")
+        print(f"❌ Error conectando con endpoint Modal: {type(e).__name__}: {e}")
         return f"Lo siento, no se pudo conectar con el servicio. Error: {str(e)}"
 
 def get_or_create_session_id():

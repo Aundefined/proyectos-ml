@@ -105,12 +105,14 @@
                     <li>Respuestas graduales y naturales</li>
                 </ul>
 
-                <h6 class="mt-4"><i class="bi bi-lightning text-warning"></i> Ventajas</h6>
+                <h6 class="mt-4"><i class="bi bi-cloud text-warning"></i> Despliegue en producción</h6>
+                <p>El modelo está desplegado como endpoint serverless en <strong>Modal</strong>:</p>
                 <ul>
-                    <li><strong>Especialización:</strong> Modelo dedicado únicamente al manual Blaniza</li>
-                    <li><strong>Eficiencia:</strong> Respuestas más rápidas que modelos generales</li>
-                    <li><strong>Consistencia:</strong> Respuestas más consistentes y precisas</li>
-                    <li><strong>Sin API externa:</strong> Modelo ejecutándose localmente</li>
+                    <li><strong>Infraestructura:</strong> GPU NVIDIA T4 bajo demanda</li>
+                    <li><strong>Escalado automático:</strong> El contenedor arranca con cada petición y se apaga tras inactividad</li>
+                    <li><strong>Modelo cacheado:</strong> Los pesos (~14GB) se almacenan en un volumen persistente para minimizar el cold start</li>
+                    <li><strong>Sin coste fijo:</strong> Facturación por uso, solo se paga durante la inferencia</li>
+                    <li><strong>Infraestructura como código:</strong> Todo el despliegue definido en Python con Modal SDK</li>
                 </ul>
 
                 <h6 class="mt-4"><i class="bi bi-chat-dots text-info"></i> Uso</h6>
