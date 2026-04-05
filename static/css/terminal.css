@@ -147,13 +147,14 @@
 
 .term-welcome { color: #555; margin-bottom: 8px; }
 .term-accent  { color: #00e676; }
-.term-dim     { color: #555; }
+.term-dim     { color: #555;  margin: 4px 0;    padding-left: 14px; }
 
 .term-user         { color: #00e676; margin: 6px 0 2px; }
 .term-user::before { content: "❯ "; }
 
 .term-bot      { color: #e0e0e0; margin: 2px 0 6px; padding-left: 14px; }
-.term-error    { color: #ff5252; margin: 4px 0;    padding-left: 14px; }
+.term-error    { color: #ffc252; margin: 4px 0;    padding-left: 14px; }
+.term-white    { color: #ffffff; margin: 4px 0;    padding-left: 14px; }
 .term-disclaimer { color: #ff5252; margin: 2px 0; padding-left: 0; display: block; }
 .term-thinking { color: #555;   margin: 4px 0;    padding-left: 14px; font-style: italic; }
 

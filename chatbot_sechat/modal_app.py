@@ -26,6 +26,7 @@ import modal
 app = modal.App("sechat")
 
 MODEL_DIR = "/model"
+USE_HISTORY = False
 volume = modal.Volume.from_name("sechat-cache", create_if_missing=True)
 
 image = (
@@ -100,11 +101,14 @@ class LLMPropio:
         # Construir prompt con historial (máx 4 intercambios)
         history = history[-4:]
         prompt = ""
-        for msg in history:
-            if msg["role"] == "user":
-                prompt += f"### Instrucción:\n{msg['content']}\n### Respuesta:\n"
-            else:
-                prompt += f"{msg['content']}\n###\n"
+        
+        if (USE_HISTORY):
+            for msg in history:
+                if msg["role"] == "user":
+                    prompt += f"### Instrucción:\n{msg['content']}\n### Respuesta:\n"
+                else:
+                    prompt += f"{msg['content']}\n###\n"
+                    
         prompt += f"### Instrucción:\n{message}\n### Respuesta:\n"
 
         try:
