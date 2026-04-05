@@ -155,7 +155,9 @@
 .term-bot      { color: #e0e0e0; margin: 2px 0 6px; padding-left: 14px; }
 .term-error    { color: #ffc252; margin: 4px 0;    padding-left: 14px; }
 .term-white    { color: #ffffff; margin: 4px 0;    padding-left: 14px; }
-.term-disclaimer { color: #ff5252; margin: 2px 0; padding-left: 0; display: block; }
+.term-disclaimer  { color: #ffc252; margin: 2px 0; padding-left: 0; display: block; }
+.term-dim-block   { color: #555;    margin: 2px 0; padding-left: 0; display: block; }
+.term-white-block { color: #e0e0e0; margin: 2px 0; padding-left: 0; display: block; }
 .term-thinking { color: #555;   margin: 4px 0;    padding-left: 14px; font-style: italic; }
 
 .terminal-input-wrapper {
