@@ -26,6 +26,7 @@ from recomendador_peliculas import recomendador_peliculas_bp
 from chatbot_pedidos import chatbot_pedidos_bp
 from chatbot_blaniza import chatbot_blaniza_bp
 from chatbot_gemelo import chatbot_gemelo_bp
+from chatbot_sechat import chatbot_sechat_bp
 from visitas_log import visitas_log_bp
 
 
@@ -54,6 +55,7 @@ app.register_blueprint(recomendador_peliculas_bp)
 app.register_blueprint(chatbot_pedidos_bp)
 app.register_blueprint(chatbot_blaniza_bp)
 app.register_blueprint(chatbot_gemelo_bp)
+app.register_blueprint(chatbot_sechat_bp)
 app.register_blueprint(visitas_log_bp)
 
 app.wsgi_app = ProxyFix(app.wsgi_app, x_proto=1, x_host=1)

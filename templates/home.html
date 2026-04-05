@@ -2,7 +2,9 @@
 
 {% block title %}Proyectos de Machine Learning{% endblock %}
 
-{% block head_styles %}{% endblock %}
+{% block head_styles %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/terminal.css') }}">
+{% endblock %}
 
 {% block content %}
 <!-- Modal de bienvenida -->
@@ -240,6 +242,60 @@
             </div>
         </div>
     </div>
+
+    <div class="sechat-showcase">
+        <div class="sechat-glow"></div>
+        <div class="aidoo-content">
+            <div class="aidoo-info">
+                <div class="aidoo-label sechat-label">
+                    <span class="live-dot sechat-dot"></span> En producción
+                </div>
+                <h3 class="sechat-title">Sechat</h3>
+                <p class="aidoo-desc">
+                    Transformer decoder-only de 400M parámetros (24 capas, 16 cabezas, n_embd=1024) implementado en PyTorch puro desde cero.
+                    Preentrenado sobre 7.2B tokens en español (Wikipedia + CulturaX) con vocab compacto de 94.770 tokens, Flash Attention, BF16 y torch.compile.
+                    37 horas de entrenamiento en Google Colab con GPU RTX 6000 Pro Server Edition, val_loss final: 2.4301.
+                </p>
+                <p class="aidoo-desc">
+                    Fine-tuning supervisado (SFT) con Alpaca Spanish en formato instrucción-respuesta. Exportado a ONNX y servido serverless en Modal.
+                </p>
+                <div class="aidoo-features">
+                    <div class="aidoo-feature">
+                        <i class="bi bi-cpu"></i>
+                        <span>400M parámetros</span>
+                    </div>
+                    <div class="aidoo-feature">
+                        <i class="bi bi-layers"></i>
+                        <span>SFT Instruct</span>
+                    </div>
+                    <div class="aidoo-feature">
+                        <i class="bi bi-code-slash"></i>
+                        <span>PyTorch desde cero</span>
+                    </div>
+                    <div class="aidoo-feature infra-feature">
+                        <span>Desplegado en</span>
+                        <img src="{{ url_for('static', filename='img/modal-wordmark.svg') }}" class="modal-wordmark" alt="Modal">
+                    </div>
+                </div>
+            </div>
+            <div class="aidoo-actions">
+                <button class="sechat-btn" data-bs-toggle="modal" data-bs-target="#terminalLLMModal">
+                    <i class="bi bi-terminal-fill"></i>
+                    <div>
+                        <span class="aidoo-btn-label">Abrir</span>
+                        <span class="aidoo-btn-title">Terminal</span>
+                    </div>
+                </button>
+                <a href="https://github.com/Aundefined/sechat" target="_blank" class="aidoo-btn sechat-btn-github">
+                    <i class="bi bi-github"></i>
+                    <div>
+                        <span class="aidoo-btn-label">Ver código en</span>
+                        <span class="aidoo-btn-title">GitHub</span>
+                    </div>
+                </a>
+            </div>
+        </div>
+    </div>
 </section>
 
 <!-- ===== PROYECTOS DEL PORTFOLIO ===== -->
@@ -404,8 +460,53 @@
 <div class="text-center mt-4 mb-5 fall-element fall-delay-5">
     <p class="text-white-60 small"><i class="bi bi-calendar-check me-1"></i>Primera publicación: 05/04/2025 - Última actualización: 14/03/2026</p>
 </div>
+<!-- ===== MODAL TERMINAL: LLM desde cero ===== -->
+<div class="modal fade" id="terminalLLMModal" tabindex="-1" aria-labelledby="terminalLLMModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-xl modal-dialog-centered">
+        <div class="modal-content terminal-modal-content">
+
+            <!-- Barra de título estilo macOS -->
+            <div class="modal-header terminal-header">
+                <div class="terminal-dots">
+                    <span class="terminal-dot dot-red"></span>
+                    <span class="terminal-dot dot-yellow"></span>
+                    <span class="terminal-dot dot-green"></span>
+                </div>
+                <span class="terminal-title">arnaud@portfolio — sechat</span>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+            </div>
+
+            <!-- Área de chat -->
+            <div class="modal-body terminal-body">
+                <div id="llm-output" class="terminal-output">
+                    <div class="term-welcome">
+                        <span class="term-error">⚠ AVISO: Este es un modelo experimental muy pequeño entrenado con fines educativos.</span><br>
+                        <span class="term-error">Sus respuestas pueden ser incorrectas, incoherentes o directamente falsas.</span><br>
+                        <span class="term-error">No tomes ninguna decisión basándote en lo que diga.</span><br>
+                        <span class="term-dim">────────────────────────────────────────────────</span><br>
+                    </div>
+                </div>
+                <div class="terminal-input-wrapper">
+                    <span class="term-prompt-icon">❯</span>
+                    <input type="text" id="llm-input" class="terminal-input"
+                           placeholder="Escribe tu mensaje y pulsa Enter…" autocomplete="off" />
+                    <button class="terminal-send-btn" id="llm-send-btn">Enviar</button>
+                </div>
+            </div>
+
+            <!-- Footer -->
+            <div class="modal-footer terminal-footer">
+                <span class="term-dim" style="font-size:0.75rem;">Enter para enviar &nbsp;·&nbsp; Ctrl+L para limpiar</span>
+                <button class="terminal-clear-btn" id="llm-clear-btn">Limpiar</button>
+            </div>
+
+        </div>
+    </div>
+</div>
+
 {% endblock %}
 
 {% block scripts %}
 <script src="{{ url_for('static', filename='js/home.js') }}"></script>
+<script src="{{ url_for('static', filename='js/terminal.js') }}"></script>
 {% endblock %}
